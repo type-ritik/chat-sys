@@ -1,6 +1,7 @@
 const http = require("http");
 const { startServer } = require("./app/index");
 const { PORT } = require("./app/config/env");
+const { connectToDatabase } = require("./app/data/db");
 // For subscriptions (graphql-ws)
 const { WebSocketServer } = require("ws");
 const { useServer } = require("graphql-ws/lib/use/ws");
@@ -15,6 +16,9 @@ async function main() {
 
   // Create HTTP server
   const httpServer = http.createServer(app);
+
+  // Connect to the database
+  await connectToDatabase();
 
   // Create GraphQL schema for both HTTP and WebSocket
   const schema = makeExecutableSchema({ typeDefs, resolvers });
