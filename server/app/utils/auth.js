@@ -1,17 +1,15 @@
 const jwt = require("jsonwebtoken");
 
-function authenticate(req, res, next) {
-  const token = req.headers?.authorization?.split(" ")[1];
+// Verify JWT and extract user info
+function verifyToken(token) {
   if (!token) {
-    return res.status(401).json({ message: "Unauthorized" });
+    throw new Error("Unauthorized");
   }
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded;
-    next();
+    return jwt.verify(token, process.env.JWT_SECRET);
   } catch (err) {
-    return res.status(401).json({ message: "Invalid token" });
+    throw new Error("Invalid token");
   }
 }
 
-module.exports = { authenticate };
+module.exports = { verifyToken };
