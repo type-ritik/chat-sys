@@ -30,7 +30,6 @@ async function startServer() {
   const server = new ApolloServer({
     typeDefs,
     resolvers,
-    context: getContext,
   });
 
   await server.start();
@@ -39,7 +38,7 @@ async function startServer() {
     cors(),
     express.json(),
     bodyParser.json(),
-    expressMiddleware(server)
+    expressMiddleware(server, { context: getContext })
   );
 
   return app;

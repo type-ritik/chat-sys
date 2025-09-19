@@ -8,6 +8,7 @@ const typeDefs = gql`
     username: String!
     isAdmin: Boolean!
     createdAt: String!
+    token: String!
   }
 
   type Message {
