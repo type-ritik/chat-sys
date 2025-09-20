@@ -3,25 +3,31 @@ const { prisma } = require("../data/prisma");
 const { comparePassword } = require("../utils/passKey");
 
 async function loginUser(_, { email, password }, context) {
+  // Check if the user exists with the given email
   const isUser = await prisma.user.findUnique({
     where: { email },
   });
 
+  // If user does not exist, throw an error
   if (!isUser) {
     throw new Error("No user found with this email");
   }
 
+  // Check if the password is valid
   const isPasswordValid = await comparePassword(password, isUser.password);
 
+  // If password is invalid, throw an error
   if (!isPasswordValid) {
     throw new Error("Invalid password");
   }
 
+  // Generate a JWT token for the authenticated user
   const token = jwt.sign(
     { userId: isUser.id, role: isUser.isAdmin ? "admin" : "user" },
     process.env.JWT_SECRET
   );
 
+  // Return the user data along with the token
   return { ...isUser, token };
 }
 
