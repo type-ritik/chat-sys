@@ -20,6 +20,7 @@ const typeDefs = gql`
 
   type Query {
     messages: [Message!]!
+    loginUser(email: String!, password: String!): User!
     hello: String!
   }
 
