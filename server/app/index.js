@@ -22,6 +22,9 @@ const { resolvers } = require("./resolvers");
 // Context for Apollo Server
 const { getContext } = require("./context");
 
+// Redis Client
+const { redisClient } = require("./data/pubsub");
+
 // Start Http and Apollo server
 async function startServer() {
   const app = express();
@@ -30,6 +33,26 @@ async function startServer() {
   const server = new ApolloServer({
     typeDefs,
     resolvers,
+  });
+
+  redisClient.on("connecting", () => {
+    console.log("Connecting to Redis server...");
+  })
+
+  redisClient.on("connect", () => {
+    console.log("Connected to Redis server");
+  });
+
+  redisClient.on("error", (error) => {
+    console.error("Redis connection error:", error);
+  });
+
+  redisClient.on("ready", () => {
+    console.log("Redis connection is ready");
+  });
+
+  redisClient.on("close", () => {
+    console.log("Redis connection closed");
   });
 
   await server.start();
