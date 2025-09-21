@@ -1,6 +1,7 @@
 const { gql } = require("graphql-tag");
 
 const typeDefs = gql`
+
   type User {
     id: ID!
     name: String!
@@ -8,7 +9,15 @@ const typeDefs = gql`
     username: String!
     isAdmin: Boolean!
     createdAt: String!
-    token: String!
+    profile: Profile
+    token: String
+  }
+
+  type Profile {
+    id: ID!
+    bio: String
+    isActive: Boolean!
+    avatarUrl: String!
   }
 
   type Message {
@@ -21,6 +30,7 @@ const typeDefs = gql`
   type Query {
     messages: [Message!]!
     loginUser(email: String!, password: String!): User!
+    exploreFriends(username: String!): User!
     hello: String!
   }
 
