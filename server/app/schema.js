@@ -1,7 +1,6 @@
 const { gql } = require("graphql-tag");
 
 const typeDefs = gql`
-
   type User {
     id: ID!
     name: String!
@@ -24,7 +23,18 @@ const typeDefs = gql`
     id: ID!
     content: String!
     sender: String!
+    isSeen: Boolean!
+    requestedId: String!
     createdAt: String!
+  }
+
+  type ChatMsgPayload {
+    from: String!
+    message: String!
+  }
+
+  type NotificationPayload {
+    msg: String!
   }
 
   type Query {
@@ -35,12 +45,14 @@ const typeDefs = gql`
   }
 
   type Mutation {
+    sayHello(friendId: String!, msg: String): Boolean!
     sendMessage(content: String!, sender: String!): Message!
     createUser(name: String!, email: String!, password: String!): User!
   }
 
   type Subscription {
-    messageSent: Message!
+    subNotify(userId: String!): NotificationPayload!
+    chatMsg(userId: String!, msg: String): ChatMsgPayload!
   }
 `;
 
