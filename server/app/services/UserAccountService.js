@@ -27,6 +27,8 @@ async function loginUser(_, { email, password }, context) {
     process.env.JWT_SECRET
   );
 
+  console.log("User logged in:", isUser);
+
   // Return the user data along with the token
   return { ...isUser, token };
 }
