@@ -14,14 +14,16 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(uuid())
-  name      String?
-  email     String   @unique
-  username  String   @unique
-  password  String
-  isAdmin   Boolean  @default(false)
-  profile   Profile?
-  createdAt DateTime @default(now())
+  id                     String       @id @default(uuid())
+  name                   String?
+  email                  String       @unique
+  username               String       @unique
+  password               String
+  isAdmin                Boolean      @default(false)
+  profile                Profile?
+  createdAt              DateTime     @default(now())
+  friendRequestsSent     Friendship[] @relation("FriendRequestsSent")
+  friendRequestsReceived Friendship[] @relation("FriendRequestsReceived")
 }
 
 model Profile {
@@ -45,6 +47,8 @@ model Message {
 model Friendship {
   id        String   @id @default(uuid())
   userId    String
+  user      User     @relation("FriendRequestsSent", fields: [userId], references: [id])
+  friend    User     @relation("FriendRequestsReceived", fields: [friendId], references: [id])
   friendId  String
   status    String // e.g., "pending", "accepted", "blocked"
   createdAt DateTime @default(now())
