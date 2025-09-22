@@ -25,7 +25,7 @@ const typeDefs = gql`
     sender: String!
     isSeen: Boolean!
     requestedId: String!
-    createdAt: String!
+    timestamp: String!
   }
 
   type ChatMsgPayload {
@@ -48,10 +48,12 @@ const typeDefs = gql`
     sayHello(friendId: String!, msg: String): Boolean!
     sendMessage(content: String!, sender: String!): Message!
     createUser(name: String!, email: String!, password: String!): User!
+    followFriend(userId: String!, friendId: String!): Boolean
+    followResponse(friendshipId: String!, status: String!): Boolean
   }
 
   type Subscription {
-    subNotify(userId: String!): NotificationPayload!
+    subNotify(userId: String!): Message!
     chatMsg(userId: String!, msg: String): ChatMsgPayload!
   }
 `;

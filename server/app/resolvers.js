@@ -1,6 +1,7 @@
 const { loginUser, createUser } = require("./services/UserAccountService");
 const { exploreFriends } = require("./services/ExploreFriend");
 const { pubsub } = require("./data/pubsub");
+const { followFriend, followResponse } = require("./services/FollowFriend");
 
 const resolvers = {
   Query: {
@@ -21,8 +22,9 @@ const resolvers = {
 
       return true;
     },
-
+    followFriend,
     createUser,
+    followResponse,
   },
 
   Subscription: {
