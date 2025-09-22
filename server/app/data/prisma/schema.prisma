@@ -14,16 +14,18 @@ datasource db {
 }
 
 model User {
-  id                     String       @id @default(uuid())
+  id                     String        @id @default(uuid())
   name                   String?
-  email                  String       @unique
-  username               String       @unique
+  email                  String        @unique
+  username               String        @unique
   password               String
-  isAdmin                Boolean      @default(false)
+  isAdmin                Boolean       @default(false)
   profile                Profile?
-  createdAt              DateTime     @default(now())
-  friendRequestsSent     Friendship[] @relation("FriendRequestsSent")
-  friendRequestsReceived Friendship[] @relation("FriendRequestsReceived")
+  createdAt              DateTime      @default(now())
+  friendRequestsSent     Friendship[]  @relation("FriendRequestsSent")
+  friendRequestsReceived Friendship[]  @relation("FriendRequestsReceived")
+  ChatMsgSender          ChatMessage[] @relation("ChatMsgSender")
+  ChatMsgReceiver        ChatMessage[] @relation("ChatMsgReceiver")
 }
 
 model Profile {
@@ -55,4 +57,16 @@ model Friendship {
   updatedAt DateTime @updatedAt
 
   @@unique([userId, friendId])
+}
+
+model ChatMessage {
+  id         String   @id @default(uuid())
+  senderId   String
+  receiverId String
+  content    String
+  sender     User     @relation("ChatMsgSender", fields: [senderId], references: [id])
+  receiver   User     @relation("ChatMsgReceiver", fields: [receiverId], references: [id])
+  createdAt  DateTime @default(now())
+
+  @@unique([senderId, receiverId])
 }
