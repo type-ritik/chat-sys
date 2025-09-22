@@ -1,6 +1,6 @@
 const jwt = require("jsonwebtoken");
 const { prisma } = require("../data/prisma");
-const { comparePassword } = require("../utils/passKey");
+const { comparePassword, hashPassword } = require("../utils/passKey");
 
 async function loginUser(_, { email, password }, context) {
   // Check if the user exists with the given email
