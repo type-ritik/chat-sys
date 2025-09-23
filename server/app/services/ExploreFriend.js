@@ -19,8 +19,8 @@ async function exploreFriends(_, { username }, context) {
       profile: {
         select: {
           id: true,
-          avatarUrl: true
-        }
+          avatarUrl: true,
+        },
       }, // Include the profile relation
     },
   });
@@ -32,4 +32,21 @@ async function exploreFriends(_, { username }, context) {
   return friend;
 }
 
-module.exports = { exploreFriends };
+async function exploreChatFriend(_, { userId, username }, context) {
+  const user = await prisma.friendship.findUnique({
+    where: {
+      userId: userId,
+      friend: {
+        username: username,
+      },
+    },
+  });
+
+  if (!user) {
+    throw new Error("User not found.");
+  }
+
+  return user;
+}
+
+module.exports = { exploreFriends , exploreChatFriend};
