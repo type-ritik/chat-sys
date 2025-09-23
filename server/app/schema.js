@@ -37,10 +37,20 @@ const typeDefs = gql`
     msg: String!
   }
 
+  type Friendship {
+    id: ID!
+    user: User
+    friend: User
+    userId: String
+    friendId: String
+    createdAt: String
+  }
+
   type Query {
     messages: [Message!]!
     loginUser(email: String!, password: String!): User!
     exploreFriends(username: String!): User!
+    exploreChatFriend(userId: String!, username: String): Friendship
     hello: String!
   }
 

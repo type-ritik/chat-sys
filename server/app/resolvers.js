@@ -1,13 +1,17 @@
 const { loginUser, createUser } = require("./services/UserAccountService");
-const { exploreFriends } = require("./services/ExploreFriend");
+const {
+  exploreFriends,
+  exploreChatFriend,
+} = require("./services/ExploreFriend");
 const { pubsub } = require("./data/pubsub");
 const { followFriend, followResponse } = require("./services/FollowFriend");
 
 const resolvers = {
   Query: {
     hello: () => "Hello World!",
-    loginUser: loginUser,
-    exploreFriends: exploreFriends,
+    loginUser,
+    exploreFriends,
+    exploreChatFriend,
   },
 
   Mutation: {
