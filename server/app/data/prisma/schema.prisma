@@ -14,18 +14,19 @@ datasource db {
 }
 
 model User {
-  id                     String        @id @default(uuid())
+  id                     String         @id @default(uuid())
   name                   String?
-  email                  String        @unique
-  username               String        @unique
+  email                  String         @unique
+  username               String         @unique
   password               String
-  isAdmin                Boolean       @default(false)
+  isAdmin                Boolean        @default(false)
   profile                Profile?
-  createdAt              DateTime      @default(now())
-  friendRequestsSent     Friendship[]  @relation("FriendRequestsSent")
-  friendRequestsReceived Friendship[]  @relation("FriendRequestsReceived")
-  ChatMsgSender          ChatMessage[] @relation("ChatMsgSender")
-  ChatMsgReceiver        ChatMessage[] @relation("ChatMsgReceiver")
+  createdAt              DateTime       @default(now())
+  friendRequestsSent     Friendship[]   @relation("FriendRequestsSent")
+  friendRequestsReceived Friendship[]   @relation("FriendRequestsReceived")
+  ChatMsgSender          ChatMessage[]  @relation("ChatMsgSender")
+  ChatMsgReceiver        ChatMessage[]  @relation("ChatMsgReceiver")
+  ChatMsgUser            ChatMessages[] @relation("ChatMsgFromUser")
 }
 
 model Profile {
@@ -47,14 +48,15 @@ model Message {
 }
 
 model Friendship {
-  id        String   @id @default(uuid())
+  id        String     @id @default(uuid())
   userId    String
-  user      User     @relation("FriendRequestsSent", fields: [userId], references: [id])
-  friend    User     @relation("FriendRequestsReceived", fields: [friendId], references: [id])
+  user      User       @relation("FriendRequestsSent", fields: [userId], references: [id])
+  friend    User       @relation("FriendRequestsReceived", fields: [friendId], references: [id])
+  chatRoom  ChatRoom[] @relation("ChatRoomFriendship")
   friendId  String
   status    String // e.g., "pending", "accepted", "blocked"
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
 
   @@unique([userId, friendId])
 }
@@ -69,4 +71,24 @@ model ChatMessage {
   createdAt  DateTime @default(now())
 
   @@unique([senderId, receiverId])
+}
+
+model ChatMessages {
+  id         String   @id @default(uuid())
+  chatRoomId String
+  userId     String
+  message    String
+  createdAt  DateTime @default(now())
+  user       User     @relation("ChatMsgFromUser", fields: [userId], references: [id])
+  chatRoom   ChatRoom @relation("ChatRoomMessages", fields: [chatRoomId], references: [id])
+}
+
+model ChatRoom {
+  id           String         @id @default(uuid())
+  friendshp    Friendship     @relation("ChatRoomFriendship", fields: [friendShipId], references: [id])
+  friendShipId String
+  createdAt    DateTime       @default(now())
+  ChatMessages ChatMessages[] @relation("ChatRoomMessages")
+
+  @@unique([friendShipId])
 }

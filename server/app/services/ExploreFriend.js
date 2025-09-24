@@ -35,10 +35,20 @@ async function exploreFriends(_, { username }, context) {
 async function exploreChatFriend(_, { userId, username }, context) {
   const user = await prisma.friendship.findFirst({
     where: {
-      userId: userId,
-      friend: {
-        username: username,
-      },
+      OR: [
+        {
+          userId: userId,
+          friend: {
+            username: username,
+          },
+        },
+        {
+          friendId: userId,
+          user: {
+            username: username,
+          },
+        },
+      ],
     },
   });
 

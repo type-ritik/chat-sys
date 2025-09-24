@@ -14,4 +14,4 @@ const connectToDatabase = async () => {
   }
 };
 
-module.exports = { pool, connectToDatabase };
+module.exports = {connectToDatabase };
