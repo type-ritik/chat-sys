@@ -59,6 +59,7 @@ async function createUser(_, { name, email, password }, context) {
     },
   });
 
+  // Generate token
   const token = jwt.sign(
     { userId: newUser.id, role: newUser.isAdmin ? "admin" : "user" },
     process.env.JWT_SECRET
@@ -66,6 +67,7 @@ async function createUser(_, { name, email, password }, context) {
 
   console.log("New user created:", newUser);
 
+  // Return the new user payload with token
   return { ...newUser, token };
 }
 module.exports = { loginUser, createUser };

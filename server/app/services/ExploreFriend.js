@@ -13,6 +13,7 @@ async function exploreFriends(_, { username }, context) {
 
   delete isfriendExist.password; // Remove password before returning user data
 
+  // Find the friend user details
   const friend = await prisma.user.findUnique({
     where: { username },
     include: {
@@ -25,14 +26,12 @@ async function exploreFriends(_, { username }, context) {
     },
   });
 
-  console.log("User found:", friend);
-
-  // Find friends of the user
-
+  // Return the friend payload
   return friend;
 }
 
 async function exploreChatFriend(_, { userId, username }, context) {
+  // Find friendship exist of user with friends username
   const user = await prisma.friendship.findFirst({
     where: {
       OR: [
@@ -52,10 +51,12 @@ async function exploreChatFriend(_, { userId, username }, context) {
     },
   });
 
+  // If not throw error
   if (!user) {
     throw new Error(`You don't have a friend name ${username}.`);
   }
 
+  // Return the friendship payload
   return user;
 }
 
