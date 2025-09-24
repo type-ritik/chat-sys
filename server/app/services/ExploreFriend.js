@@ -25,8 +25,6 @@ async function exploreFriends(_, { username }, context) {
     },
   });
 
-  console.log("User found:", friend);
-
   // Find friends of the user
 
   return friend;

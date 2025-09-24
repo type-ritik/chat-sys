@@ -34,7 +34,6 @@ async function sendMessage(_, { userId, chatRoomId, text }) {
       },
     },
   });
-  console.log(`ChatRoomPayload: ${chatRoomPayload}`);
 
   delete chatRoomPayload.createdAt;
   delete chatRoomPayload.friendShipId;
@@ -71,7 +70,7 @@ async function sendMessage(_, { userId, chatRoomId, text }) {
 }
 
 async function chatRoomCell(_, { friendshipId }, context) {
-  console.log("Working", friendshipId);
+
   const friend = await prisma.friendship.findUnique({
     where: {
       id: friendshipId,
@@ -82,7 +81,6 @@ async function chatRoomCell(_, { friendshipId }, context) {
     throw new Error("Friend is not found");
   }
 
-  console.log("Working 2", friend);
   let chatRoom = await prisma.chatRoom.findFirst({
     where: {
       friendShipId: friendshipId,
@@ -96,8 +94,6 @@ async function chatRoomCell(_, { friendshipId }, context) {
       },
     });
   }
-
-  console.log("Working 3", chatRoom);
 
   return chatRoom;
 }

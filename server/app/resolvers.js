@@ -16,17 +16,6 @@ const resolvers = {
   },
 
   Mutation: {
-    sayHello: async (_, { friendId, msg }, context) => {
-      // Publish directly via graphql-redis-subscriptions
-      console.log("User Send Message to Friend: ", friendId);
-      await pubsub.publish(`CHATMSG:${friendId}`, {
-        // Here, We are returning the message to user as a payload based of typeDef
-        chatMsg: { from: friendId, message: msg },
-      });
-      console.log("Message Published to Redis");
-
-      return true;
-    },
     sendMessage,
     chatRoomCell,
     followFriend,
