@@ -33,7 +33,7 @@ async function exploreFriends(_, { username }, context) {
 }
 
 async function exploreChatFriend(_, { userId, username }, context) {
-  const user = await prisma.friendship.findUnique({
+  const user = await prisma.friendship.findFirst({
     where: {
       userId: userId,
       friend: {
@@ -43,10 +43,10 @@ async function exploreChatFriend(_, { userId, username }, context) {
   });
 
   if (!user) {
-    throw new Error("User not found.");
+    throw new Error(`You don't have a friend name ${username}.`);
   }
 
   return user;
 }
 
-module.exports = { exploreFriends , exploreChatFriend};
+module.exports = { exploreFriends, exploreChatFriend };

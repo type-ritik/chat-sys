@@ -59,41 +59,40 @@ async function followResponse(_, { friendshipId, status }, context) {
   }
 
   // Update the friend record Status - ["ACCEPTED", "REJECTED"]
-  await prisma.friendship.update({
-    where: {
-      id: friendshipId,
-    },
-    data: {
-      status: status,
-    },
-  });
+  if (status !== "ACCEPTED") {
+    await prisma.friendship.delete({
+      where: {
+        id: friendshipId,
+      },
+    });
+  } else {
+    await prisma.friendship.update({
+      where: {
+        id: friendshipId,
+      },
+      data: {
+        status: status,
+      },
+    });
+  }
 
   console.log("Friendship record is updated");
 
   // Retrieve Friend Record include Sender record
-  const friendPayload = await prisma.friendship.findUnique({
+  const friendPayload = await prisma.user.findUnique({
     where: {
-      id: friendshipId,
-    },
-    include: {
-      user: {
-        select: {
-          id: true,
-          username: true,
-          name: true,
-        },
-      },
+      id: friend.userId,
     },
   });
 
-  console.log("FriendShip record is retrieved");
+  console.log("User record is retrieved");
 
   // Create notification for Sender for request update
   const notify = await prisma.message.create({
     data: {
-      content: `${friendPayload.user.username} has ${status} your follow request.`,
-      sender: friendPayload.user.username,
-      requestedId: friendPayload.userId,
+      content: `${friendPayload.username} has ${status} your follow request.`,
+      sender: friendPayload.username,
+      requestedId: friendPayload.id,
       isSeen: false,
     },
   });
@@ -101,13 +100,13 @@ async function followResponse(_, { friendshipId, status }, context) {
   console.log("Notification is record is created");
 
   // Publish Notification to Sender
-  pubsub.publish(`NOTIFICATIONS:${friendPayload.userId}`, {
+  pubsub.publish(`NOTIFICATIONS:${friendPayload.id}`, {
     subNotify: notify,
   });
 
   console.log(
     "Notification sent to user: ",
-    friendPayload.user.username,
+    friendPayload.username,
     "Successfully."
   );
 
