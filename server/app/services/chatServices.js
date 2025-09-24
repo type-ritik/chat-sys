@@ -3,6 +3,7 @@ const { prisma } = require("../data/prisma");
 const { pubsub } = require("../data/pubsub");
 
 async function sendMessage(_, { userId, chatRoomId, text }) {
+  // Create the new record for chatmessage
   const messagePayload = await prisma.chatMessages.create({
     data: {
       userId: userId,
@@ -11,6 +12,7 @@ async function sendMessage(_, { userId, chatRoomId, text }) {
     },
   });
 
+  // Retrieve the chatRoom payload data for friend and user ids
   const chatRoomPayload = await prisma.chatRoom.findFirst({
     where: {
       id: chatRoomId,
@@ -35,10 +37,12 @@ async function sendMessage(_, { userId, chatRoomId, text }) {
     },
   });
 
+  // Remove unwanted payload from chatRoomPayload
   delete chatRoomPayload.createdAt;
   delete chatRoomPayload.friendShipId;
   delete chatRoomPayload.id;
 
+  // Record the notification about friend send you a message
   const notification = await prisma.message.create({
     data: {
       content: `You got a message from ${chatRoomPayload.friendshp.user.username}`,
@@ -47,7 +51,7 @@ async function sendMessage(_, { userId, chatRoomId, text }) {
     },
   });
 
-  //   Publish the new chat message event to Redis for subscriptions
+  // Publish the new chat message event to Redis for live chat
   if (userId === chatRoomPayload.friendshp.friendId) {
     pubsub.publish(`CHATMSG:${chatRoomPayload.friendshp.userId}`, {
       chatMsg: messagePayload,
@@ -66,28 +70,33 @@ async function sendMessage(_, { userId, chatRoomId, text }) {
     });
   }
 
+  // Return true payload to say its send
   return true;
 }
 
 async function chatRoomCell(_, { friendshipId }, context) {
-
+  // Find you are friend with userB
   const friend = await prisma.friendship.findUnique({
     where: {
       id: friendshipId,
     },
   });
 
+  // If not throw error
   if (!friend) {
     throw new Error("Friend is not found");
   }
 
+  // Check the chatRoom is exist using friendship id
   let chatRoom = await prisma.chatRoom.findFirst({
     where: {
       friendShipId: friendshipId,
     },
   });
 
+  // If not exists chatRoom
   if (!chatRoom) {
+    // Create new ChatRoom
     chatRoom = await prisma.chatRoom.create({
       data: {
         friendShipId: friendshipId,
@@ -95,6 +104,7 @@ async function chatRoomCell(_, { friendshipId }, context) {
     });
   }
 
+  // Return ChatRoomPaylaod to user
   return chatRoom;
 }
 
