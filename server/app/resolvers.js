@@ -3,6 +3,7 @@ const {
   exploreFriends,
   exploreChatFriend,
 } = require("./services/ExploreFriend");
+const {chatRoomCell, sendMessage} = require("./services/chatServices")
 const { pubsub } = require("./data/pubsub");
 const { followFriend, followResponse } = require("./services/FollowFriend");
 
@@ -26,6 +27,8 @@ const resolvers = {
 
       return true;
     },
+    sendMessage,
+    chatRoomCell,
     followFriend,
     createUser,
     followResponse,
