@@ -60,4 +60,18 @@ async function exploreChatFriend(_, { userId, username }, context) {
   return user;
 }
 
-module.exports = { exploreFriends, exploreChatFriend };
+async function friendList(_, { userId }, context) {
+  const friends = await prisma.friendship.findMany({
+    where: {
+      OR: [{ userId: userId }, { friendId: userId }],
+    },
+  });
+
+  if (friends.length <= 0) {
+    throw new Error("Don't have any friends");
+  }
+
+  return friends;
+}
+
+module.exports = { exploreFriends, exploreChatFriend, friendList };

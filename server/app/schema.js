@@ -61,6 +61,7 @@ const typeDefs = gql`
     exploreFriends(username: String!): User!
     exploreChatFriend(userId: String!, username: String): Friendship
     hello: String!
+    friendList(userId: String!):[Friendship!]!
   }
 
   type Mutation {
