@@ -117,15 +117,33 @@ async function chatRoomList(_, { userId }, context) {
     },
   });
 
-  if(roomList <= 0) {
+  if (roomList <= 0) {
     throw new Error("Zero ChatRoom");
   }
 
   return roomList;
 }
 
+async function chatMessageList(_, { chatRoomId }, context) {
+  const msgList = await prisma.chatMessages.findMany({
+    where: {
+      chatRoomId: chatRoomId,
+    },
+    orderBy: {
+      createdAt: "asc",
+    },
+  });
+
+  if (msgList.length <= 0) {
+    throw new Error("Not Enough messages");
+  }
+
+  return msgList;
+}
+
 module.exports = {
   sendMessage,
   chatRoomCell,
-  chatRoomList
+  chatRoomList,
+  chatMessageList,
 };
