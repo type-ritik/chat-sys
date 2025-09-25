@@ -108,7 +108,24 @@ async function chatRoomCell(_, { friendshipId }, context) {
   return chatRoom;
 }
 
+async function chatRoomList(_, { userId }, context) {
+  const roomList = await prisma.chatRoom.findMany({
+    where: {
+      friendshp: {
+        OR: [{ userId: userId }, { friendId: userId }],
+      },
+    },
+  });
+
+  if(roomList <= 0) {
+    throw new Error("Zero ChatRoom");
+  }
+
+  return roomList;
+}
+
 module.exports = {
   sendMessage,
   chatRoomCell,
+  chatRoomList
 };

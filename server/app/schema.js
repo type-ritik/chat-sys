@@ -62,6 +62,7 @@ const typeDefs = gql`
     exploreChatFriend(userId: String!, username: String): Friendship
     hello: String!
     friendList(userId: String!):[Friendship!]!
+    chatRoomList(userId: String!):[ChatRoomPayload!]!
   }
 
   type Mutation {

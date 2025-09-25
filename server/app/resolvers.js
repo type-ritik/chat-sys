@@ -4,7 +4,11 @@ const {
   exploreChatFriend,
   friendList,
 } = require("./services/ExploreFriend");
-const { chatRoomCell, sendMessage } = require("./services/chatServices");
+const {
+  chatRoomCell,
+  sendMessage,
+  chatRoomList,
+} = require("./services/chatServices");
 const { pubsub } = require("./data/pubsub");
 const { followFriend, followResponse } = require("./services/FollowFriend");
 
@@ -15,6 +19,7 @@ const resolvers = {
     exploreFriends,
     exploreChatFriend,
     friendList,
+    chatRoomList,
   },
 
   Mutation: {
