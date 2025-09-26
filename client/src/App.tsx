@@ -8,6 +8,7 @@ function App() {
     <>
     <Routes>
       <Route path='/login' element={<LoginPage />} />
+      <Route path='/home' element={"Hello"}/>
     </Routes>
     </>
   )
