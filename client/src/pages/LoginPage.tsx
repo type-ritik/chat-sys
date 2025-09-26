@@ -1,21 +1,16 @@
 import React, { useState } from "react";
 import { fetchServer, isValidEmail } from "../services/LoginService";
+import { useNavigate } from "react-router-dom";
+import { Eye, EyeOff } from "lucide-react";
 
 function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [payload, setPayload] = useState({ email, password });
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setErrorMsg("");
-    const target = e.target;
-    if (target.id === "email") {
-      setEmail(target.value);
-    } else {
-      setPassword(target.value);
-    }
-  };
+  const [successMsg, setSuccessMsg] = useState("");
+  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -41,40 +36,95 @@ function LoginPage() {
       return;
     }
 
-    console.log(resData.data.loginUser)
+    console.log(resData.data.loginUser);
+    setSuccessMsg(`Welcome back ${resData.data.loginUser.username}`);
     setErrorMsg("");
+    navigate("/home");
   };
 
   return (
-    <div>
-      <form onSubmit={(e) => handleSubmit(e)}>
-        <div className="entr-email">
-          <label htmlFor="email_address">Email</label>
+    <div className="w-full h-screen flex flex-col justify-center items-center bg-gradient-to-br from-purple-200 via-blue-200 to-pink-200 p-4">
+      <h1 className="text-4xl font-extrabold mb-6 text-gray-800 transition-all duration-500 hover:scale-105">
+        Login Now
+      </h1>
+
+      <form
+        onSubmit={handleSubmit}
+        className="w-full max-w-md flex flex-col bg-white/80 backdrop-blur-md rounded-2xl border border-purple-300 p-6 shadow-xl space-y-5 transition-all duration-500 hover:shadow-2xl"
+      >
+        {/* Email */}
+        <div className="flex flex-col">
+          <label htmlFor="email" className="font-semibold text-gray-700 mb-1">
+            Email
+          </label>
           <input
             type="text"
             placeholder="example@email.com"
-            onChange={(e) => handleChange(e)}
             value={email}
+            onChange={(e) => {
+              setEmail(e.target.value);
+              if (errorMsg) setErrorMsg("");
+            }}
             id="email"
-            name="email_address"
+            name="email"
+            className="bg-blue-50 px-3 py-2 rounded-md text-gray-700 outline-none border border-gray-300 focus:ring-2 focus:ring-purple-400 transition-all"
           />
         </div>
-        <div className="entr-pass">
-          <label htmlFor="password">Password</label>
+
+        {/* Password */}
+        <div className="flex flex-col relative">
+          <label
+            htmlFor="password"
+            className="font-semibold text-gray-700 mb-1"
+          >
+            Password
+          </label>
           <input
-            type="password"
+            type={showPassword ? "text" : "password"}
             placeholder="********"
-            name="password"
-            id="password"
-            onChange={(e) => handleChange(e)}
             value={password}
+            onChange={(e) => {
+              setPassword(e.target.value);
+              if (errorMsg) setErrorMsg("");
+            }}
+            id="password"
+            name="password"
+            className="bg-blue-50 px-3 py-2 rounded-md text-gray-700 outline-none border border-gray-300 focus:ring-2 focus:ring-purple-400 transition-all pr-10"
           />
+          <button
+            type="button"
+            onClick={() => setShowPassword(!showPassword)}
+            className="absolute right-3 top-[38px] text-gray-500 hover:text-purple-600 transition-colors"
+          >
+            {showPassword ? (
+              <EyeOff className="cursor-pointer" size={20} />
+            ) : (
+              <Eye size={20} className="cursor-pointer" />
+            )}
+          </button>
         </div>
-        <div className="login">
-          <button type="submit">Login</button>
-        </div>
+
+        {/* Submit */}
+        <button
+          type="submit"
+          className="w-full py-3 bg-gradient-to-r from-green-400 to-green-600 text-white font-semibold rounded-lg shadow-md hover:from-green-300 hover:to-green-500 hover:scale-105 transition-transform duration-300 cursor-pointer"
+        >
+          Login
+        </button>
       </form>
-      {errorMsg ? <div>{errorMsg}</div> : <></>}
+
+      {/* Messages */}
+      {errorMsg && (
+        <div className="bg-red-200 text-red-800 w-full max-w-md flex justify-center items-center py-2 rounded-md mt-4 shadow">
+          {errorMsg}
+        </div>
+      )}
+
+      {successMsg && (
+        <div className="bg-green-200 text-green-800 w-full max-w-md flex justify-center items-center py-2 rounded-md mt-4 shadow">
+          {successMsg}
+        </div>
+      )}
     </div>
   );
 }
