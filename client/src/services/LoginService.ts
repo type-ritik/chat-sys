@@ -1,6 +1,14 @@
 import { baseUrl } from "../config";
 
-export const fetchServer = async (payload) => {
+export const isValidEmail = (email: string) => {
+  const regex = /^[a-zA-Z]{1,}[\d?\D]{1,}[@]{1}[a-z]{2,}.[com]{3}$/g;
+  return regex.test(email);
+};
+
+export const fetchServer = async (payload: {
+  email: string;
+  password: string;
+}) => {
   console.log(payload);
   const res = await fetch(baseUrl, {
     method: "POST",
@@ -23,13 +31,14 @@ export const fetchServer = async (payload) => {
     }),
   });
 
-  if (!res.ok) {
-    throw new Error("Client Error");
+  const result = await res.json();
+  if (result.errors) {
+    return { res: false, msg: result.errors[0].message };
   }
 
-  const result = await res.json();
-
-  console.log(result.data.loginUser);
+  // console.log(result);
+  window.sessionStorage.setItem("token", result.data.loginUser.token);
+  window.cookieStore.set("token", result.data.loginUser.token);
   window.localStorage.setItem("token", result.data.loginUser.token);
 
   return result;

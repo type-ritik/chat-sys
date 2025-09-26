@@ -1,20 +1,48 @@
-import { useState, useEffect } from "react";
-import { fetchServer } from "../services/LoginService";
+import React, { useState } from "react";
+import { fetchServer, isValidEmail } from "../services/LoginService";
 
 function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [errorMsg, setErrorMsg] = useState("");
   const [payload, setPayload] = useState({ email, password });
 
-  const handleSubmit = (e) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setErrorMsg("");
+    const target = e.target;
+    if (target.id === "email") {
+      setEmail(target.value);
+    } else {
+      setPassword(target.value);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    if (!isValidEmail(email)) {
+      setErrorMsg("Invalid Email");
+      return;
+    }
+
+    if (password.length < 8) {
+      setErrorMsg("Password length should be greater than 8");
+      return;
+    }
 
     setPayload({
       email: email,
       password: password,
     });
 
-    fetchServer(payload);
+    const resData = await fetchServer(payload);
+    if (resData.res === false) {
+      setErrorMsg(resData.msg);
+      return;
+    }
+
+    console.log(resData.data.loginUser)
+    setErrorMsg("");
   };
 
   return (
@@ -25,8 +53,9 @@ function LoginPage() {
           <input
             type="text"
             placeholder="example@email.com"
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={(e) => handleChange(e)}
             value={email}
+            id="email"
             name="email_address"
           />
         </div>
@@ -36,7 +65,8 @@ function LoginPage() {
             type="password"
             placeholder="********"
             name="password"
-            onChange={(e) => setPassword(e.target.value)}
+            id="password"
+            onChange={(e) => handleChange(e)}
             value={password}
           />
         </div>
@@ -44,6 +74,7 @@ function LoginPage() {
           <button type="submit">Login</button>
         </div>
       </form>
+      {errorMsg ? <div>{errorMsg}</div> : <></>}
     </div>
   );
 }
