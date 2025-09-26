@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { fetchServer, isValidEmail } from "../services/LoginService";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Eye, EyeOff } from "lucide-react";
 
 function LoginPage() {
@@ -36,7 +36,6 @@ function LoginPage() {
       return;
     }
 
-    console.log(resData.data.loginUser);
     setSuccessMsg(`Welcome back ${resData.data.loginUser.username}`);
     setErrorMsg("");
     navigate("/home");
@@ -65,7 +64,6 @@ function LoginPage() {
               setEmail(e.target.value);
               if (errorMsg) setErrorMsg("");
             }}
-            id="email"
             name="email"
             className="bg-blue-50 px-3 py-2 rounded-md text-gray-700 outline-none border border-gray-300 focus:ring-2 focus:ring-purple-400 transition-all"
           />
@@ -87,7 +85,6 @@ function LoginPage() {
               setPassword(e.target.value);
               if (errorMsg) setErrorMsg("");
             }}
-            id="password"
             name="password"
             className="bg-blue-50 px-3 py-2 rounded-md text-gray-700 outline-none border border-gray-300 focus:ring-2 focus:ring-purple-400 transition-all pr-10"
           />
@@ -104,6 +101,14 @@ function LoginPage() {
           </button>
         </div>
 
+        {/* Reset Password */}
+        <Link
+          to="/reset-pass"
+          className="flex justify-end text-sm font-semibold text-blue-600 hover:text-blue-800 transition-colors duration-200 mt-1"
+        >
+          Reset password?
+        </Link>
+
         {/* Submit */}
         <button
           type="submit"
@@ -111,6 +116,14 @@ function LoginPage() {
         >
           Login
         </button>
+
+        {/* Need account? */}
+        <Link
+          to="/signup"
+          className="flex justify-center text-sm font-medium text-indigo-500 hover:text-indigo-700 transition-colors duration-200 mt-2"
+        >
+          Create New Account?
+        </Link>
       </form>
 
       {/* Messages */}
