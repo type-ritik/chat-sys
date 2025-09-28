@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { fetchServer, isValidEmail } from "../services/LoginService";
+import { fetchServer } from "../services/LoginService";
+import { isValidEmail } from "../config";
 import { Link, useNavigate } from "react-router-dom";
 import { Eye, EyeOff } from "lucide-react";
 
@@ -8,7 +9,6 @@ function LoginPage() {
   const [password, setPassword] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [payload, setPayload] = useState({ email, password });
   const [successMsg, setSuccessMsg] = useState("");
   const navigate = useNavigate();
 
@@ -25,12 +25,8 @@ function LoginPage() {
       return;
     }
 
-    setPayload({
-      email: email,
-      password: password,
-    });
+    const resData = await fetchServer({ email, password });
 
-    const resData = await fetchServer(payload);
     if (resData.res === false) {
       setErrorMsg(resData.msg);
       return;
@@ -57,7 +53,7 @@ function LoginPage() {
             Email
           </label>
           <input
-            type="text"
+            type="email"
             placeholder="example@email.com"
             value={email}
             onChange={(e) => {
