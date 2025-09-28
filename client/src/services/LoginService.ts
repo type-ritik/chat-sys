@@ -1,10 +1,5 @@
 import { baseUrl } from "../config";
 
-export const isValidEmail = (email: string) => {
-  const regex = /^[a-zA-Z]{1,}[\d?\D]{1,}[@]{1}[a-z]{2,}.[com]{3}$/g;
-  return regex.test(email);
-};
-
 export const fetchServer = async (payload: {
   email: string;
   password: string;
