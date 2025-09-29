@@ -38,7 +38,7 @@ function SignupPage() {
 
     setSuccessMsg(`Welcome ${resData.data.createUser.username}`);
     setErrorMsg("");
-    navigate("/home");
+    navigate("/");
   };
 
   return (

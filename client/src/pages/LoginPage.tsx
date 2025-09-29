@@ -34,7 +34,7 @@ function LoginPage() {
 
     setSuccessMsg(`Welcome back ${resData.data.loginUser.username}`);
     setErrorMsg("");
-    navigate("/home");
+    navigate("/");
   };
 
   return (

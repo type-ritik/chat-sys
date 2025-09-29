@@ -1,3 +1,13 @@
+import { Outlet, Link } from "react-router-dom";
+
+const navLink = [
+  { label: "Home", route: "/" },
+  { label: "Profile", route: "/profile" },
+  { label: "Explore", route: "/explore" },
+  { label: "Chat", route: "/chat" },
+  { label: "Notification", route: "/notification" },
+];
+
 function IndexPage() {
   return (
     <div className="w-full h-screen flex flex-col">
@@ -36,22 +46,19 @@ function IndexPage() {
       <div className="flex flex-1">
         {/* Sidebar */}
         <aside className="bg-gradient-to-b from-purple-200 to-purple-100 flex flex-col gap-3 h-full w-3/12 md:w-2/12 lg:w-1/6 p-4 border-r border-purple-300">
-          {["Home", "Profile", "Explore", "Chat", "Notifications"].map(
-            (item) => (
-              <button
-                key={item}
-                className="w-full py-2 flex items-center justify-center rounded-md shadow hover:shadow-lg hover:scale-105 transition-all duration-300 bg-gradient-to-r from-blue-600 to-pink-600 text-white font-semibold"
-              >
-                {item}
+          {navLink.map((item) => (
+            <Link to={item.route} key={item.label}>
+              <button className="w-full py-2 flex items-center justify-center rounded-md shadow hover:shadow-lg hover:scale-105 transition-all duration-300 bg-gradient-to-r from-blue-600 to-pink-600 text-white font-semibold">
+                {item.label}
               </button>
-            )
-          )}
+            </Link>
+          ))}
         </aside>
 
         {/* Main Content */}
         <main className="flex-1 p-6 overflow-y-auto">
           <div className="text-gray-700 text-lg font-medium">
-            Component Renderer
+            <Outlet />
           </div>
         </main>
       </div>
