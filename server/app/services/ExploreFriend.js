@@ -30,7 +30,8 @@ async function exploreFriends(_, { username }, context) {
   return friend;
 }
 
-async function exploreChatFriend(_, { userId, username }, context) {
+async function exploreChatFriend(_, { username }, context) {
+  const userId = context.user.userId;
   // Find friendship exist of user with friends username
   const user = await prisma.friendship.findFirst({
     where: {
@@ -60,7 +61,8 @@ async function exploreChatFriend(_, { userId, username }, context) {
   return user;
 }
 
-async function friendList(_, { userId }, context) {
+async function friendList(_, obj, context) {
+  const userId = context.user.userId;
   const friends = await prisma.friendship.findMany({
     where: {
       OR: [{ userId: userId }, { friendId: userId }],

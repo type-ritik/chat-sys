@@ -1,7 +1,8 @@
 const { prisma } = require("../data/prisma");
 const { pubsub } = require("../data/pubsub");
 
-async function followFriend(_, { userId, friendId }, context) {
+async function followFriend(_, { friendId }, context) {
+  const userId = context.user.userId;
   // Check if both users exist
   const user = await prisma.user.findUnique({ where: { id: userId } });
   const friend = await prisma.user.findUnique({ where: { id: friendId } });
