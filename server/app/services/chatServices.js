@@ -2,7 +2,8 @@
 const { prisma } = require("../data/prisma");
 const { pubsub } = require("../data/pubsub");
 
-async function sendMessage(_, { userId, chatRoomId, text }) {
+async function sendMessage(_, { chatRoomId, text }, context) {
+  const userId = context.user.userId;
   // Create the new record for chatmessage
   const messagePayload = await prisma.chatMessages.create({
     data: {
@@ -108,7 +109,8 @@ async function chatRoomCell(_, { friendshipId }, context) {
   return chatRoom;
 }
 
-async function chatRoomList(_, { userId }, context) {
+async function chatRoomList(_, obj, context) {
+  const userId = context.user.userId;
   const roomList = await prisma.chatRoom.findMany({
     where: {
       friendshp: {
