@@ -59,18 +59,18 @@ const typeDefs = gql`
     messages: [Message!]!
     loginUser(email: String!, password: String!): User!
     exploreFriends(username: String!): User!
-    exploreChatFriend(userId: String!, username: String): Friendship
+    exploreChatFriend(username: String): Friendship
     hello: String!
-    friendList(userId: String!):[Friendship!]!
-    chatRoomList(userId: String!):[ChatRoomPayload!]!
+    friendList:[Friendship!]!
+    chatRoomList:[ChatRoomPayload!]!
     chatMessageList(chatRoomId: String!):[ChatMsgPayload!]!
   }
 
   type Mutation {
     sayHello(friendId: String!, msg: String): Boolean!
-    sendMessage(userId: String!, chatRoomId: String!, text: String!): Boolean!
+    sendMessage(chatRoomId: String!, text: String!): Boolean!
     createUser(name: String!, email: String!, password: String!): User!
-    followFriend(userId: String!, friendId: String!): Boolean
+    followFriend(friendId: String!): Boolean
     followResponse(friendshipId: String!, status: String!): Boolean
     chatRoomCell(friendshipId: String!): ChatRoomPayload
   }
