@@ -1,9 +1,10 @@
 import React, { useState } from "react";
-import { fetchFriend } from "../services/FriendService";
+import { fetchFollowFriend, fetchFriend } from "../services/FriendService";
 
 function ExploreFriendComponent() {
   const [searchInput, setSearchInput] = useState("");
   type Friend = {
+    id: string;
     name: string;
     email: string;
   };
@@ -32,10 +33,13 @@ function ExploreFriendComponent() {
     setErrorMsg("");
   };
 
-  const handleSendRequest = () => {
-    if (searchResult) {
-      alert(`Friend request sent to ${searchResult.name}`);
+  const handleSendRequest = async () => {
+    if (!searchResult) return;
+    const resData = await fetchFollowFriend(searchResult.id);
+    if (resData.res === false) {
+      setErrorMsg(resData.msg);
     }
+    alert(`Friend request sent to ${searchResult.name}`);
   };
 
   return (
