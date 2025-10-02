@@ -12,6 +12,7 @@ const {
 } = require("./services/chatServices");
 const { pubsub } = require("./data/pubsub");
 const { followFriend, followResponse } = require("./services/FollowFriend");
+const { retrieveNotification } = require("./services/Notification");
 
 const resolvers = {
   Query: {
@@ -21,7 +22,8 @@ const resolvers = {
     exploreChatFriend,
     friendList,
     chatRoomList,
-    chatMessageList
+    chatMessageList,
+    retrieveNotification,
   },
 
   Mutation: {
