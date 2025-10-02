@@ -43,6 +43,8 @@ model Message {
   content     String
   requestedId String
   isSeen      Boolean  @default(false)
+  senderId    String
+  receiverId  String
   sender      String
   timestamp   DateTime @default(now())
 }
