@@ -8,7 +8,11 @@ const navLink = [
   { label: "Notification", route: "/notification" },
 ];
 
-function IndexPage() {
+interface IndexPageProps {
+  notify: boolean;
+}
+
+function IndexPage({ notify }: IndexPageProps) {
   return (
     <div className="w-full h-screen flex flex-col">
       {/* Header */}
@@ -45,14 +49,36 @@ function IndexPage() {
       {/* Grid Layout */}
       <div className="flex flex-1">
         {/* Sidebar */}
-        <aside className="bg-gradient-to-b from-purple-200 to-purple-100 flex flex-col gap-3 h-full w-3/12 md:w-2/12 lg:w-1/6 p-4 border-r border-purple-300">
-          {navLink.map((item) => (
-            <Link to={item.route} key={item.label}>
-              <button className="w-full py-2 flex items-center justify-center rounded-md shadow hover:shadow-lg hover:scale-105 transition-all duration-300 bg-gradient-to-r from-blue-600 to-pink-600 text-white font-semibold">
-                {item.label}
-              </button>
-            </Link>
-          ))}
+        <aside className="bg-gradient-to-b from-purple-100 to-purple-50 flex flex-col h-full w-3/12 md:w-2/12 lg:w-1/6 p-4 border-r border-purple-200 shadow-sm">
+          <nav className="flex flex-col gap-3">
+            {navLink.map((item) => (
+              <Link to={item.route} key={item.label}>
+                <button
+                  className={`
+            relative w-full py-2 px-4 flex items-center justify-center
+            rounded-lg font-medium text-sm
+            bg-gradient-to-r from-blue-500 to-pink-500 text-white
+            shadow-md hover:shadow-lg hover:scale-105
+            transition-all duration-300 ease-in-out
+          `}
+                >
+                  {/* Label */}
+                  <span>{item.label}</span>
+
+                  {/* Notification badge */}
+                  {item.label === "Notification" && notify && (
+                    <span
+                      className="absolute top-1 right-2 min-w-[18px] h-[18px] px-1
+                         flex items-center justify-center text-xs font-bold
+                         bg-yellow-500 text-white rounded-full shadow-md"
+                    >
+                      {""}
+                    </span>
+                  )}
+                </button>
+              </Link>
+            ))}
+          </nav>
         </aside>
 
         {/* Main Content */}

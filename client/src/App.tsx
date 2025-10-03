@@ -17,7 +17,16 @@ type NotificationSubscriptionData = {
     content: string;
     isSeen: boolean;
     requestedId: string;
-    sender: string;
+    sender: {
+      username: string;
+      name: string;
+    };
+    receiver: {
+      username: string;
+      name: string;
+    };
+    receiverId: string;
+    senderId: string;
     timestamp: string;
   };
 };
@@ -49,16 +58,13 @@ function App() {
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignupPage />} />
-        <Route path="/" element={<IndexPage />}>
+        <Route path="/" element={<IndexPage notify={notificationData ? (true) : (false)} />}>
           {/* Nested rotues inside Indexpage */}
           <Route index element={<div>Welcome to ChatSys!</div>} />
           <Route path="profile" element={<div>Welcome to Profile</div>} />
           <Route path="explore" element={<ExploreFriendComponent />} />
           <Route path="chat" element={<ChatRoomComponent />} />
-          <Route
-            path="notification"
-            element={<NotificationComponent notifyData={notificationData} />}
-          />
+          <Route path="notification" element={<NotificationComponent />} />
           <Route path="chat/:id" element={<div>Welcome to ChatById</div>} />
         </Route>
       </Routes>
