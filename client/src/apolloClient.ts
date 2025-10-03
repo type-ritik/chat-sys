@@ -3,16 +3,31 @@ import { GraphQLWsLink } from "@apollo/client/link/subscriptions";
 import { createClient } from "graphql-ws";
 import { getMainDefinition } from "@apollo/client/utilities";
 import { baseUrl, wsBaseUrl } from "./config";
+import { ApolloLink } from "@apollo/client";
 
 // 1. HTTP link for queries & mutation
 const httpLink = new HttpLink({
   uri: baseUrl, // server HTTP endpoint
 });
 
+// Configure token on Apollo Client to inject it automatically
+const authLink = new ApolloLink((operation, forward) => {
+  const token = localStorage.getItem("token");
+  operation.setContext({
+    headers: {
+      authorization: token ? `${token}` : "",
+    },
+  });
+  return forward(operation);
+});
+
 // 2. WebSocket link for subscriptions
 const wsLink = new GraphQLWsLink(
   createClient({
     url: wsBaseUrl, // server WS endpoint
+    connectionParams: {
+      authToken: localStorage.getItem("token"), // auth for subs
+    },
   })
 );
 
@@ -25,7 +40,7 @@ const splitLink = split(
     );
   },
   wsLink, // subscriptions go here
-  httpLink // queries & mutations go here
+  authLink.concat(httpLink) // apply auth here for queries/mutations
 );
 
 // 4. Create client
