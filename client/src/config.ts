@@ -12,11 +12,20 @@ export const isValidEmail = (email: string) => {
 export const NOTIFICATION_SUBSCRIPTION = gql`
   subscription ($userId: String!) {
     subNotify(userId: $userId) {
-      id
       content
-      sender
-      isSeen
+      id
       requestedId
+      sender {
+        username
+        name
+      }
+      senderId
+      receiver {
+        username
+        name
+      }
+      receiverId
+      isSeen
       timestamp
     }
   }
