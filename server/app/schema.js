@@ -1,13 +1,15 @@
 const { gql } = require("graphql-tag");
 
 const typeDefs = gql`
+  scalar DateTime
+
   type User {
     id: ID!
     name: String!
     email: String!
     username: String!
     isAdmin: Boolean!
-    createdAt: String!
+    createdAt: DateTime!
     profile: Profile
     token: String
   }
@@ -22,16 +24,20 @@ const typeDefs = gql`
   type ChatRoomPayload {
     id: String!
     friendShipId: String!
-    createdAt: String!
+    createdAt: DateTime!
   }
 
   type Message {
     id: ID!
     content: String!
-    sender: String!
     isSeen: Boolean!
     requestedId: String!
-    timestamp: String!
+    receiverId: String!
+    senderId: String!
+    sender: User
+    receiver: User
+    profile: Profile
+    timestamp: DateTime
   }
 
   type ChatMsgPayload {
@@ -39,7 +45,7 @@ const typeDefs = gql`
     userId: String!
     message: String!
     chatRoomId: String
-    createdAt: String
+    createdAt: DateTime!
   }
 
   type Friendship {
@@ -48,7 +54,7 @@ const typeDefs = gql`
     friend: User
     userId: String
     friendId: String
-    createdAt: String
+    createdAt: DateTime!
   }
 
   type Query {
@@ -56,9 +62,9 @@ const typeDefs = gql`
     exploreFriends(username: String!): User!
     exploreChatFriend(username: String): Friendship
     hello: String!
-    friendList:[Friendship!]!
-    chatRoomList:[ChatRoomPayload!]!
-    chatMessageList(chatRoomId: String!):[ChatMsgPayload!]!
+    friendList: [Friendship!]!
+    chatRoomList: [ChatRoomPayload!]!
+    chatMessageList(chatRoomId: String!): [ChatMsgPayload!]!
     retrieveNotification: [Message!]!
   }
 

@@ -4,18 +4,19 @@ const { pubsub } = require("../data/pubsub");
 async function followFriend(_, { friendId }, context) {
   const userId = context.user.userId;
   // Check if both users exist
-  const user = await prisma.user.findUnique({ where: { id: userId } });
-  const friend = await prisma.user.findUnique({ where: { id: friendId } });
+  const sender = await prisma.user.findUnique({ where: { id: userId } }); // Sender
+  const receiver = await prisma.user.findUnique({ where: { id: friendId } }); // Receiver
 
-  if (!user || !friend) {
+  if (!sender || !receiver) {
+    // Are both valid id
     throw new Error("Invalid Credential");
   }
 
   // Create a follow relationship
   const follow = await prisma.friendship.create({
     data: {
-      userId: userId,
-      friendId: friendId,
+      userId: sender.id,
+      friendId: receiver.id,
       status: "PENDING",
     },
   });
@@ -25,27 +26,43 @@ async function followFriend(_, { friendId }, context) {
   //   Notify the friend about the follow request (implementation depends on your notification system)
   const notification = await prisma.message.create({
     data: {
-      content: `${user.username} has sent you a follow request.`,
-      sender: user.username,
+      content: `${sender.username} has sent you a follow request.`,
+      senderId: sender.id,
+      receiverId: receiver.id,
       requestedId: follow.id,
       isSeen: false,
+    },
+    include: {
+      sender: {
+        select: {
+          username: true,
+          name: true,
+        },
+      },
+      receiver: {
+        select: {
+          username: true,
+          name: true,
+        },
+      },
     },
   });
 
   console.log("Notification record created:", notification);
 
   // Publish the notification to subscribers (if using subscriptions)
-  pubsub.publish(`NOTIFICATIONS:${friendId}`, {
+  pubsub.publish(`NOTIFICATIONS:${receiver.id}`, {
     subNotify: notification,
   });
 
-  console.log("Notification is live-on user:", friend.username);
+  console.log("Notification is live-on user:", sender.username);
 
   return true;
 }
 
 // Everything related to following friends
 async function followResponse(_, { friendshipId, status }, context) {
+  const userId = context.user.userId;
   // Check if friend record is valid
   const friend = await prisma.friendship.findUnique({
     where: {
@@ -92,8 +109,9 @@ async function followResponse(_, { friendshipId, status }, context) {
   const notify = await prisma.message.create({
     data: {
       content: `${friendPayload.username} has ${status} your follow request.`,
-      sender: friendPayload.username,
+      senderId: userId,
       requestedId: friendPayload.id,
+      receiverId: friendPayload.id,
       isSeen: false,
     },
   });

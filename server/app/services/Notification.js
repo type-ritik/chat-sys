@@ -9,10 +9,24 @@ async function retrieveNotification(_, obj, context) {
 
   const notiPayload = await prisma.message.findMany({
     where: {
-      OR: [{ senderId: userId }, { receiverId: userId }],
+      OR: [{ receiverId: userId }],
     },
     orderBy: {
       timestamp: "desc",
+    },
+    include: {
+      sender: {
+        select: {
+          username: true,
+          name: true,
+          profile: {
+            select: {
+              avatarUrl: true,
+              isActive: true,
+            },
+          },
+        },
+      },
     },
   });
 
