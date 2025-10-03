@@ -13,8 +13,24 @@ const {
 const { pubsub } = require("./data/pubsub");
 const { followFriend, followResponse } = require("./services/FollowFriend");
 const { retrieveNotification } = require("./services/Notification");
+const { GraphQLScalarType, Kind } = require("graphql");
 
 const resolvers = {
+  DateTime: new GraphQLScalarType({
+    name: "DateTime",
+    description: "ISO-8601 DateTime scalar",
+    parseValue(value) {
+      return new Date(value);
+    },
+    serialize(value) {
+      return value instanceof Date
+        ? value.toISOString()
+        : new Date(value).toISOString();
+    },
+    parseLiteral(ast) {
+      return ast.kind === Kind.STRING ? new Date(ast.value) : null;
+    },
+  }),
   Query: {
     hello: () => "Hello World!",
     loginUser,
