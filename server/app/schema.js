@@ -50,10 +50,17 @@ const typeDefs = gql`
 
   type Friendship {
     id: ID!
-    user: User
-    friend: User
-    userId: String
-    friendId: String
+    user: User!
+    friend: User!
+    status: String!
+    createdAt: DateTime!
+    otherUser: User!
+  }
+
+  type FriendReqPayload {
+    id: ID!
+    user: User!
+    status: String!
     createdAt: DateTime!
   }
 
@@ -66,6 +73,7 @@ const typeDefs = gql`
     chatRoomList: [ChatRoomPayload!]!
     chatMessageList(chatRoomId: String!): [ChatMsgPayload!]!
     retrieveNotification: [Message!]!
+    friendRequestList: [FriendReqPayload!]!
   }
 
   type Mutation {

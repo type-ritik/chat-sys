@@ -3,6 +3,7 @@ const {
   exploreFriends,
   exploreChatFriend,
   friendList,
+  friendRequestList,
 } = require("./services/ExploreFriend");
 const {
   chatRoomCell,
@@ -16,6 +17,17 @@ const { retrieveNotification } = require("./services/Notification");
 const { GraphQLScalarType, Kind } = require("graphql");
 
 const resolvers = {
+  Friendship: {
+    otherUser: (parent, _, context) => {
+      const { userId } = context.user; // logged-in user ID
+
+      if (parent.userId === userId) {
+        return parent.friend; // I initiated → return friend
+      } else {
+        return parent.user; // I was added → return user
+      }
+    },
+  },
   DateTime: new GraphQLScalarType({
     name: "DateTime",
     description: "ISO-8601 DateTime scalar",
@@ -40,6 +52,7 @@ const resolvers = {
     chatRoomList,
     chatMessageList,
     retrieveNotification,
+    friendRequestList
   },
 
   Mutation: {
