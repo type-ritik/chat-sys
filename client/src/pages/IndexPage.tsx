@@ -6,6 +6,7 @@ const navLink = [
   { label: "Explore", route: "/explore" },
   { label: "Chat", route: "/chat" },
   { label: "Notification", route: "/notification" },
+  { label: "Friends", route: "/friends" },
 ];
 
 interface IndexPageProps {

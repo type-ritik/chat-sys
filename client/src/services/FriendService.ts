@@ -1,3 +1,4 @@
+import { gql } from "@apollo/client";
 import { baseUrl } from "../config";
 
 export const fetchFriend = async (payload: string) => {
@@ -32,6 +33,7 @@ export const fetchFollowFriend = async (payload: string) => {
   const res = await fetch(baseUrl, {
     method: "POST",
     headers: {
+      Authorization: window.localStorage.getItem("token") || "",
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
@@ -51,3 +53,32 @@ export const fetchFollowFriend = async (payload: string) => {
 
   return result;
 };
+
+export const FRIEND_LIST = gql`
+  query {
+    friendList {
+      id
+      status
+      otherUser {
+        id
+        username
+        name
+      }
+    }
+  }
+`;
+
+export const FRIEND_REQUEST = gql`
+  query {
+    friendRequestList {
+      id
+      user {
+        id
+        name
+        username
+      }
+      createdAt
+      status
+    }
+  }
+`;
