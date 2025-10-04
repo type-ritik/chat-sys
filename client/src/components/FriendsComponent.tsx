@@ -1,5 +1,10 @@
-import { useQuery } from "@apollo/client/react";
-import { FRIEND_LIST, FRIEND_REQUEST } from "../services/FriendService";
+import { useMutation, useQuery } from "@apollo/client/react";
+import {
+  ACCEPT_REQUEST,
+  FRIEND_LIST,
+  FRIEND_REQUEST,
+  REJECT_REQUEST,
+} from "../services/FriendService";
 import { useEffect, useState } from "react";
 
 // FriendListItem: Represents a single friend relationship, including the other user's info and status.
@@ -59,17 +64,53 @@ function FriendsComponent() {
     if (data) {
       setFriendList(data.friendList);
       setFriendList(data.friendList);
-      console.log("Query data:", data.friendList);
     }
-
 
     if (reqLoading) console.log("FriendReqList is loading...");
     if (reqError) console.log("FriendReqList Error", reqError);
     if (reqData) {
       setFriendReqList(reqData.friendRequestList);
-      console.log("Query friendReqList: ", reqData.friendRequestList);
     }
   }, [loading, error, data, reqLoading, reqData, reqError]);
+
+  // Mutation hook for accepting friend requests
+  const [acceptRequest] = useMutation(ACCEPT_REQUEST);
+
+  // Mutation hook for rejecting friend requests
+  const [rejectRequest] = useMutation(REJECT_REQUEST);
+
+  // Accept friend Request
+  const handleAcceptReq = async (id: string) => {
+    if (!id) {
+      console.log("Client Error");
+      return;
+    }
+
+    try {
+      await acceptRequest({
+        variables: { friendshipId: id, status: "ACCEPTED" },
+      });
+      console.log("Request Accepted");
+    } catch (error) {
+      console.log("Mutation Error:", error);
+    }
+  };
+
+  // Reject friend Request
+  const handleRejectReq = async (id: string) => {
+    if (!id) {
+      console.log("Client Error");
+      return;
+    }
+    try {
+      await rejectRequest({
+        variables: { friendshipId: id, status: "REJECTED" },
+      });
+      console.log("Request Rejected");
+    } catch (error) {
+      console.log("Mutation Error:", error);
+    }
+  };
 
   // Render the friends and requests sections.
   return (
@@ -153,10 +194,16 @@ function FriendsComponent() {
 
                 {/* Action Buttons */}
                 <div className="flex gap-2">
-                  <button className="px-3 md:px-4 py-1 text-sm font-medium bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors">
+                  <button
+                    className="px-3 md:px-4 py-1 text-sm font-medium bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
+                    onClick={() => handleAcceptReq(item.id)}
+                  >
                     Accept
                   </button>
-                  <button className="px-3 md:px-4 py-1 text-sm font-medium bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors">
+                  <button
+                    className="px-3 md:px-4 py-1 text-sm font-medium bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+                    onClick={() => handleRejectReq(item.id)}
+                  >
                     Reject
                   </button>
                 </div>

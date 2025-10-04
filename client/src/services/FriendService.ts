@@ -82,3 +82,15 @@ export const FRIEND_REQUEST = gql`
     }
   }
 `;
+
+export const ACCEPT_REQUEST = gql`
+  mutation FollowResponse($friendshipId: String!, $status: String!) {
+    followResponse(friendshipId: $friendshipId, status: $status)
+  }
+`;
+
+export const REJECT_REQUEST = gql`
+  mutation FollowResponse($friendshipId: String!, $status: String!) {
+    followResponse(friendshipId: $friendshipId, status: $status)
+  }
+`;
