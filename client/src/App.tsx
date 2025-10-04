@@ -9,6 +9,7 @@ import { NOTIFICATION_SUBSCRIPTION } from "./config";
 import { useEffect, useState } from "react";
 import { useSubscription } from "@apollo/client/react";
 import NotificationComponent from "./components/NotificationComponent";
+import FriendsComponent from "./components/FriendsComponent";
 
 // Notification Data Type
 type NotificationSubscriptionData = {
@@ -58,7 +59,10 @@ function App() {
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignupPage />} />
-        <Route path="/" element={<IndexPage notify={notificationData ? (true) : (false)} />}>
+        <Route
+          path="/"
+          element={<IndexPage notify={notificationData ? true : false} />}
+        >
           {/* Nested rotues inside Indexpage */}
           <Route index element={<div>Welcome to ChatSys!</div>} />
           <Route path="profile" element={<div>Welcome to Profile</div>} />
@@ -66,6 +70,7 @@ function App() {
           <Route path="chat" element={<ChatRoomComponent />} />
           <Route path="notification" element={<NotificationComponent />} />
           <Route path="chat/:id" element={<div>Welcome to ChatById</div>} />
+          <Route path="friends" element={<FriendsComponent />} />
         </Route>
       </Routes>
     </>
