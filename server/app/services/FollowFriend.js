@@ -114,6 +114,14 @@ async function followResponse(_, { friendshipId, status }, context) {
       receiverId: friendPayload.id,
       isSeen: false,
     },
+    include: {
+      sender: {
+        select: {
+          username: true,
+          name: true,
+        },
+      },
+    },
   });
 
   console.log("Notification is record is created");

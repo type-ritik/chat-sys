@@ -66,6 +66,11 @@ async function friendList(_, obj, context) {
   const friends = await prisma.friendship.findMany({
     where: {
       OR: [{ userId: userId }, { friendId: userId }],
+      AND: [{ status: "ACCEPTED" }],
+    },
+    include: {
+      user: true,
+      friend: true,
     },
   });
 
@@ -76,4 +81,22 @@ async function friendList(_, obj, context) {
   return friends;
 }
 
-module.exports = { exploreFriends, exploreChatFriend, friendList };
+async function friendRequestList(_, obj, context) {
+  const userId = context.user.userId;
+  const friendsReq = await prisma.friendship.findMany({
+    where: {
+      friendId: userId,
+      status: "PENDING",
+    },
+    include: {
+      user: true,
+    },
+  });
+
+  if (friendList.length <= 0) {
+    throw new Error("Don't have any request");
+  }
+  return friendsReq;
+}
+
+module.exports = { exploreFriends, exploreChatFriend, friendList, friendRequestList };
