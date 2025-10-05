@@ -99,7 +99,13 @@ async function followResponse(_, { friendshipId, status }, context) {
   // Retrieve Friend Record include Sender record
   const friendPayload = await prisma.user.findUnique({
     where: {
-      id: friend.userId,
+      id: friendshipId.userId,
+    },
+  });
+
+  const userPayload = await prisma.user.findUnique({
+    where: {
+      id: userId,
     },
   });
 
@@ -108,9 +114,9 @@ async function followResponse(_, { friendshipId, status }, context) {
   // Create notification for Sender for request update
   const notify = await prisma.message.create({
     data: {
-      content: `${friendPayload.username} has ${status} your follow request.`,
+      content: `${userPayload.username} has ${status} your follow request.`,
       senderId: userId,
-      requestedId: friendPayload.id,
+      requestedId: userPayload.id,
       receiverId: friendPayload.id,
       isSeen: false,
     },
