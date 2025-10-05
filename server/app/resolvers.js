@@ -52,7 +52,7 @@ const resolvers = {
     chatRoomList,
     chatMessageList,
     retrieveNotification,
-    friendRequestList
+    friendRequestList,
   },
 
   Mutation: {
@@ -72,7 +72,7 @@ const resolvers = {
     },
 
     chatMsg: {
-      subscribe: async (_, { userId }) => {
+      subscribe: async (_, {userId}) => {
         console.log(`User:${userId} Subscribed to Chat Messages`);
         return pubsub.asyncIterator(`CHATMSG:${userId}`);
       },

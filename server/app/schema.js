@@ -23,7 +23,7 @@ const typeDefs = gql`
 
   type ChatRoomPayload {
     id: String!
-    friendShipId: String!
+    friendshipId: String!
     createdAt: DateTime!
   }
 
@@ -87,7 +87,7 @@ const typeDefs = gql`
 
   type Subscription {
     subNotify(userId: String!): Message!
-    chatMsg(userId: String!, msg: String): ChatMsgPayload!
+    chatMsg(userId: String!): ChatMsgPayload!
   }
 `;
 
