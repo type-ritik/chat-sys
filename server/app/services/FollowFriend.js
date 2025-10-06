@@ -83,6 +83,7 @@ async function followResponse(_, { friendshipId, status }, context) {
         id: friendshipId,
       },
     });
+    console.log("Rejected here!");
   } else {
     await prisma.friendship.update({
       where: {
@@ -92,6 +93,7 @@ async function followResponse(_, { friendshipId, status }, context) {
         status: status,
       },
     });
+    console.log("Accepted here!");
   }
 
   console.log("Friendship record is updated");
@@ -99,7 +101,7 @@ async function followResponse(_, { friendshipId, status }, context) {
   // Retrieve Friend Record include Sender record
   const friendPayload = await prisma.user.findUnique({
     where: {
-      id: friendshipId.userId,
+      id: friend.userId,
     },
   });
 
