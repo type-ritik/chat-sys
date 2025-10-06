@@ -27,6 +27,13 @@ const typeDefs = gql`
     createdAt: DateTime!
   }
 
+  type ChatRoomCellData {
+    id: String!
+    friendshipId: String!
+    friendship: Friendship!
+    createdAt: DateTime!
+  }
+
   type Message {
     id: ID!
     content: String!
@@ -50,8 +57,8 @@ const typeDefs = gql`
 
   type Friendship {
     id: ID!
-    user: User!
-    friend: User!
+    user: User
+    friend: User
     status: String!
     createdAt: DateTime!
     otherUser: User!
@@ -74,6 +81,7 @@ const typeDefs = gql`
     chatMessageList(chatRoomId: String!): [ChatMsgPayload!]!
     retrieveNotification: [Message!]!
     friendRequestList: [FriendReqPayload!]!
+    chatCellData(chatRoomId: String!): ChatRoomCellData
   }
 
   type Mutation {

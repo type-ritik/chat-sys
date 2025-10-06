@@ -10,6 +10,7 @@ const {
   sendMessage,
   chatRoomList,
   chatMessageList,
+  chatCellData,
 } = require("./services/chatServices");
 const { pubsub } = require("./data/pubsub");
 const { followFriend, followResponse } = require("./services/FollowFriend");
@@ -53,6 +54,7 @@ const resolvers = {
     chatMessageList,
     retrieveNotification,
     friendRequestList,
+    chatCellData,
   },
 
   Mutation: {
@@ -72,7 +74,7 @@ const resolvers = {
     },
 
     chatMsg: {
-      subscribe: async (_, {userId}) => {
+      subscribe: async (_, { userId }) => {
         console.log(`User:${userId} Subscribed to Chat Messages`);
         return pubsub.asyncIterator(`CHATMSG:${userId}`);
       },
