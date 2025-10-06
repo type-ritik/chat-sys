@@ -6,6 +6,9 @@ import {
   REJECT_REQUEST,
 } from "../services/FriendService";
 import { useEffect, useState } from "react";
+import { MessageCircle, MessageSquareText } from "lucide-react"; // pick whichever you like
+import { CREATE_CHATROOM_CELL } from "../services/ChatService";
+import { useNavigate } from "react-router-dom";
 
 // FriendListItem: Represents a single friend relationship, including the other user's info and status.
 type FriendListItem = {
@@ -57,6 +60,11 @@ function FriendsComponent() {
     null
   );
 
+  // Create ChatRoom
+  const [chatRoomCellData] = useMutation(CREATE_CHATROOM_CELL);
+
+  const navigate = useNavigate();
+
   // Effect to handle query results and errors.
   useEffect(() => {
     if (loading) console.log("FriendList is loading...");
@@ -65,13 +73,15 @@ function FriendsComponent() {
       setFriendList(data.friendList);
       setFriendList(data.friendList);
     }
+  }, [loading, error, data]);
 
+  useEffect(() => {
     if (reqLoading) console.log("FriendReqList is loading...");
     if (reqError) console.log("FriendReqList Error", reqError);
     if (reqData) {
       setFriendReqList(reqData.friendRequestList);
     }
-  }, [loading, error, data, reqLoading, reqData, reqError]);
+  }, [reqLoading, reqData, reqError]);
 
   // Mutation hook for accepting friend requests
   const [acceptRequest] = useMutation(ACCEPT_REQUEST);
@@ -112,13 +122,34 @@ function FriendsComponent() {
     }
   };
 
+  const handleChatOpen = async (id: string) => {
+    if (!id) {
+      console.log("Client Error");
+      return;
+    }
+
+    try {
+      const { data } = await chatRoomCellData({
+        variables: { friendshipId: id },
+      });
+
+      if (data) {
+        console.log("ChatRoomCell Data", data);
+
+        navigate(`chat/${data.chatRoomCell.id}`);
+      }
+    } catch (error) {
+      console.log("Mutation Error:", error);
+    }
+  };
+
   // Render the friends and requests sections.
   return (
     <div className="w-full h-full flex flex-col md:flex-row gap-6 p-4 md:p-6 bg-gray-50">
       {/* Friends Section */}
       <div className="flex-1 flex flex-col items-center bg-white rounded-2xl shadow-lg p-5">
-        <h1 className="text-xl md:text-2xl font-bold text-gray-700 mb-4">
-          Friends
+        <h1 className="text-xl md:text-2xl font-bold text-gray-700 mb-4 flex items-center gap-2">
+          <MessageSquareText className="text-pink-500" /> Friends
         </h1>
 
         {friendList && friendList.length !== 0 ? (
@@ -126,7 +157,7 @@ function FriendsComponent() {
             {friendList.map((item: FriendListItem, index: number) => (
               <div
                 key={index}
-                className="flex w-full items-center gap-4 p-3 bg-gradient-to-r from-pink-50 to-pink-100 rounded-xl shadow-sm justify-between hover:shadow-md transition-all duration-300 ease-in-out"
+                className="flex w-full items-center gap-4 p-3 bg-gradient-to-r from-pink-50 to-pink-100 rounded-xl shadow-sm justify-between hover:shadow-md hover:scale-[1.02] transition-all duration-300 ease-in-out"
               >
                 {/* Avatar */}
                 <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-pink-300 flex-shrink-0">
@@ -149,6 +180,15 @@ function FriendsComponent() {
                     @{item.otherUser.username}
                   </span>
                 </div>
+
+                {/* Chat Message Icon */}
+                <button
+                  className="p-2 bg-pink-100 hover:bg-pink-200 rounded-full text-pink-600 hover:text-pink-700 transition-colors duration-200"
+                  onClick={() => handleChatOpen(item.id)} // optional function
+                  title="Message"
+                >
+                  <MessageCircle size={20} />
+                </button>
               </div>
             ))}
           </div>
@@ -159,8 +199,8 @@ function FriendsComponent() {
 
       {/* Requests Section */}
       <div className="flex-1 flex flex-col items-center bg-white rounded-2xl shadow-lg p-5">
-        <h1 className="text-xl md:text-2xl font-bold text-gray-700 mb-4">
-          Requests
+        <h1 className="text-xl md:text-2xl font-bold text-gray-700 mb-4 flex items-center gap-2">
+          <MessageCircle className="text-blue-500" /> Requests
         </h1>
 
         {friendReqLis && friendReqLis.length > 0 ? (
@@ -168,7 +208,7 @@ function FriendsComponent() {
             {friendReqLis.map((item: FriendReqListItem, index: number) => (
               <div
                 key={index}
-                className="flex w-full items-center justify-between gap-4 p-3 bg-gradient-to-r from-blue-50 to-blue-100 rounded-xl shadow-sm hover:shadow-md transition-all duration-300 ease-in-out"
+                className="flex w-full items-center justify-between gap-4 p-3 bg-gradient-to-r from-blue-50 to-blue-100 rounded-xl shadow-sm hover:shadow-md hover:scale-[1.02] transition-all duration-300 ease-in-out"
               >
                 {/* Profile */}
                 <div className="flex items-center gap-3 flex-1 min-w-0">

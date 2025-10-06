@@ -9,11 +9,12 @@ const navLink = [
   { label: "Friends", route: "/friends" },
 ];
 
-interface IndexPageProps {
+interface IndexNotifyProps {
   notify: boolean;
+  chatify: boolean;
 }
 
-function IndexPage({ notify }: IndexPageProps) {
+function IndexPage({ notify, chatify }: IndexNotifyProps) {
   return (
     <div className="w-full h-screen flex flex-col">
       {/* Header */}
@@ -67,15 +68,16 @@ function IndexPage({ notify }: IndexPageProps) {
                   <span>{item.label}</span>
 
                   {/* Notification badge */}
-                  {item.label === "Notification" && notify && (
-                    <span
-                      className="absolute top-1 right-2 min-w-[18px] h-[18px] px-1
+                  {(item.label === "Notification" && notify) ||
+                    (item.label === "Chat" && chatify && (
+                      <span
+                        className="absolute top-1 right-2 min-w-[18px] h-[18px] px-1
                          flex items-center justify-center text-xs font-bold
                          bg-yellow-500 text-white rounded-full shadow-md"
-                    >
-                      {""}
-                    </span>
-                  )}
+                      >
+                        {""}
+                      </span>
+                    ))}
                 </button>
               </Link>
             ))}
