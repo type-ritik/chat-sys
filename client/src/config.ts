@@ -30,3 +30,15 @@ export const NOTIFICATION_SUBSCRIPTION = gql`
     }
   }
 `;
+
+export const CHATMSG_SUBS = gql`
+  subscription($userId: String!) {
+    chatMsg(userId: $userId) {
+      id
+      userId
+      message
+      chatRoomId
+      createdAt
+    }
+  }
+`;
