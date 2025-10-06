@@ -144,9 +144,62 @@ async function chatMessageList(_, { chatRoomId }, context) {
   return msgList;
 }
 
+async function chatCellData(_, { chatRoomId }, context) {
+  const userId = context.user.userId;
+
+  const chatCellPayload = await prisma.chatRoom.findFirst({
+    where: { id: chatRoomId },
+    include: {
+      friendship: {
+        include: {
+          user: {
+            select: {
+              id: true,
+              name: true,
+              username: true,
+              profile: {
+                select: {
+                  id: true,
+                  isActive: true,
+                  avatarUrl: true,
+                },
+              },
+            },
+          },
+          friend: {
+            select: {
+              id: true,
+              name: true,
+              username: true,
+              profile: {
+                select: {
+                  id: true,
+                  isActive: true,
+                  avatarUrl: true,
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  });
+
+  if (chatCellPayload.friendship.userId === userId) {
+    delete chatCellPayload.friendship.user;
+  } else {
+    delete chatCellPayload.friendship.friend;
+  }
+
+  console.log(chatCellPayload);
+
+  return chatCellPayload;
+}
+
 module.exports = {
   sendMessage,
   chatRoomCell,
   chatRoomList,
   chatMessageList,
+  chatCellData,
 };
