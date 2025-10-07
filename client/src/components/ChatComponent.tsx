@@ -4,14 +4,6 @@ import { useQuery } from "@apollo/client/react";
 import { RETRIEVE_CHATROOM_DATA } from "../services/ChatService";
 import { useEffect, useState } from "react";
 
-// type chatMsgInterface = {
-//   id: string;
-//   userId: string;
-//   message: string;
-//   chatRoomId: string;
-//   createdAt: string;
-// };
-
 type FriendChatStructure = {
   chatCellData: {
     id: string;
@@ -86,7 +78,7 @@ function ChatComponent() {
         id="chat-editor"
         className="border-t border-blue-800 bg-blue-900/80 backdrop-blur-md p-3 sticky bottom-0 left-0 z-10"
       >
-        <ChatEditor />
+        <ChatEditor chatRoomId={friendState?.id} />
       </div>
     </div>
   );
