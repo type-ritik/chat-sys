@@ -2,6 +2,12 @@
 const { prisma } = require("../data/prisma");
 const { pubsub } = require("../data/pubsub");
 
+const receiverUser = (userId, payload) => {
+  return userId === payload.friendship.user.id
+    ? payload.friendship.friend.id
+    : userId;
+};
+
 // On Click Send Messages
 async function sendMessage(_, { chatRoomId, text }, context) {
   const userId = context.user.userId;
@@ -40,34 +46,44 @@ async function sendMessage(_, { chatRoomId, text }, context) {
   });
 
   // Remove unwanted payload from chatRoomPayload
+  delete chatRoomPayload.friendship.friendId;
+  delete chatRoomPayload.friendship.userId;
+  delete chatRoomPayload.friendship.status;
   delete chatRoomPayload.createdAt;
   delete chatRoomPayload.friendshipId;
   delete chatRoomPayload.id;
 
+  console.log("chatRoomPayload ", chatRoomPayload);
   // Record the notification about friend send you a message
+
   const notification = await prisma.message.create({
     data: {
-      content: `You got a message from ${chatRoomPayload.friendship.user.username}`,
-      sender: userId,
+      content: `You got a message from ${
+        userId === chatRoomPayload.friendship.user.id
+          ? chatRoomPayload.friendship.user.username
+          : chatRoomPayload.friendship.friend.username
+      }`,
+      senderId: userId,
       requestedId: chatRoomId,
+      receiverId: receiverUser(userId, chatRoomPayload),
     },
   });
 
   // Publish the new chat message event to Redis for live chat
-  if (userId === chatRoomPayload.friendship.friendId) {
-    pubsub.publish(`CHATMSG:${chatRoomPayload.friendship.userId}`, {
+  if (userId === chatRoomPayload.friendship.friend.id) {
+    pubsub.publish(`CHATMSG:${chatRoomPayload.friendship.user.id}`, {
       chatMsg: messagePayload,
     });
 
-    pubsub.publish(`NOTIFICATIONS:${chatRoomPayload.friendship.userId}`, {
+    pubsub.publish(`NOTIFICATIONS:${chatRoomPayload.friendship.user.id}`, {
       subNotify: notification,
     });
   } else {
-    pubsub.publish(`CHATMSG:${chatRoomPayload.friendship.friendId}`, {
+    pubsub.publish(`CHATMSG:${chatRoomPayload.friendship.friend.id}`, {
       chatMsg: messagePayload,
     });
 
-    pubsub.publish(`NOTIFICATIONS:${chatRoomPayload.friendship.friendId}`, {
+    pubsub.publish(`NOTIFICATIONS:${chatRoomPayload.friendship.friend.id}`, {
       subNotify: notification,
     });
   }
