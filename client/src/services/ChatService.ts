@@ -20,6 +20,19 @@ export const CREATE_CHATROOM_CELL = gql`
   }
 `;
 
+
+export const RETRIEVE_CHAT_MSG = gql`
+  query ChatMessageList($chatRoomId: String!) {
+    chatMessageList(chatRoomId: $chatRoomId) {
+    id
+    userId
+    message
+    chatRoomId
+    createdAt
+    }
+  }
+`
+
 export const SEND_MSG = gql`
   mutation SendMessage($chatRoomId: String!, $text: String!) {
     sendMessage(chatRoomId: $chatRoomId, text: $text)

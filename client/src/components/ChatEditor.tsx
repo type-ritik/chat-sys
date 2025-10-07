@@ -3,7 +3,12 @@ import { Send, Smile, Paperclip } from "lucide-react";
 import { useMutation } from "@apollo/client/react";
 import { SEND_MSG } from "../services/ChatService";
 
-function ChatEditor({ chatRoomId }: string | null) {
+interface Props {
+  chatRoomId: string;
+  setChatMsg: [];
+}
+
+function ChatEditor({ chatRoomId, setChatMsg }: Props) {
   const [text, setText] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [sendMsg] = useMutation(SEND_MSG);
@@ -19,6 +24,15 @@ function ChatEditor({ chatRoomId }: string | null) {
 
   const showChatMsg = async () => {
     if (!text.trim()) return;
+
+    // Create local preview message
+    const newMsg = {
+      id: Date.now().toString(),
+      userId: localStorage.getItem("userId"),
+      message: text,
+    };
+    setChatMsg((prev) => [...prev, newMsg]);
+
     const isMsgSend = await sendMsg({
       variables: { chatRoomId: chatRoomId, text: text },
     });
