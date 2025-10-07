@@ -2,12 +2,6 @@
 const { prisma } = require("../data/prisma");
 const { pubsub } = require("../data/pubsub");
 
-const receiverUser = (userId, payload) => {
-  return userId === payload.friendship.user.id
-    ? payload.friendship.friend.id
-    : userId;
-};
-
 // On Click Send Messages
 async function sendMessage(_, { chatRoomId, text }, context) {
   const userId = context.user.userId;
@@ -65,7 +59,10 @@ async function sendMessage(_, { chatRoomId, text }, context) {
       }`,
       senderId: userId,
       requestedId: chatRoomId,
-      receiverId: receiverUser(userId, chatRoomPayload),
+      receiverId:
+        userId === chatRoomPayload.friendship.user.id
+          ? chatRoomPayload.friendship.friend.id
+          : chatRoomPayload.friendship.user.id,
     },
   });
 
