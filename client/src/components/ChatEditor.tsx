@@ -1,9 +1,12 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Send, Smile, Paperclip } from "lucide-react";
+import { useMutation } from "@apollo/client/react";
+import { SEND_MSG } from "../services/ChatService";
 
-function ChatEditor() {
+function ChatEditor({ chatRoomId }: string | null) {
   const [text, setText] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const [sendMsg] = useMutation(SEND_MSG);
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const el = textareaRef.current;
@@ -14,11 +17,19 @@ function ChatEditor() {
     setText(e.target.value);
   };
 
-  const showChatMsg = () => {
+  const showChatMsg = async () => {
     if (!text.trim()) return;
-    console.log("Message sent:", text);
+    const isMsgSend = await sendMsg({
+      variables: { chatRoomId: chatRoomId, text: text },
+    });
+    if (isMsgSend.error) {
+      throw new Error("Error: ", isMsgSend.error);
+    }
+    console.log("Message sent:", isMsgSend.data);
     setText("");
   };
+
+  useEffect(() => {}, []);
 
   return (
     <div className="flex items-end gap-2 w-full">
@@ -54,5 +65,4 @@ function ChatEditor() {
   );
 }
 
-
-export default ChatEditor
+export default ChatEditor;
