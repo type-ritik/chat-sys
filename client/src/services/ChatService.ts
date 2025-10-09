@@ -20,18 +20,17 @@ export const CREATE_CHATROOM_CELL = gql`
   }
 `;
 
-
 export const RETRIEVE_CHAT_MSG = gql`
   query ChatMessageList($chatRoomId: String!) {
     chatMessageList(chatRoomId: $chatRoomId) {
-    id
-    userId
-    message
-    chatRoomId
-    createdAt
+      id
+      userId
+      message
+      chatRoomId
+      createdAt
     }
   }
-`
+`;
 
 export const SEND_MSG = gql`
   mutation SendMessage($chatRoomId: String!, $text: String!) {
@@ -65,6 +64,27 @@ export const RETRIEVE_CHATROOM_DATA = gql`
             avatarUrl
           }
         }
+      }
+    }
+  }
+`;
+
+export const RETRIEVE_CHATROOM_LIST = gql`
+  query {
+    chatRoomList {
+      id
+      friendship {
+        otherUser {
+          username
+          name
+          id
+        }
+      }
+      lastMsg {
+        id
+        userId
+        message
+        createdAt
       }
     }
   }
