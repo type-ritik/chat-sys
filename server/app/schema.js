@@ -24,7 +24,17 @@ const typeDefs = gql`
   type ChatRoomPayload {
     id: String!
     friendshipId: String!
+    friendship: Friendship
+    lastMsg: LastMsg
     createdAt: DateTime!
+  }
+
+  type LastMsg {
+    id: String!
+    chatRoomId: String
+    userId: String
+    message: String
+    createdAt: DateTime
   }
 
   type ChatRoomCellData {

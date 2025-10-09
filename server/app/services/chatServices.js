@@ -131,13 +131,33 @@ async function chatRoomList(_, obj, context) {
         OR: [{ userId: userId }, { friendId: userId }],
       },
     },
+    include: {
+      friendship: {
+        select: {
+          friend: true,
+          user: true,
+        },
+      },
+    },
   });
 
   if (roomList <= 0) {
     throw new Error("Zero ChatRoom");
   }
 
-  return roomList;
+  const roomListWithLastMsg = await Promise.all(
+    roomList.map(async (room) => {
+      const lastMsg = await prisma.chatMessages.findFirst({
+        where: { chatRoomId: room.id },
+        orderBy: { createdAt: "desc" },
+      });
+      return { ...room, lastMsg };
+    })
+  );
+
+  console.log(roomListWithLastMsg);
+
+  return roomListWithLastMsg;
 }
 
 async function chatMessageList(_, { chatRoomId }, context) {
