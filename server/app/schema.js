@@ -71,7 +71,7 @@ const typeDefs = gql`
     friend: User
     status: String!
     createdAt: DateTime!
-    otherUser: User!
+    otherUser: User
   }
 
   type FriendReqPayload {
@@ -81,10 +81,18 @@ const typeDefs = gql`
     createdAt: DateTime!
   }
 
+  type ChatFriendPayload {
+    id: ID!
+    userId: String
+    username: String
+    name: String
+    createdAt: DateTime!
+  }
+
   type Query {
     loginUser(email: String!, password: String!): User!
     exploreFriends(username: String!): User!
-    exploreChatFriend(username: String): Friendship
+    exploreChatFriend(username: String): ChatFriendPayload
     hello: String!
     friendList: [Friendship!]!
     chatRoomList: [ChatRoomPayload!]!
