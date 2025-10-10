@@ -50,6 +50,10 @@ async function exploreChatFriend(_, { username }, context) {
         },
       ],
     },
+    include: {
+      user: true,
+      friend: true,
+    },
   });
 
   // If not throw error
@@ -57,8 +61,28 @@ async function exploreChatFriend(_, { username }, context) {
     throw new Error(`You don't have a friend name ${username}.`);
   }
 
+  let payload;
+
+  if (userId === user.userId) {
+    payload = {
+      id: user.id,
+      userId: user.friendId,
+      name: user.friend.name,
+      username: user.friend.username,
+      createdAt: user.createdAt,
+    };
+  } else {
+    payload = {
+      id: user.id,
+      userId: user.userId,
+      name: user.user.name,
+      username: user.user.username,
+      createdAt: user.createdAt,
+    };
+  }
+
   // Return the friendship payload
-  return user;
+  return payload;
 }
 
 async function friendList(_, obj, context) {
@@ -99,4 +123,9 @@ async function friendRequestList(_, obj, context) {
   return friendsReq;
 }
 
-module.exports = { exploreFriends, exploreChatFriend, friendList, friendRequestList };
+module.exports = {
+  exploreFriends,
+  exploreChatFriend,
+  friendList,
+  friendRequestList,
+};
