@@ -69,6 +69,18 @@ export const RETRIEVE_CHATROOM_DATA = gql`
   }
 `;
 
+export const EXPLORE_FRIEND = gql`
+  query ExploreChatFriend($username: String) {
+    exploreChatFriend(username: $username) {
+      id
+      userId
+      username
+      name
+      createdAt
+    }
+  }
+`;
+
 export const RETRIEVE_CHATROOM_LIST = gql`
   query {
     chatRoomList {
