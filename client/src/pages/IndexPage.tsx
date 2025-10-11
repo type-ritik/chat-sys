@@ -85,7 +85,7 @@ function IndexPage({ notify, chatify }: IndexNotifyProps) {
         </aside>
 
         {/* Main Content */}
-        <main className="flex-1 p-6 overflow-y-auto">
+        <main className="flex-1 p-6 relative overflow-y-auto">
           <div className="text-gray-700 text-lg font-medium">
             <Outlet />
           </div>
