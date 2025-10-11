@@ -11,6 +11,7 @@ import { useSubscription } from "@apollo/client/react";
 import NotificationComponent from "./components/NotificationComponent";
 import FriendsComponent from "./components/FriendsComponent";
 import ChatComponent from "./components/ChatComponent";
+import ProfileComponent from "./components/ProfileComponent";
 
 // ChatMsg Data Type
 type ChatMsgSubsData = {
@@ -100,7 +101,7 @@ function App() {
         >
           {/* Nested rotues inside Indexpage */}
           <Route index element={<div>Welcome to ChatSys!</div>} />
-          <Route path="profile" element={<div>Welcome to Profile</div>} />
+          <Route path="profile" element={<ProfileComponent />} />
           <Route path="explore" element={<ExploreFriendComponent />} />
           <Route path="chat" element={<ChatRoomComponent />} />
           <Route path="notification" element={<NotificationComponent />} />
