@@ -1,1 +1,22 @@
 @import "tailwindcss";
+
+/* index.css */
+.sidebar-btn {
+  @apply w-full py-2 flex items-center justify-center rounded-md shadow
+  bg-gradient-to-r from-blue-600 to-pink-600 text-white font-semibold
+  hover:shadow-lg hover:scale-105 transition-all duration-300;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.animate-fade-in {
+  animation: fade-in 0.3s ease-in-out;
+}
