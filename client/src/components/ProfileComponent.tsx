@@ -1,7 +1,30 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Camera } from "lucide-react";
+import { useQuery } from "@apollo/client/react";
+import { USER_DATA } from "../services/ProfileService";
 
 function ProfileComponent() {
+  const { error, data, loading } = useQuery(USER_DATA);
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [bio, setBio] = useState("");
+  const [image, newImage] = useState("");
+  const [username, setUsername] = useState("");
+  const [isOnline, setIsOnline] = useState(true);
+
+  useEffect(() => {
+    if (loading) console.log("User data is loading...");
+    if (error) console.log("User data error: ", error.message);
+    if (data) {
+      console.log(data.userData);
+      setName(data.userData.name);
+      setUsername(data.userData.username);
+      setEmail(data.userData.email);
+      // setBio(data.userData.profile.bio);
+      // setIsOnline(data.userData.profile.isActive);
+    }
+  }, [error, data, loading]);
+
   const [isEditing, setIsEditing] = useState(false);
   const [profileImage, setProfileImage] = useState(
     "https://images.unsplash.com/photo-1759508949812-973dcd259b6e?ixlib=rb-4.1.0&auto=format&fit=crop&q=80&w=600"
@@ -22,14 +45,15 @@ function ProfileComponent() {
         {/* Header */}
         <div className="flex justify-between items-center flex-wrap gap-4">
           <div className="text-gray-700 font-medium text-sm">
-            <span className="text-gray-500">@</span>ritik.vw98
+            <span className="text-gray-500">@</span>
+            {username}
           </div>
 
           <div className="relative group">
             {/* Profile Image */}
             <div className="w-28 h-28 rounded-full overflow-hidden border-4 border-purple-300 shadow-md">
               <img
-                src={profileImage}
+                src={image || profileImage}
                 alt="Profile"
                 className="w-full h-full object-cover"
               />
@@ -52,7 +76,7 @@ function ProfileComponent() {
 
           <div className="flex items-center gap-2 text-sm text-green-600 font-medium">
             <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-            Online
+            {isOnline ? "Online" : "Offline"}
           </div>
         </div>
 
@@ -62,10 +86,12 @@ function ProfileComponent() {
           <div className="flex flex-col sm:flex-row gap-3 items-center">
             <input
               type="text"
-              placeholder="Ritik Sharma"
+              placeholder={name || "No name"}
               disabled={!isEditing}
               className={`w-full sm:w-3/4 px-4 py-2 border rounded-lg text-gray-700 focus:outline-none focus:ring-2 ${
-                isEditing ? "focus:ring-purple-400" : "bg-gray-100 cursor-not-allowed"
+                isEditing
+                  ? "focus:ring-purple-400"
+                  : "bg-gray-100 cursor-not-allowed"
               }`}
             />
           </div>
@@ -74,10 +100,12 @@ function ProfileComponent() {
           <div className="flex flex-col sm:flex-row gap-3 items-center">
             <input
               type="email"
-              placeholder="ritik.vw98@gmail.com"
+              placeholder={email || "No email"}
               disabled={!isEditing}
               className={`w-full sm:w-3/4 px-4 py-2 border rounded-lg text-gray-700 focus:outline-none focus:ring-2 ${
-                isEditing ? "focus:ring-purple-400" : "bg-gray-100 cursor-not-allowed"
+                isEditing
+                  ? "focus:ring-purple-400"
+                  : "bg-gray-100 cursor-not-allowed"
               }`}
             />
           </div>
@@ -85,10 +113,12 @@ function ProfileComponent() {
           {/* Bio */}
           <div className="flex flex-col sm:flex-row gap-3 items-center">
             <textarea
-              placeholder="This is Ritik Sharma. Nothing scares me."
+              placeholder={bio || "This is Ritik Sharma. Nothing scares me."}
               disabled={!isEditing}
               className={`w-full sm:w-3/4 px-4 py-2 border rounded-lg resize-none text-gray-700 focus:outline-none focus:ring-2 ${
-                isEditing ? "focus:ring-purple-400" : "bg-gray-100 cursor-not-allowed"
+                isEditing
+                  ? "focus:ring-purple-400"
+                  : "bg-gray-100 cursor-not-allowed"
               }`}
               rows={3}
             />
