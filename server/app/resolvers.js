@@ -1,4 +1,8 @@
-const { loginUser, createUser } = require("./services/UserAccountService");
+const {
+  loginUser,
+  createUser,
+  userData,
+} = require("./services/UserAccountService");
 const {
   exploreFriends,
   exploreChatFriend,
@@ -46,6 +50,7 @@ const resolvers = {
   }),
   Query: {
     hello: () => "Hello World!",
+    userData,
     loginUser,
     exploreFriends,
     exploreChatFriend,

@@ -100,6 +100,7 @@ const typeDefs = gql`
     retrieveNotification: [Message!]!
     friendRequestList: [FriendReqPayload!]!
     chatCellData(chatRoomId: String!): ChatRoomCellData
+    userData: User!
   }
 
   type Mutation {
