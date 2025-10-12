@@ -70,4 +70,21 @@ async function createUser(_, { name, email, password }, context) {
   // Return the new user payload with token
   return { ...newUser, token };
 }
-module.exports = { loginUser, createUser };
+
+async function userData(_, obj, context) {
+  const userId = context.user.userId;
+
+  const payload = await prisma.user.findFirst({
+    where: {
+      id: userId,
+    },
+    include: {
+      profile: true,
+    },
+  });
+
+  console.log(payload);
+
+  return payload;
+}
+module.exports = { loginUser, createUser, userData };
