@@ -33,9 +33,9 @@ model User {
   sentRequests     Friendship[] @relation("UserSentRequests")
   receivedRequests Friendship[] @relation("UserReceivedRequests")
 
-  // Chat Messages
-  sentChatMessages     ChatMessage[] @relation("UserSentChatMessages")
-  receivedChatMessages ChatMessage[] @relation("UserReceivedChatMessages")
+  // // Chat Messages
+  // sentChatMessages     ChatMessage[] @relation("UserSentChatMessages")
+  // receivedChatMessages ChatMessage[] @relation("UserReceivedChatMessages")
 
   // Room Messages (Group or private chat messages)
   roomMessages ChatRoomMessage[] @relation("UserRoomMessages")
@@ -43,6 +43,9 @@ model User {
   // Private messages (notifications / DMs)
   sentMessages     Message[] @relation("UserSentMessages")
   receivedMessages Message[] @relation("UserReceivedMessages")
+
+  // User Action Records (Monitoring user activity)
+  AuditLog AuditLog[] @relation("UserActionRecord")
 }
 
 model Profile {
@@ -98,18 +101,18 @@ model Friendship {
 // 🧾 CHAT MESSAGE DOMAIN
 // ========================
 
-model ChatMessage {
-  id         String   @id @default(uuid())
-  senderId   String
-  receiverId String
-  content    String
-  createdAt  DateTime @default(now())
+// model ChatMessage {
+//   id         String   @id @default(uuid())
+//   senderId   String
+//   receiverId String
+//   content    String
+//   createdAt  DateTime @default(now())
 
-  sender   User @relation("UserSentChatMessages", fields: [senderId], references: [id])
-  receiver User @relation("UserReceivedChatMessages", fields: [receiverId], references: [id])
+//   sender   User @relation("UserSentChatMessages", fields: [senderId], references: [id])
+//   receiver User @relation("UserReceivedChatMessages", fields: [receiverId], references: [id])
 
-  @@unique([senderId, receiverId])
-}
+//   @@unique([senderId, receiverId])
+// }
 
 // ========================
 // 💬 CHAT DOMAIN
@@ -133,6 +136,20 @@ model ChatRoomMessage {
 
   chatRoom ChatRoom @relation("ChatRoomMessages", fields: [chatRoomId], references: [id])
   user     User     @relation("UserRoomMessages", fields: [userId], references: [id])
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  userId    String? // nullable: system actions may not have a user
+  action    String // e.g., "LOGIN", "UPDATE_PROFILE", "SEND_MESSAGE"
+  entity    String? // e.g., "User", "Friendship", "Message"
+  entityId  String? // ID of affected entity
+  details   String? // optional JSON or description
+  ipAddress String? // track user IP (if applicable)
+  userAgent String? // e.g., browser or device info
+  createdAt DateTime @default(now())
+
+  user User? @relation("UserActionRecord", fields: [userId], references: [id])
 }
 
 enum FriendshipStatus {
