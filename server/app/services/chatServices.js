@@ -6,7 +6,7 @@ const { pubsub } = require("../data/pubsub");
 async function sendMessage(_, { chatRoomId, text }, context) {
   const userId = context.user.userId;
   // Create the new record for chatmessage
-  const messagePayload = await prisma.chatMessages.create({
+  const messagePayload = await prisma.chatRoomMessage.create({
     data: {
       userId: userId,
       message: text,
@@ -147,7 +147,7 @@ async function chatRoomList(_, obj, context) {
 
   const roomListWithLastMsg = await Promise.all(
     roomList.map(async (room) => {
-      const lastMsg = await prisma.chatMessages.findFirst({
+      const lastMsg = await prisma.chatRoomMessage.findFirst({
         where: { chatRoomId: room.id },
         orderBy: { createdAt: "desc" },
       });
@@ -161,7 +161,7 @@ async function chatRoomList(_, obj, context) {
 }
 
 async function chatMessageList(_, { chatRoomId }, context) {
-  const msgList = await prisma.chatMessages.findMany({
+  const msgList = await prisma.chatRoomMessage.findMany({
     where: {
       chatRoomId: chatRoomId,
     },

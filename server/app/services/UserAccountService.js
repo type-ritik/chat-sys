@@ -59,6 +59,18 @@ async function createUser(_, { name, email, password }, context) {
     },
   });
 
+  const defaultUrl =
+    "https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg?_gl=1*1q4t3f4*_ga*Mzg1NDU4ODQyLjE3NjA0Mzk4NzA.*_ga_8JE65Q40S6*czE3NjA0Mzk4NzAkbzEkZzEkdDE3NjA0Mzk4NzkkajUxJGwwJGgw";
+
+  const newProfile = await prisma.profile.create({
+    data: {
+      userId: newUser.id,
+      avatarUrl: defaultUrl,
+      isActive: true,
+      bio: `Hi there, This is ${newUser.name}`,
+    },
+  });
+
   // Generate token
   const token = jwt.sign(
     { userId: newUser.id, role: newUser.isAdmin ? "admin" : "user" },
@@ -68,7 +80,7 @@ async function createUser(_, { name, email, password }, context) {
   console.log("New user created:", newUser);
 
   // Return the new user payload with token
-  return { ...newUser, token };
+  return { ...newUser, profile: newProfile, token };
 }
 
 async function userData(_, obj, context) {
