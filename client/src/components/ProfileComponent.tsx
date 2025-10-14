@@ -8,7 +8,7 @@ function ProfileComponent() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [bio, setBio] = useState("");
-  const [image, newImage] = useState("");
+  const [image, setImage] = useState("");
   const [username, setUsername] = useState("");
   const [isOnline, setIsOnline] = useState(true);
 
@@ -16,12 +16,12 @@ function ProfileComponent() {
     if (loading) console.log("User data is loading...");
     if (error) console.log("User data error: ", error.message);
     if (data) {
-      console.log(data.userData);
       setName(data.userData.name);
       setUsername(data.userData.username);
       setEmail(data.userData.email);
-      // setBio(data.userData.profile.bio);
-      // setIsOnline(data.userData.profile.isActive);
+      setBio(data.userData.profile.bio);
+      setIsOnline(data.userData.profile.isActive);
+      setImage(data.userData.profile.avatarUrl);
     }
   }, [error, data, loading]);
 

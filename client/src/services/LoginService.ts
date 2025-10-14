@@ -19,6 +19,12 @@ export const fetchServer = async (payload: {
               username
               name
               email
+              profile {
+                id
+                bio
+                avatarUrl
+                isActive
+              }
             }
           }
         `,
