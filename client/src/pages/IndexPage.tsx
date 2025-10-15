@@ -43,7 +43,7 @@ function IndexPage({ notify, chatify }: IndexNotifyProps) {
             R
           </div>
           <span className="hidden sm:inline text-lg font-semibold text-purple-900">
-            Ritik
+            {window.localStorage.getItem("username")}
           </span>
         </div>
       </header>
