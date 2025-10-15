@@ -3,6 +3,13 @@ import { Eye, EyeOff } from "lucide-react";
 import { fetchServer } from "../services/SignupService";
 import { isValidEmail } from "../config";
 import { Link, useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import * as store from "../redux/store.js";
+import {
+  signInFailure,
+  signInStart,
+  signInSuccess,
+} from "../redux/user/userSlice";
 
 function SignupPage() {
   const [name, setName] = useState("");
@@ -12,33 +19,44 @@ function SignupPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [successMsg, setSuccessMsg] = useState("");
   const navigate = useNavigate();
+  const { loading, error: errMessage } = useSelector(
+    (state: store.RootState) => state.user
+  );
+  const dispatch = useDispatch();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log(email);
-    console.log(password);
-    console.log(name);
 
     if (!isValidEmail(email)) {
       setErrorMsg("Invalid Email");
-      return;
+      return dispatch(signInFailure("Invalid Email"));
     }
 
     if (password.length < 8) {
-      setErrorMsg("Password length should be greater than 8");
-      return;
+      setErrorMsg("Password length should be greater than 8 Characters");
+      return dispatch(
+        signInFailure("Password length should be greater than 8 Characters")
+      );
     }
 
-    const resData = await fetchServer({ name, email, password });
+    try {
+      dispatch(signInStart());
+      const resData = await fetchServer({ name, email, password });
 
-    if (resData.res === false) {
-      setErrorMsg(resData.msg);
-      return;
+      if (resData.res === false) {
+        setErrorMsg(resData.msg);
+        dispatch(signInFailure(resData.msg));
+        return;
+      }
+
+      setSuccessMsg(`Welcome ${resData.data.createUser.username}`);
+      dispatch(signInSuccess(resData.data.createUser));
+      setErrorMsg("");
+      navigate("/");
+    } catch (error) {
+      console.log("Error", error);
+      dispatch(signInFailure(error.message));
     }
-
-    setSuccessMsg(`Welcome ${resData.data.createUser.username}`);
-    setErrorMsg("");
-    navigate("/");
   };
 
   return (
@@ -142,9 +160,9 @@ function SignupPage() {
       </form>
 
       {/* Messages */}
-      {errorMsg && (
+      {errMessage && (
         <div className="bg-red-200 w-full max-w-md flex justify-center items-center py-2 rounded-md mt-4 shadow">
-          <p className="text-sm text-red-600 mt-1 text-center">{errorMsg}</p>
+          <p className="text-sm text-red-600 mt-1 text-center">{errMessage}</p>
         </div>
       )}
 

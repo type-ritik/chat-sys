@@ -3,6 +3,13 @@ import { fetchServer } from "../services/LoginService";
 import { isValidEmail } from "../config";
 import { Link, useNavigate } from "react-router-dom";
 import { Eye, EyeOff } from "lucide-react";
+import { useDispatch, useSelector } from "react-redux";
+import * as store from "../redux/store.js";
+import {
+  signInFailure,
+  signInStart,
+  signInSuccess,
+} from "../redux/user/userSlice";
 
 function LoginPage() {
   const [email, setEmail] = useState("");
@@ -11,30 +18,43 @@ function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [successMsg, setSuccessMsg] = useState("");
   const navigate = useNavigate();
+  const { loading, error: errMsg } = useSelector(
+    (state: store.RootState) => state.user
+  );
+  const dispatch = useDispatch();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     if (!isValidEmail(email)) {
       setErrorMsg("Invalid Email");
-      return;
+      return dispatch(signInFailure("Invalid Email"));
     }
 
     if (password.length < 8) {
-      setErrorMsg("Password length should be greater than 8");
-      return;
+      setErrorMsg("Password length should be greater than 8 Characters");
+      return dispatch(
+        signInFailure("Password length should be greater than 8 Characters")
+      );
     }
 
-    const resData = await fetchServer({ email, password });
+    try {
+      dispatch(signInStart());
 
-    if (resData.res === false) {
-      setErrorMsg(resData.msg);
-      return;
+      const resData = await fetchServer({ email, password });
+
+      if (resData.res === false) {
+        setErrorMsg(resData.msg);
+        return dispatch(signInFailure(resData.msg));
+      }
+
+      setSuccessMsg(`Welcome back ${resData.data.loginUser.username}`);
+      dispatch(signInSuccess(resData.data.loginUser));
+      setErrorMsg("");
+      navigate("/");
+    } catch (error) {
+      dispatch(signInFailure(error.message));
     }
-
-    setSuccessMsg(`Welcome back ${resData.data.loginUser.username}`);
-    setErrorMsg("");
-    navigate("/");
   };
 
   return (
@@ -123,9 +143,9 @@ function LoginPage() {
       </form>
 
       {/* Messages */}
-      {errorMsg && (
+      {errMsg && (
         <div className="bg-red-200 text-red-800 w-full max-w-md flex justify-center items-center py-2 rounded-md mt-4 shadow">
-          {errorMsg}
+          {errMsg}
         </div>
       )}
 
