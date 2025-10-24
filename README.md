@@ -1,58 +1,130 @@
-# ViteMessage
+# 💬 Web-Based Chat System
 
-## Project Explanation
+A **real-time chat application** where users can send and accept friend requests, manage chat rooms, and communicate seamlessly — built with **GraphQL**, **React**, **Node.js**, and **Prisma**.
 
-ViteMessage project is inspired by some Facebook feature like:
+This project was created to deeply understand **how chat systems work under the hood**, focusing on the **data flow**, **GraphQL API design**, and **real-time communication structure** between users.
 
-- Friend Request
-- Friend Explore
-- Chat Cell
-- Text Message
-- Private Chat
-- Notification
-- Login / Signup
+---
 
-like some very useful features which make facebook best.
+## 🚀 Features
 
-## Purpose
+✅ User authentication and session management  
+✅ Send, accept, and manage friend requests  
+✅ Create and join private chat rooms  
+✅ Real-time messaging using GraphQL queries and mutations  
+✅ Dynamic UI built with TailwindCSS  
+✅ Scalable backend structure using Prisma ORM and PostgreSQL  
+✅ Clean, modular frontend with React and Apollo Client
 
-ViteMessage is developed by `Ritik Sharma`. His sole purpose was to learn how exaclty our facebook or anyother application like WhatsApp exaclty work under the hood? How they send message from one close environment to whole world? How I make one? Those were his question to start developing this application.
+---
 
-## What it does
+## 🧠 Learning Goals
 
-ViteMessage login/Signup user, from that point user choose:
+This project helped me learn:
 
-1. If he doesn't have any friend find by username and send request
-2. Else from chatroom start chatting with any of his friend
-3. UserA can send message by Texting on our Custom made Editor and Send
-4. If UserB is online:
+- How **GraphQL** handles structured communication between client and server  
+- Designing **API schemas** that scale with user relationships (friends, rooms, messages)  
+- Managing **real-time user state** (active friends, online/offline status)  
+- How **Prisma ORM** simplifies database operations and maintains relationships  
+- Frontend integration using **Apollo Client** and **React hooks**  
+- UI design principles — **responsive**, **clean**, and **consistent**
 
-- He will receive message in between the time interval of 1s
+---
 
-5. Else UserB is offline:
+## 🧩 Tech Stack
 
-- Message will stored in Database and When user is online He'll notified
+| Layer | Technology |
+|-------|-------------|
+| **Frontend** | React.js, Apollo Client, TailwindCSS |
+| **Backend** | Node.js, Express.js |
+| **API** | GraphQL (Apollo Server) |
+| **Database** | PostgreSQL with Prisma ORM |
+| **Other Tools** | JWT for auth, ESLint + Prettier for code quality |
 
-6. User can change his profile data and Read other's people profile
-7. User notified about friend request or reject and Chat Notification
+---
 
-## Installation
+## 🧱 Project Structure
 
-ViteMessage is easy to install:
+```
+📦 web-chat-system
+├── 📁 client           # Frontend (React + Apollo Client)
+│   ├── components/
+│   ├── pages/
+│   ├── services/
+│   └── App.tsx
+│
+├── 📁 server           # Backend (Node.js + GraphQL)
+│   ├── prisma/         # Prisma schema & migrations
+│   ├── src/
+│   │   ├── resolvers/
+│   │   ├── schema/
+│   │   └── index.ts
+│   └── package.json
+│
+└── README.md
+```
 
-### Server Stack: [PostgreSQL] [Prisma] [Express] [Redis] [GraphQL] [ApolloServer] [JavaScript]
+---
 
-1. Clone the repositories
-2. Move to \Server env and use `npm install -y` on terminal or simply `npm install`
-3. Set your database URL on `.env` and `Token`
-4. Then run the command on Terminal `npm run dev`
+## ⚙️ Setup & Installation
 
-### Client Stack: [React] [Vite] [ApolloClient] [GraphQL] [TailwindCSS] [TypeScript]
+### 🖥️ Prerequisites
+- Node.js v18+  
+- PostgreSQL installed locally  
+- npm or yarn package manager  
 
-1. Hopefully perform Server installation
-2. Move to \Client env and user `npm install`
-3. Then run the command on Terminal `npm run dev`
+### 🔧 Steps
 
-# Usage
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/yourusername/web-chat-system.git
+   cd web-chat-system
+   ```
 
-You will encounter the the first page for `\login` or `\signup` in `http://localhost:5173/signup` after login your username will set based on your unique email address and then you are welcome to ViteMessage
+2. **Setup the backend**
+   ```bash
+   cd server
+   npm install
+   npx prisma migrate dev
+   npm run dev
+   ```
+
+3. **Setup the frontend**
+   ```bash
+   cd ../client
+   npm install
+   npm start
+   ```
+
+4. **Connect to the backend**
+   Make sure the backend server (GraphQL API) runs before starting the frontend.
+
+---
+
+## 🖼️ Preview
+
+| Login / Register | Chat Room | Notification UI |
+|------------------|------------|-------------|
+| ![Login](<img width="1920" height="1080" alt="Screenshot from 2025-10-24 17-12-17" src="https://github.com/user-attachments/assets/5fc27136-fa29-4e68-ae85-436b1b61af0f" />
+) | ![Chat](<img width="1920" height="1080" alt="Screenshot from 2025-10-24 17-15-13" src="https://github.com/user-attachments/assets/1dd302de-ae20-48f3-9130-3dc5ca28f1e6" />
+) | ![Notification](<img width="1920" height="1080" alt="Screenshot from 2025-10-24 17-14-52" src="https://github.com/user-attachments/assets/1c2b51c5-66a1-47a8-9d86-10ea4d6555d5" />
+) |
+
+---
+
+## 🧩 Future Improvements
+
+- WebSocket / GraphQL Subscriptions for real-time updates  
+- Typing indicators and message delivery status  
+- Group chat rooms  
+- Notifications system  
+- Profile customization with image upload  
+
+---
+
+## 🧑‍💻 Author
+
+**Ritik Sharma**  
+💼 Aspiring Full Stack Developer | Learning by Building  
+🔗 [LinkedIn](https://linkedin.com/in/type-ritik)  
+🌐 [Portfolio](Working...)
