@@ -1,6 +1,10 @@
 const { prisma } = require("../data/prisma");
+const { isValidUsername } = require("../utils/user.config");
 
 async function exploreFriends(_, { username }, context) {
+  if (!isValidUsername(username)) {
+    throw new Error("Invalid username");
+  }
   // Find the user by username
   const isfriendExist = await prisma.user.findUnique({
     where: { username },
@@ -32,6 +36,11 @@ async function exploreFriends(_, { username }, context) {
 
 async function exploreChatFriend(_, { username }, context) {
   const userId = context.user.userId;
+
+  if (!isValidUsername(username)) {
+    throw new Error("Invalid username");
+  }
+
   // Find friendship exist of user with friends username
   const user = await prisma.friendship.findFirst({
     where: {

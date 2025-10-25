@@ -3,6 +3,7 @@ const {
   findUserByEmail,
   findUserById,
   userRecord,
+  isValidUsername
 } = require("../utils/user.config");
 const { comparePassword } = require("../utils/passKey");
 const { genToken } = require("../utils/auth");

@@ -1,8 +1,14 @@
 const { prisma } = require("../data/prisma");
 const { pubsub } = require("../data/pubsub");
+const { isValidUUID } = require("../utils/user.config");
+
 
 async function followFriend(_, { friendId }, context) {
   const userId = context.user.userId;
+
+  if (!isValidUUID(friendId)) {
+    throw new Error("Invalid UUID");
+  }
   // Check if both users exist
   const sender = await prisma.user.findUnique({ where: { id: userId } }); // Sender
   const receiver = await prisma.user.findUnique({ where: { id: friendId } }); // Receiver
@@ -64,6 +70,10 @@ async function followFriend(_, { friendId }, context) {
 async function followResponse(_, { friendshipId, status }, context) {
   const userId = context.user.userId;
   // Check if friend record is valid
+
+  if (!isValidUUID(friendshipId)) {
+    throw new Error("Invalid UUID");
+  }
   const friend = await prisma.friendship.findUnique({
     where: {
       id: friendshipId,
