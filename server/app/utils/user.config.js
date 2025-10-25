@@ -1,6 +1,15 @@
 const { prisma } = require("../data/prisma");
 const { hashPassword } = require("../utils/passKey");
 
+
+
+
+function isValidUUID(uuid) {
+  const uuidRegex = /^[0-9A-F]{8}-[0-9A-F]{4}-[1-5][0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i;
+  return uuidRegex.test(uuid);
+}
+
+
 // Validation function
 function validateAuthInput(email, password) {
   const errors = [];
@@ -45,7 +54,7 @@ async function findUserByEmail(email) {
   const user = await prisma.user.findFirst({
     where: { email },
     include: {
-      profile: true
+      profile: true,
     },
   });
 
@@ -89,11 +98,17 @@ async function userRecord(name, email, password) {
     });
 
     return { ...newUser };
-  } catch(err) {
+  } catch (err) {
     return {
-      error: "Server Error (Record new data)"
-    }
+      error: "Server Error (Record new data)",
+    };
   }
+}
+
+async function isValidUsername(username) {
+  return (
+    typeof username === "string" && username.length > 2 && username.length < 20
+  );
 }
 
 module.exports = {
@@ -101,4 +116,6 @@ module.exports = {
   findUserByEmail,
   findUserById,
   validateAuthInput,
+  isValidUsername,
+  isValidUUID
 };

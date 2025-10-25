@@ -1,10 +1,16 @@
 // Description: Services for handling chat operations
 const { prisma } = require("../data/prisma");
 const { pubsub } = require("../data/pubsub");
+const { isValidUUID } = require("../utils/user.config");
 
 // On Click Send Messages
 async function sendMessage(_, { chatRoomId, text }, context) {
   const userId = context.user.userId;
+
+  if (!isValidUUID(chatRoomId)) {
+    throw new Error("Invalid UUID");
+  }
+
   // Create the new record for chatmessage
   const messagePayload = await prisma.chatRoomMessage.create({
     data: {
@@ -90,6 +96,10 @@ async function sendMessage(_, { chatRoomId, text }, context) {
 }
 
 async function chatRoomCell(_, { friendshipId }, context) {
+  if (!isValidUUID(friendshipId)) {
+    throw new Error("Invalid UUID");
+  }
+
   // Find you are friend with userB
   const friend = await prisma.friendship.findUnique({
     where: {
@@ -161,6 +171,10 @@ async function chatRoomList(_, obj, context) {
 }
 
 async function chatMessageList(_, { chatRoomId }, context) {
+  if (!isValidUUID(chatRoomId)) {
+    throw new Error("Invalid UUID");
+  }
+
   const msgList = await prisma.chatRoomMessage.findMany({
     where: {
       chatRoomId: chatRoomId,
@@ -179,6 +193,10 @@ async function chatMessageList(_, { chatRoomId }, context) {
 
 async function chatCellData(_, { chatRoomId }, context) {
   const userId = context.user.userId;
+
+  if (!isValidUUID(chatRoomId)) {
+    throw new Error("Invalid UUID");
+  }
 
   const chatCellPayload = await prisma.chatRoom.findFirst({
     where: { id: chatRoomId },
