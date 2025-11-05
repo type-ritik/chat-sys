@@ -3,7 +3,9 @@ const {
   findUserByEmail,
   findUserById,
   userRecord,
-  isValidUsername
+  isSuspiciousLogin,
+  createLoginAttempt,
+  blockUser,
 } = require("../utils/user.config");
 const { comparePassword } = require("../utils/passKey");
 const { genToken } = require("../utils/auth");
@@ -11,7 +13,10 @@ const { genToken } = require("../utils/auth");
 // User Login
 async function loginUser(_, { email, password }, context) {
   try {
+    // User input validation
     const validationErrors = validateAuthInput(email, password);
+
+    // If not valid, report "Validation Error" message
     if (validationErrors.length > 0) {
       console.log("Validation Error", validationErrors);
       return {
@@ -19,8 +24,10 @@ async function loginUser(_, { email, password }, context) {
       };
     }
 
-    // User check
+    // Find User by Email
     const userCheck = await findUserByEmail(email);
+
+    // If user not found, report "User Found Error" message
     if (!userCheck.res) {
       console.log("User Error", userCheck.err);
       return {
@@ -28,16 +35,37 @@ async function loginUser(_, { email, password }, context) {
       };
     }
 
-    // Password check
+    const now = new Date();
+
+    const ipAddress = context.req.ip.replace("::ffff:", "");
+
+    const record = await isSuspiciousLogin(userCheck.payload.id, ipAddress);
+
+    if (
+      record &&
+      record.blocked_until &&
+      now < new Date(record.blocked_until)
+    ) {
+      console.log("User blocked. Try again later.");
+      throw new Error("User blocked. Try again later.");
+    }
+
+    // Match the password
     const isValidPass = await comparePassword(
       password,
       userCheck.payload.password
     );
+
+    // If not matched, report "Incorrect password Error" message
     if (!isValidPass) {
       console.log("Validation Error:", "Not valid password");
-      return {
-        error: "Invalid password",
-      };
+      const updated = await createLoginAttempt(userCheck.payload.id, ipAddress);
+
+      if (updated.attempts >= 100) {
+        const msg = await blockUser(userCheck.payload.id);
+        throw new Error(msg.error);
+      }
+      throw new Error("Invalid password");
     }
 
     const token = genToken(userCheck.payload.id, userCheck.payload.isAdmin);
@@ -46,9 +74,8 @@ async function loginUser(_, { email, password }, context) {
     return { ...userCheck.payload, token };
   } catch (error) {
     console.log("Server Error", error.message);
-    return {
-      error: error.message,
-    };
+
+    throw new Error(error.message);
   }
 }
 
@@ -62,21 +89,20 @@ async function createUser(_, { name, email, password }, context) {
       };
     }
 
-    console.log("Input validation is completed")
+    console.log("Input validation is completed");
 
     const isUserPresent = await findUserByEmail(email);
-    console.log(isUserPresent)
+    console.log(isUserPresent);
     if (isUserPresent.res) {
       return {
         error: "User already exists with this email",
       };
     }
 
-    console.log("User validation is completed")
-
+    console.log("User validation is completed");
 
     const user = await userRecord(name, email, password);
-    console.log("userError",user);
+    console.log("userError", user);
     if (!user) {
       return { error: user.error };
     }

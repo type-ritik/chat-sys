@@ -1,14 +1,11 @@
 const { prisma } = require("../data/prisma");
 const { hashPassword } = require("../utils/passKey");
 
-
-
-
 function isValidUUID(uuid) {
-  const uuidRegex = /^[0-9A-F]{8}-[0-9A-F]{4}-[1-5][0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i;
+  const uuidRegex =
+    /^[0-9A-F]{8}-[0-9A-F]{4}-[1-5][0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i;
   return uuidRegex.test(uuid);
 }
-
 
 // Validation function
 function validateAuthInput(email, password) {
@@ -111,11 +108,60 @@ async function isValidUsername(username) {
   );
 }
 
+async function isSuspiciousLogin(userId, ip) {
+  const record = await prisma.loginAttempts.findFirst({
+    where: { userId },
+  });
+
+  return record;
+}
+
+async function createLoginAttempt(userId, ip) {
+  const createAttempt = await prisma.loginAttempts.upsert({
+    where: { userId },
+    update: {
+      userId,
+      attempts: {
+        increment: 1,
+      },
+      ipAddress: ip,
+    },
+    create: {
+      userId,
+      ipAddress: ip,
+      attempts: 1,
+    },
+  });
+
+  console.log(createAttempt);
+
+  return createAttempt;
+}
+
+async function blockUser(userId) {
+  const blockUntil = await prisma.loginAttempts.update({
+    where: {
+      userId,
+    },
+    data: {
+      blocked_until: new Date(Date.now() + 30 * 60 * 1000),
+      status: "suspicious",
+    },
+  });
+
+  return {
+    error: "Too many attempts. Blocked for 30 mins.",
+  };
+}
+
 module.exports = {
   userRecord,
   findUserByEmail,
   findUserById,
   validateAuthInput,
   isValidUsername,
-  isValidUUID
+  createLoginAttempt,
+  isValidUUID,
+  isSuspiciousLogin,
+  blockUser,
 };
