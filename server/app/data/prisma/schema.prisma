@@ -45,7 +45,8 @@ model User {
   receivedMessages Message[] @relation("UserReceivedMessages")
 
   // User Action Records (Monitoring user activity)
-  AuditLog AuditLog[] @relation("UserActionRecord")
+  AuditLog      AuditLog[]     @relation("UserActionRecord")
+  LoginAttempts LoginAttempts?
 }
 
 model Profile {
@@ -97,27 +98,6 @@ model Friendship {
   @@unique([userId, friendId])
 }
 
-// ========================
-// 🧾 CHAT MESSAGE DOMAIN
-// ========================
-
-// model ChatMessage {
-//   id         String   @id @default(uuid())
-//   senderId   String
-//   receiverId String
-//   content    String
-//   createdAt  DateTime @default(now())
-
-//   sender   User @relation("UserSentChatMessages", fields: [senderId], references: [id])
-//   receiver User @relation("UserReceivedChatMessages", fields: [receiverId], references: [id])
-
-//   @@unique([senderId, receiverId])
-// }
-
-// ========================
-// 💬 CHAT DOMAIN
-// ========================
-
 model ChatRoom {
   id           String   @id @default(uuid())
   friendshipId String   @unique
@@ -150,6 +130,17 @@ model AuditLog {
   createdAt DateTime @default(now())
 
   user User? @relation("UserActionRecord", fields: [userId], references: [id])
+}
+
+model LoginAttempts {
+  id            String    @id @default(uuid())
+  attempts      Int       @default(0)
+  userId        String    @unique
+  blocked_until DateTime?
+  status        String    @default("active")
+  ipAddress     String
+
+  user User @relation(fields: [userId], references: [id])
 }
 
 enum FriendshipStatus {
