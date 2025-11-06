@@ -11,14 +11,14 @@ const { typeDefs } = require("./app/schema");
 const { resolvers } = require("./app/resolvers");
 
 async function main() {
+  // Connect to Database
+  await connectToDatabase();
+
   // Start Express + Apollo
   const app = await startServer();
 
   // Create HTTP server
   const httpServer = http.createServer(app);
-
-  // Connect to the database
-  await connectToDatabase();
 
   // Create GraphQL schema for both HTTP and WebSocket
   const schema = makeExecutableSchema({ typeDefs, resolvers });
