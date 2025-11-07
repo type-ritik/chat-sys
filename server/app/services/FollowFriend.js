@@ -1,6 +1,6 @@
 const { prisma } = require("../data/prisma");
 const { pubsub } = require("../data/pubsub");
-const { isValidUUID } = require("../utils/user.config");
+const { isValidUUID, findUserById } = require("../utils/user.config");
 
 
 async function followFriend(_, { friendId }, context) {
@@ -9,14 +9,19 @@ async function followFriend(_, { friendId }, context) {
   if (!isValidUUID(friendId)) {
     throw new Error("Invalid UUID");
   }
-  // Check if both users exist
-  const sender = await prisma.user.findUnique({ where: { id: userId } }); // Sender
-  const receiver = await prisma.user.findUnique({ where: { id: friendId } }); // Receiver
 
-  if (!sender || !receiver) {
-    // Are both valid id
-    throw new Error("Invalid Credential");
-  }
+  // Check if both users exist
+  const sender = await findUserById(userId);
+  const receiver = await findUserById(userId)
+
+
+  // const sender = await prisma.user.findUnique({ where: { id: userId } }); // Sender
+  // const receiver = await prisma.user.findUnique({ where: { id: friendId } }); // Receiver
+
+  // if (!sender || !receiver) {
+  //   // Are both valid id
+  //   throw new Error("Invalid Credential");
+  // }
 
   // Create a follow relationship
   const follow = await prisma.friendship.create({
