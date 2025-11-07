@@ -32,19 +32,10 @@ async function findUserById(userId) {
   });
 
   if (!user) {
-    return {
-      res: false,
-      // No user found with this userId
-      err: user.error,
-      payload: null,
-    };
+    throw new Error("User doesn't Exists")
   }
 
-  return {
-    res: true,
-    err: "",
-    payload: user,
-  };
+  return user
 }
 
 async function findUserByEmail(email) {
@@ -56,19 +47,10 @@ async function findUserByEmail(email) {
   });
 
   if (!user) {
-    return {
-      res: false,
-      // No user found with this email
-      err: "User is not found",
-      payload: null,
-    };
+    throw new Error("User does not found.")
   }
 
-  return {
-    res: true,
-    err: "",
-    payload: user,
-  };
+  return user
 }
 
 async function userRecord(name, email, password) {

@@ -19,27 +19,25 @@ async function loginUser(_, { email, password }, context) {
     // If not valid, report "Validation Error" message
     if (validationErrors.length > 0) {
       console.log("Validation Error", validationErrors);
-      return {
-        error: validationErrors,
-      };
+      throw new Error(validationErrors);
     }
 
     // Find User by Email
     const userCheck = await findUserByEmail(email);
 
     // If user not found, report "User Found Error" message
-    if (!userCheck.res) {
-      console.log("User Error", userCheck.err);
-      return {
-        error: userCheck.err,
-      };
-    }
+    // if (!userCheck.res) {
+    //   console.log("User Error", userCheck.err);
+    //   return {
+    //     error: userCheck.err,
+    //   };
+    // }
 
     const now = new Date();
 
     const ipAddress = context.req.ip.replace("::ffff:", "");
 
-    const record = await isSuspiciousLogin(userCheck.payload.id, ipAddress);
+    const record = await isSuspiciousLogin(userCheck.id, ipAddress);
 
     if (
       record &&
@@ -51,27 +49,24 @@ async function loginUser(_, { email, password }, context) {
     }
 
     // Match the password
-    const isValidPass = await comparePassword(
-      password,
-      userCheck.payload.password
-    );
+    const isValidPass = await comparePassword(password, userCheck.password);
 
     // If not matched, report "Incorrect password Error" message
     if (!isValidPass) {
       console.log("Validation Error:", "Not valid password");
-      const updated = await createLoginAttempt(userCheck.payload.id, ipAddress);
+      const updated = await createLoginAttempt(userCheck.id, ipAddress);
 
       if (updated.attempts >= 100) {
-        const msg = await blockUser(userCheck.payload.id);
+        const msg = await blockUser(userCheck.id);
         throw new Error(msg.error);
       }
       throw new Error("Invalid password");
     }
 
-    const token = genToken(userCheck.payload.id, userCheck.payload.isAdmin);
-    console.log("Login Success:", userCheck.payload);
+    const token = genToken(userCheck.id, userCheck.isAdmin);
+    console.log("Login Success:", userCheck);
 
-    return { ...userCheck.payload, token };
+    return { ...userCheck, token };
   } catch (error) {
     console.log("Server Error", error.message);
 
@@ -84,19 +79,15 @@ async function createUser(_, { name, email, password }, context) {
   try {
     const validationErrors = validateAuthInput(email, password);
     if (validationErrors.length > 0) {
-      return {
-        error: validationErrors,
-      };
+      throw new Error(validationErrors);
     }
 
     console.log("Input validation is completed");
 
     const isUserPresent = await findUserByEmail(email);
     console.log(isUserPresent);
-    if (isUserPresent.res) {
-      return {
-        error: "User already exists with this email",
-      };
+    if (isUserPresent) {
+      throw new Error("User already exists with this email");
     }
 
     console.log("User validation is completed");
@@ -104,7 +95,7 @@ async function createUser(_, { name, email, password }, context) {
     const user = await userRecord(name, email, password);
     console.log("userError", user);
     if (!user) {
-      return { error: user.error };
+      throw new Error("User not found.");
     }
 
     const token = genToken(user.id, user.isAdmin);
@@ -112,9 +103,7 @@ async function createUser(_, { name, email, password }, context) {
     return { ...user, token };
   } catch (error) {
     console.log("Server Error", error.message);
-    return {
-      error: error.message,
-    };
+    throw new Error("Server error creating user");
   }
 }
 
@@ -122,8 +111,6 @@ async function userData(_, obj, context) {
   const userId = context.user.userId;
 
   const payload = findUserById(userId);
-
-  console.log(payload);
 
   return payload;
 }
