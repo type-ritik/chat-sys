@@ -77,35 +77,52 @@ async function loginUser(_, { email, password }, context) {
 // Create User
 async function createUser(_, { name, email, password }, context) {
   try {
+    // 1. Input validation
     const validationErrors = validateAuthInput(email, password);
     if (validationErrors.length > 0) {
-      throw new Error(validationErrors);
+      throw new Error(validationErrors.join(", "));
     }
 
-    console.log("Input validation is completed");
+    console.log("Input validation passed");
 
-    const isUserPresent = await findUserByEmail(email);
-    console.log(isUserPresent);
-    if (isUserPresent) {
+    // 2. Check if user exists
+    const existingUser = await findUserByEmail(email);
+    if (existingUser) {
       throw new Error("User already exists with this email");
     }
 
-    console.log("User validation is completed");
+    console.log("User does not exist, creating new user...");
 
-    const user = await userRecord(name, email, password);
-    console.log("userError", user);
-    if (!user) {
-      throw new Error("User not found.");
+    // 3. Create new user
+    const result = await userRecord(name, email, password);
+
+    if (result.error) {
+      throw new Error(result.error);
     }
 
+    const user = result.user; // extract user object
+
+    if (!user) {
+      throw new Error("User creation failed");
+    }
+
+    console.log("User created successfully:", user.email);
+
+    // 4. Generate token
     const token = genToken(user.id, user.isAdmin);
 
-    return { ...user, token };
+    // 5. Return final response
+    return {
+      ...user,
+      token,
+    };
+
   } catch (error) {
-    console.log("Server Error", error.message);
-    throw new Error("Server error creating user");
+    console.error("Error in createUser:", error.message);
+    throw new Error(error.message); // return real error to client
   }
 }
+
 
 async function userData(_, obj, context) {
   const userId = context.user.userId;

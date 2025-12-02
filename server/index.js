@@ -1,7 +1,7 @@
 const http = require("http");
 const { startServer } = require("./app/index");
 const { PORT } = require("./app/config/env");
-const { connectToDatabase } = require("./app/data/db");
+// const { connectToDatabase } = require("./app/data/db");
 // For subscriptions (graphql-ws)
 const { WebSocketServer } = require("ws");
 const { useServer } = require("graphql-ws/lib/use/ws");
@@ -12,7 +12,7 @@ const { resolvers } = require("./app/resolvers");
 
 async function main() {
   // Connect to Database
-  await connectToDatabase();
+  // await connectToDatabase();
 
   // Start Express + Apollo
   const app = await startServer();

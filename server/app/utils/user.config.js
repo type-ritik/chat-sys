@@ -65,7 +65,7 @@ async function userRecord(name, email, password) {
         profile: {
           create: {
             avatarUrl:
-              "https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg?_gl=1*1q4t3f4*_ga*Mzg1NDU4ODQyLjE3NjA0Mzk4NzA.*_ga_8JE65Q40S6*czE3NjA0Mzk4NzAkbzEkZzEkdDE3NjA0Mzk4NzkkajUxJGwwJGgw",
+              "https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg",
             isActive: true,
             bio: `Hi there, This is ${name}`,
           },
@@ -76,13 +76,13 @@ async function userRecord(name, email, password) {
       },
     });
 
-    return { ...newUser };
+    return { user: newUser };
   } catch (err) {
-    return {
-      error: "Server Error (Record new data)",
-    };
+    console.error("User creation failed:", err.message);
+    return { error: "Database error creating user" };
   }
 }
+
 
 async function isValidUsername(username) {
   return (
