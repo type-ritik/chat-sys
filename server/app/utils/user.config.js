@@ -10,7 +10,7 @@ function isValidUUID(uuid) {
 // Validation function
 function validateAuthInput(email, password) {
   const errors = [];
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/;
   if (!emailRegex.test(email)) {
     errors.push("Invalid email format");
   }
@@ -30,10 +30,6 @@ async function findUserById(userId) {
       profile: true,
     },
   });
-
-  if (!user) {
-    throw new Error("User doesn't Exists")
-  }
 
   return user
 }

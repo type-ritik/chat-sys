@@ -12,7 +12,7 @@ async function followFriend(_, { friendId }, context) {
 
   // Check if both users exist
   const sender = await findUserById(userId);
-  const receiver = await findUserById(userId)
+  const receiver = await findUserById(friendId);
 
 
   // const sender = await prisma.user.findUnique({ where: { id: userId } }); // Sender
