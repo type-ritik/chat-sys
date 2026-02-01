@@ -49,8 +49,8 @@ function ChatComponent() {
               <div
                 className={`px-4 py-2 rounded-2xl shadow-md max-w-[75%] text-sm md:text-base transition-all duration-300 ${
                   isSender
-                    ? "bg-fuchsia-700 rounded-br-none"
-                    : "bg-blue-600 rounded-bl-none"
+                    ? "bg-green-600 rounded-br-none"
+                    : "bg-gray-600 rounded-bl-none"
                 }`}
               >
                 {item.message}
