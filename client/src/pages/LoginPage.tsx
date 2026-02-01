@@ -43,7 +43,7 @@ function LoginPage() {
 
       const resData = await fetchServer({ email, password });
 
-      if (resData.res === false) {
+      if (resData.errors) {
         setErrorMsg(resData.msg);
         return dispatch(signInFailure(resData.msg));
       }

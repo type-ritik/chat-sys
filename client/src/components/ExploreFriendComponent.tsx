@@ -47,7 +47,7 @@ function ExploreFriendComponent() {
       {/* Search Form */}
       <form
         onSubmit={handleSubmit}
-        className="flex gap-2 w-full max-w-md bg-white p-3 rounded-lg shadow-md border border-gray-200"
+        className="flex gap-2 not-md:flex-col not-md:w-full w-full max-w-md bg-white p-3 rounded-lg shadow-md border border-gray-200"
       >
         <input
           type="search"

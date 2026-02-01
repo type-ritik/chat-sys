@@ -160,7 +160,7 @@ function FriendsComponent() {
                 className="flex w-full items-center gap-4 p-3 bg-gradient-to-r from-pink-50 to-pink-100 rounded-xl shadow-sm justify-between hover:shadow-md hover:scale-[1.02] transition-all duration-300 ease-in-out"
               >
                 {/* Avatar */}
-                <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-pink-300 flex-shrink-0">
+                <div className="w-11 h-11 rounded-full overflow-hidden border-2 border-pink-300 flex-shrink-0">
                   <img
                     src={
                       item.otherUser.avatarUrl ||
@@ -173,7 +173,7 @@ function FriendsComponent() {
 
                 {/* Info */}
                 <div className="flex flex-col flex-1">
-                  <h3 className="text-base md:text-lg font-semibold text-gray-800 truncate">
+                  <h3 className="text-base md:text-lg font-semibold text-gray-700 truncate">
                     {item.otherUser.name}
                   </h3>
                   <span className="text-sm text-gray-500 truncate">
@@ -212,7 +212,7 @@ function FriendsComponent() {
               >
                 {/* Profile */}
                 <div className="flex items-center gap-3 flex-1 min-w-0">
-                  <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-blue-300 flex-shrink-0">
+                  <div className="w-11 h-11 rounded-full overflow-hidden border-2 border-blue-300 flex-shrink-0">
                     <img
                       src={
                         item.user.avatarUrl ||
@@ -233,15 +233,15 @@ function FriendsComponent() {
                 </div>
 
                 {/* Action Buttons */}
-                <div className="flex gap-2">
+                <div className="flex flex-col gap-2">
                   <button
-                    className="px-3 md:px-4 py-1 text-sm font-medium bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
+                    className="px-2 md:px-4 py-1 text-sm font-normal bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
                     onClick={() => handleAcceptReq(item.id)}
                   >
                     Accept
                   </button>
                   <button
-                    className="px-3 md:px-4 py-1 text-sm font-medium bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+                    className="px-2 md:px-4 py-1 text-sm font-normal bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
                     onClick={() => handleRejectReq(item.id)}
                   >
                     Reject

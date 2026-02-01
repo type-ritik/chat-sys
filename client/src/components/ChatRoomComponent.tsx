@@ -62,10 +62,10 @@ function ChatRoomComponent() {
   return (
     <div className="flex flex-col md:flex-row gap-6 p-4 md:p-8 bg-gradient-to-br from-blue-50 to-purple-50 min-h-[80vh]">
       {/* Search Friend Section */}
-      <div className="flex-1 flex flex-col items-center bg-white rounded-2xl shadow-lg p-6 hover:shadow-2xl transition-all duration-500 ease-in-out">
+      <div className="flex md:flex-col not-md:flex-col items-center bg-white rounded-2xl shadow-lg p-6 hover:shadow-2xl transition-all duration-500 ease-in-out">
         <form
           onSubmit={handleSubmit}
-          className="flex gap-2 w-full max-w-md bg-white p-3 rounded-lg shadow-md border border-gray-200"
+          className="flex not-md:flex-col gap-2 w-full max-w-md bg-white p-3 rounded-lg shadow-md border border-gray-200"
         >
           <div className="relative flex-1">
             <input
@@ -77,7 +77,7 @@ function ChatRoomComponent() {
               className="w-full px-4 py-2 rounded-md border border-gray-300 outline-none focus:ring-2 focus:ring-purple-400 transition-all duration-300"
               placeholder="Search your friend..."
             />
-            <SearchIcon className="absolute right-3 top-2.5 text-gray-400 w-5 h-5" />
+            {/* <SearchIcon className="absolute right-3 top-2.5 text-gray-400 w-5 h-5" /> */}
           </div>
           <button
             type="submit"
@@ -102,10 +102,10 @@ function ChatRoomComponent() {
                 <img
                   src="https://images.unsplash.com/photo-1502685104226-ee32379fefbe?q=80&w=688"
                   alt="User avatar"
-                  className="w-12 h-12 rounded-full object-cover border-2 border-purple-400"
+                  className="w-11 h-11 rounded-full object-cover border-2 border-purple-400"
                 />
                 <div>
-                  <h3 className="text-lg font-bold text-gray-800">
+                  <h3 className="text-base font-bold text-gray-800">
                     {searchResult.name || "Unknown"}
                   </h3>
                   <p className="text-sm text-gray-500">
@@ -115,7 +115,7 @@ function ChatRoomComponent() {
               </div>
               <button
                 onClick={() => handleChat(searchResult.id)}
-                className="px-4 py-2 bg-green-500 text-white font-medium text-sm rounded-md hover:bg-green-400 active:scale-95 transition"
+                className="px-3 py-2 bg-green-500 text-white font-normal text-sm rounded-md hover:bg-green-400 active:scale-95 transition"
               >
                 Chat
               </button>

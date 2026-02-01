@@ -48,8 +48,8 @@ function ChatEditor({ chatRoomId, setChatMsg }: Props) {
   return (
     <div className="flex items-end gap-2 w-full">
       {/* Input Area */}
-      <div className="flex items-center bg-white rounded-full px-4 py-2 flex-1 shadow-sm border border-gray-200 focus-within:ring-2 focus-within:ring-blue-400 transition-all">
-        <button className="text-gray-500 hover:text-blue-500 transition-colors">
+      <div className="flex items-center bg-gray-200 rounded-full px-4 py-2 flex-1 shadow-sm border border-black focus-within:ring-2 focus-within:ring-blue-400 transition-all">
+        <button className="text-black hover:text-blue-500 transition-colors">
           <Smile size={20} />
         </button>
 
@@ -59,10 +59,10 @@ function ChatEditor({ chatRoomId, setChatMsg }: Props) {
           value={text}
           onChange={handleChange}
           placeholder="Type a message..."
-          className="w-full mx-2 bg-transparent resize-none focus:outline-none text-gray-800 text-base leading-5 overflow-hidden"
+          className="w-full mx-2 bg-transparent resize-none focus:outline-none text-black text-base leading-5 overflow-hidden"
         />
 
-        <button className="text-gray-500 hover:text-blue-500 transition-colors">
+        <button className="text-black hover:text-blue-500 transition-colors">
           <Paperclip size={20} />
         </button>
       </div>
@@ -71,7 +71,7 @@ function ChatEditor({ chatRoomId, setChatMsg }: Props) {
       <button
         type="button"
         onClick={showChatMsg}
-        className="p-3 rounded-full bg-blue-500 hover:bg-blue-600 transition-colors text-white shadow-sm active:scale-95"
+        className="p-2 rounded-full bg-white hover:bg-blue-600 transition-colors text-gray-700 shadow-sm active:scale-95"
       >
         <Send size={20} />
       </button>

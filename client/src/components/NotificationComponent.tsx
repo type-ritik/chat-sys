@@ -43,7 +43,7 @@ function NotificationComponent() {
 
       {/* Notifications List */}
       {notificationData && notificationLength !== 0 ? (
-        <div className="w-full max-w-2xl flex flex-col gap-4">
+        <div className="w-full px-3 max-w-2xl flex flex-col gap-4">
           {(notificationData as NotificationItem[]).map(
             (item: NotificationItem, index: number) => (
               <div
@@ -65,16 +65,16 @@ function NotificationComponent() {
 
                 {/* Content */}
                 <div className="flex flex-col flex-1">
-                  <h3 className="text-base font-semibold text-gray-900">
+                  <h3 className="text-base capitalize font-semibold text-gray-900">
                     {item.sender.username}
                   </h3>
-                  <p className="text-sm text-gray-600 leading-snug">
+                  <p className="text-sm capitalize text-gray-600 leading-snug">
                     {item.content}
                   </p>
                 </div>
 
                 {/* Timestamp */}
-                <div className="flex-shrink-0 text-xs text-gray-500">
+                <div className="flex-shrink-0 text-sm text-gray-600">
                   {new Date(item.timestamp).toLocaleTimeString([], {
                     hour: "2-digit",
                     minute: "2-digit",
