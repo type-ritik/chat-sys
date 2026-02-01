@@ -34,11 +34,10 @@ export const fetchServer = async (payload: {
 
   const result = await res.json();
   if (result.errors) {
-    return { res: false, msg: result.errors[0].message };
+    return result;
   }
 
   window.sessionStorage.setItem("token", result.data.createUser.token);
-  window.cookieStore.set("token", result.data.createUser.token);
   window.localStorage.setItem("token", result.data.createUser.token);
 
   return result;

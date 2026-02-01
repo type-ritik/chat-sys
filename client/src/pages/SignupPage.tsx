@@ -43,7 +43,7 @@ function SignupPage() {
       dispatch(signInStart());
       const resData = await fetchServer({ name, email, password });
 
-      if (resData.res === false) {
+      if (resData.errors) {
         setErrorMsg(resData.msg);
         dispatch(signInFailure(resData.msg));
         return;
