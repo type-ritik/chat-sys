@@ -7,6 +7,7 @@ const navLink = [
   { label: "Chat", route: "/chat" },
   { label: "Notification", route: "/notification" },
   { label: "Friends", route: "/friends" },
+  {label: "Account", route: "/signup"}
 ];
 
 interface IndexNotifyProps {
