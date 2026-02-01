@@ -46,10 +46,6 @@ async function findUserByEmail(email) {
     },
   });
 
-  if (!user) {
-    throw new Error("User does not found.")
-  }
-
   return user
 }
 
