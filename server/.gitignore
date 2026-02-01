@@ -1,3 +1,5 @@
 node_modules/
-.env
 app/data/prisma/migrations
+.agents/
+.github
+.env
