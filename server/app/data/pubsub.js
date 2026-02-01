@@ -1,12 +1,14 @@
 const { RedisPubSub } = require("graphql-redis-subscriptions");
 const { REDIS_URL } = require("../config/env");
 const Redis = require("ioredis");
-const redisClient = new Redis(process.env.REDIS_URL);
+const redisClient = new Redis(process.env.REDIS_URL, {
+  maxRetriesPerRequest: null
+});
 
 // Redis connection options
 const options = {
   url: process.env.REDIS_URL,
-  retryStrategy: (times) => Math.min(times * 50, 2000),
+  retryStrategy: null,
 };
 
 console.log('Redis Server is listening at: ', process.env.REDIS_URL);
