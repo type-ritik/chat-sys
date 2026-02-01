@@ -2,7 +2,7 @@ import { ApolloClient, InMemoryCache, split, HttpLink } from "@apollo/client";
 import { GraphQLWsLink } from "@apollo/client/link/subscriptions";
 import { createClient } from "graphql-ws";
 import { getMainDefinition } from "@apollo/client/utilities";
-import { baseUrl, wsBaseUrl } from "./config";
+import { baseUrl } from "./config";
 import { ApolloLink } from "@apollo/client";
 
 // 1. HTTP link for queries & mutation
@@ -21,15 +21,33 @@ const authLink = new ApolloLink((operation, forward) => {
   return forward(operation);
 });
 
+
+// Detect if we are on SSL (Render) or local
+const isSecure = window.location.protocol === 'https:';
+const wsProtocol = isSecure ? 'wss' : 'ws';
+
+// Use your Render backend URL (e.g., chat-sys-server.onrender.com)
+const API_DOMAIN = baseUrl?.replace(/^https?:\/\//, '') || 'localhost:5000';
+
 // 2. WebSocket link for subscriptions
 const wsLink = new GraphQLWsLink(
   createClient({
-    url: wsBaseUrl, // server WS endpoint
+    url: `${wsProtocol}://${API_DOMAIN}`,
     connectionParams: {
-      authToken: localStorage.getItem("token"), // auth for subs
-    },
+      authToken: localStorage.getItem("token")
+    }
   })
 );
+
+
+// const wsLink = new GraphQLWsLink(
+//   createClient({
+//     url: wsBaseUrl, // server WS endpoint
+//     connectionParams: {
+//       authToken: localStorage.getItem("token"), // auth for subs
+//     },
+//   })
+// );
 
 // 3. Split based on operation type (query/mutation vs subscription)
 const splitLink = split(
