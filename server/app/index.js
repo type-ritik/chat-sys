@@ -29,6 +29,10 @@ const { redisClient } = require("./data/pubsub");
 async function startServer() {
   const app = express();
 
+  // Increase the size of json
+  app.use(express.json({ limit: "10mb" }));
+  app.use(express.urlencoded({ limit: "10mb", extended: true }));
+
   // Apollo Server setup
   const server = new ApolloServer({
     typeDefs,
@@ -37,7 +41,7 @@ async function startServer() {
 
   redisClient.on("connecting", () => {
     console.log("Connecting to Redis server...");
-  })
+  });
 
   redisClient.on("connect", () => {
     console.log("Connected to Redis server");
@@ -61,7 +65,7 @@ async function startServer() {
     cors(),
     express.json(),
     bodyParser.json(),
-    expressMiddleware(server, { context: getContext })
+    expressMiddleware(server, { context: getContext }),
   );
 
   return app;
