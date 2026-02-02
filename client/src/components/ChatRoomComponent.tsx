@@ -74,7 +74,7 @@ function ChatRoomComponent() {
               id="search"
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
-              className="w-full px-4 py-2 rounded-md border border-gray-300 outline-none focus:ring-2 focus:ring-purple-400 transition-all duration-300"
+              className="w-full px-4 py-2 not-md:text-[12px] rounded-md border border-gray-300 outline-none focus:ring-2 focus:ring-purple-400 transition-all duration-300"
               placeholder="Search your friend..."
             />
             {/* <SearchIcon className="absolute right-3 top-2.5 text-gray-400 w-5 h-5" /> */}
@@ -135,9 +135,9 @@ function ChatRoomComponent() {
             <div
               key={index}
               onClick={() => navigate(`/friends/chat/${item.id}`)}
-              className="flex items-center gap-4 p-4 bg-gradient-to-r from-blue-100 to-purple-100 rounded-xl shadow-sm hover:shadow-md hover:scale-[1.02] transition-all duration-300 ease-in-out cursor-pointer"
+              className="flex items-center gap-4 p-4 not-md:p-2 bg-gradient-to-r from-blue-100 to-purple-100 rounded-xl shadow-sm hover:shadow-md hover:scale-[1.02] transition-all duration-300 ease-in-out cursor-pointer"
             >
-              <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-blue-300">
+              <div className="not-md:w-10 not-md:h-10 w-12 h-12 rounded-full overflow-hidden border-2 border-blue-300">
                 <img
                   src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=688"
                   alt="User"
@@ -145,10 +145,10 @@ function ChatRoomComponent() {
                 />
               </div>
               <div className="flex flex-col truncate">
-                <h3 className="text-base md:text-lg font-semibold text-gray-800 truncate">
+                <h3 className="not-md:text-[12px] text-base md:text-lg font-semibold text-gray-800 truncate">
                   {item.friendship.otherUser.name}
                 </h3>
-                <span className="text-sm text-gray-500 truncate">
+                <span className="not-md:text-[12px] text-sm text-gray-500 truncate">
                   {item.lastMsg?.message || "No messages yet"}
                 </span>
               </div>

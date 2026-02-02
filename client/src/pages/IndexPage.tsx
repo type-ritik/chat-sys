@@ -52,14 +52,14 @@ function IndexPage({ notify, chatify }: IndexNotifyProps) {
       {/* Grid Layout */}
       <div className="flex flex-1">
         {/* Sidebar */}
-        <aside className="bg-gradient-to-b from-purple-100 to-purple-50 flex flex-col h-full w-3/12 md:w-2/12 lg:w-1/6 p-4 border-r border-purple-200 shadow-sm">
+        <aside className="bg-gradient-to-b from-purple-100 to-purple-50 flex flex-col h-full w-3/12 md:w-2/12 lg:w-1/6 p-2 border-r border-purple-200 shadow-sm">
           <nav className="flex flex-col gap-3">
             {navLink.map((item) => (
               <Link to={item.route} key={item.label}>
                 <button
                   className={`
-            relative w-full py-2 px-4 flex items-center justify-center
-            rounded-lg font-medium text-sm
+            relative w-full  py-2 px-4 flex items-center justify-center
+            rounded-lg not-md:font-normal font-semibold not-md:text-[12px] text-sm
             bg-gradient-to-r from-blue-500 to-pink-500 text-white
             shadow-md hover:shadow-lg hover:scale-105
             transition-all duration-300 ease-in-out
