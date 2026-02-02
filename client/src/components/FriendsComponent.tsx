@@ -157,34 +157,35 @@ function FriendsComponent() {
             {friendList.map((item: FriendListItem, index: number) => (
               <div
                 key={index}
-                className="flex w-full items-center gap-4 p-3 bg-gradient-to-r from-pink-50 to-pink-100 rounded-xl shadow-sm justify-between hover:shadow-md hover:scale-[1.02] transition-all duration-300 ease-in-out"
+                onClick={() => handleChatOpen(item.id)}
+                className="flex w-full items-center gap-4 p-2 bg-gradient-to-r from-pink-50 to-pink-100 rounded-xl shadow-sm justify-between hover:shadow-md hover:scale-[1.02] transition-all duration-300 ease-in-out"
               >
                 {/* Avatar */}
-                <div className="w-11 h-11 rounded-full overflow-hidden border-2 border-pink-300 flex-shrink-0">
+                <div className="not-md:w-10 not-md:h-10 h-12 w-12 rounded-full overflow-hidden border-2 border-pink-300 flex-shrink-0">
                   <img
                     src={
                       item.otherUser.avatarUrl ||
                       "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=688&auto=format&fit=crop&ixlib=rb-4.1.0"
                     }
                     alt={item.otherUser.name}
-                    className="w-full h-full object-cover"
+                    className="h-full w-full object-cover"
                   />
                 </div>
 
                 {/* Info */}
                 <div className="flex flex-col flex-1">
-                  <h3 className="text-base md:text-lg font-semibold text-gray-700 truncate">
+                  <h3 className="not-md:text-sm text-base md:text-lg font-bold text-gray-700 truncate">
                     {item.otherUser.name}
                   </h3>
-                  <span className="text-sm text-gray-500 truncate">
+                  <span className="not-md:text-[10px] text-sm text-gray-500 truncate">
                     @{item.otherUser.username}
                   </span>
                 </div>
 
                 {/* Chat Message Icon */}
                 <button
-                  className="p-2 bg-pink-100 hover:bg-pink-200 rounded-full text-pink-600 hover:text-pink-700 transition-colors duration-200"
-                  onClick={() => handleChatOpen(item.id)} // optional function
+                  className="p-2 not-md:hidden bg-pink-100 hover:bg-pink-200 rounded-full text-pink-600 hover:text-pink-700 transition-colors duration-200"
+                  onClick={() => handleChatOpen(item.id)}
                   title="Message"
                 >
                   <MessageCircle size={20} />
