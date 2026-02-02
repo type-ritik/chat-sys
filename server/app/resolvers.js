@@ -2,6 +2,8 @@ const {
   loginUser,
   createUser,
   userData,
+  updateUserData,
+  updateAvatar,
 } = require("./services/UserAccountService");
 const {
   exploreFriends,
@@ -68,6 +70,8 @@ const resolvers = {
     followFriend,
     createUser,
     followResponse,
+    updateUserData,
+    updateAvatar,
   },
 
   Subscription: {

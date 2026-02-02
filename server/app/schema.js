@@ -14,6 +14,12 @@ const typeDefs = gql`
     token: String
   }
 
+  type UserProfile {
+    id: ID!
+    user: User
+    profile: Profile
+  }
+
   type Profile {
     id: ID!
     bio: String
@@ -110,6 +116,8 @@ const typeDefs = gql`
     followFriend(friendId: String!): Boolean
     followResponse(friendshipId: String!, status: String!): Boolean
     chatRoomCell(friendshipId: String!): ChatRoomPayload
+    updateUserData(name: String, username: String, bio: String): UserProfile
+    updateAvatar(avatarUrl: String!): Profile
   }
 
   type Subscription {

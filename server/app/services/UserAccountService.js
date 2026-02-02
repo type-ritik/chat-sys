@@ -3,9 +3,11 @@ const {
   findUserByEmail,
   findUserById,
   userRecord,
+  updateProifle,
   isSuspiciousLogin,
   createLoginAttempt,
   blockUser,
+  alterAvatar,
 } = require("../utils/user.config");
 const { comparePassword } = require("../utils/passKey");
 const { genToken } = require("../utils/auth");
@@ -68,9 +70,9 @@ async function loginUser(_, { email, password }, context) {
 
     return { ...userCheck, token };
   } catch (error) {
-    console.log("Server Error", error.message);
+    console.log("Error login user", error.message);
 
-    throw new Error(error.message);
+    throw new Error("Error login user");
   }
 }
 
@@ -116,13 +118,37 @@ async function createUser(_, { name, email, password }, context) {
       ...user,
       token,
     };
-
   } catch (error) {
     console.error("Error in createUser:", error.message);
-    throw new Error(error.message); // return real error to client
+    throw new Error("Error signup user"); // return real error to client
   }
 }
 
+async function updateUserData(_, { name, username, bio }, context) {
+  const userId = context.user.userId;
+
+  console.log(bio)
+
+  try {
+    const payload = await updateProifle(userId, name, username, bio);
+    return payload;
+  } catch (error) {
+    console.log("Error updating userdata", error.message);
+    throw new Error("Error updating userdata");
+  }
+}
+
+async function updateAvatar(_, { avatarUrl }, context) {
+  const userId = context.user.userId;
+
+  try {
+    const payload = await alterAvatar(userId, avatarUrl);
+    return payload;
+  } catch (error) {
+    console.log("Error updating avatar", error.message);
+    throw new Error("Error updating avatar");
+  }
+}
 
 async function userData(_, obj, context) {
   const userId = context.user.userId;
@@ -131,4 +157,10 @@ async function userData(_, obj, context) {
 
   return payload;
 }
-module.exports = { loginUser, createUser, userData };
+module.exports = {
+  loginUser,
+  createUser,
+  userData,
+  updateUserData,
+  updateAvatar,
+};

@@ -7,6 +7,149 @@ function isValidUUID(uuid) {
   return uuidRegex.test(uuid);
 }
 
+// Update user profile data
+async function updateProifle(userId, name, username, bio) {
+  if (!name && !username && !bio) {
+    throw new Error("All fields are required");
+  } else if (name && username && bio) {
+    try {
+      const updateUser = await prisma.user.update({
+        where: { id: userId },
+        data: {
+          name,
+          username,
+          profile: {
+            update: {
+              bio,
+            },
+          },
+        },
+      });
+
+      return updateUser;
+    } catch (error) {
+      console.error("Error updating user profile:", error.message);
+      throw new Error("Error updating user profile");
+    }
+  } else if (name && username) {
+    try {
+      const updateUser = await prisma.user.update({
+        where: { id: userId },
+        data: {
+          name,
+          username,
+        },
+      });
+
+      return updateUser;
+    } catch (error) {
+      console.error("Error updating user profile:", error.message);
+      throw new Error("Error updating user profile");
+    }
+  } else if (name && bio) {
+    try {
+      const updateUser = await prisma.user.update({
+        where: { id: userId },
+        data: {
+          name,
+          profile: {
+            update: {
+              bio,
+            },
+          },
+        },
+      });
+
+      return updateUser;
+    } catch (error) {
+      console.error("Error updating user profile:", error.message);
+      throw new Error("Error updating user profile");
+    }
+  } else if (username && bio) {
+    try {
+      const updateUser = await prisma.user.update({
+        where: { id: userId },
+        data: {
+          username,
+          profile: {
+            update: {
+              bio,
+            },
+          },
+        },
+      });
+
+      return updateUser;
+    } catch (error) {
+      console.error("Error updating user profile:", error.message);
+      throw new Error("Error updating user profile");
+    }
+  }
+  if (name) {
+    try {
+      const updateUser = await prisma.user.update({
+        where: { id: userId },
+        data: {
+          name,
+        },
+      });
+
+      return updateUser;
+    } catch (error) {
+      console.error("Error updating user profile:", error.message);
+      throw new Error("Error updating user profile");
+    }
+  } else if (username) {
+    try {
+      const updateUser = await prisma.user.update({
+        where: { id: userId },
+        data: {
+          username,
+        },
+      });
+
+      return updateUser;
+    } catch (error) {
+      console.error("Error updating user profile:", error.message);
+      throw new Error("Error updating user profile");
+    }
+  } else if (bio) {
+    try {
+      const updateUser = await prisma.profile.update({
+        where: { userId: userId },
+        data: {
+          bio,
+        },
+      });
+
+      return updateUser;
+    } catch (error) {
+      console.error("Error updating user profile:", error.message);
+      throw new Error("Error updating user profile");
+    }
+  } else {
+    throw new Error("No valid fields to update");
+  }
+}
+
+async function alterAvatar(userId, avatarUrl) {
+  try {
+    const updateAvatar = await prisma.profile.update({
+      where: {
+        userId: userId,
+      },
+      data: {
+        avatarUrl: avatarUrl,
+      },
+    });
+
+    return updateAvatar;
+  } catch (error) {
+    console.error("Error updating avatar:", error.message);
+    throw new Error("Error updating avatar");
+  }
+}
+
 // Validation function
 function validateAuthInput(email, password) {
   const errors = [];
@@ -31,7 +174,7 @@ async function findUserById(userId) {
     },
   });
 
-  return user
+  return user;
 }
 
 async function findUserByEmail(email) {
@@ -42,7 +185,7 @@ async function findUserByEmail(email) {
     },
   });
 
-  return user
+  return user;
 }
 
 async function userRecord(name, email, password) {
@@ -74,7 +217,6 @@ async function userRecord(name, email, password) {
     return { error: "Database error creating user" };
   }
 }
-
 
 async function isValidUsername(username) {
   return (
@@ -138,4 +280,6 @@ module.exports = {
   isValidUUID,
   isSuspiciousLogin,
   blockUser,
+  updateProifle,
+  alterAvatar,
 };
