@@ -1,16 +1,21 @@
 import { useEffect, useState } from "react";
 import { Camera } from "lucide-react";
 import { useQuery } from "@apollo/client/react";
-import { USER_DATA } from "../services/ProfileService";
+import {
+  updateAvatar,
+  updateData,
+  USER_DATA,
+} from "../services/ProfileService";
 
 function ProfileComponent() {
   const { error, data, loading } = useQuery(USER_DATA);
   const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
+  const [isAdmin, setIsAdmin] = useState(false);
   const [bio, setBio] = useState("");
-  const [image, setImage] = useState("");
   const [username, setUsername] = useState("");
   const [isOnline, setIsOnline] = useState(true);
+  const [isEditing, setIsEditing] = useState(false);
+  const [profileImage, setProfileImage] = useState(null);
 
   useEffect(() => {
     if (loading) console.log("User data is loading...");
@@ -18,24 +23,48 @@ function ProfileComponent() {
     if (data) {
       setName(data.userData.name);
       setUsername(data.userData.username);
-      setEmail(data.userData.email);
+      setIsAdmin(data.userData.isAdmin);
       setBio(data.userData.profile.bio);
       setIsOnline(data.userData.profile.isActive);
-      setImage(data.userData.profile.avatarUrl);
+      setProfileImage(data.userData.profile.avatarUrl);
     }
   }, [error, data, loading]);
 
-  const [isEditing, setIsEditing] = useState(false);
-  const [profileImage, setProfileImage] = useState(
-    "https://images.unsplash.com/photo-1759508949812-973dcd259b6e?ixlib=rb-4.1.0&auto=format&fit=crop&q=80&w=600"
-  );
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    try {
+      await updateData({ name, username, bio });
+      setIsEditing(false);
+    } catch (error) {
+      // dispatch(signInFailure(error.message));
+      console.log("Error updating profile: ", error.message);
+      return;
+    }
+  };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
+
     if (file) {
       const reader = new FileReader();
-      reader.onload = () => setProfileImage(reader.result as string);
-      reader.readAsDataURL(file);
+
+      reader.onload = async () => {
+        const result = reader.result as string;
+        setProfileImage(result);
+        console.log("Profile (Base64):", result);
+
+        const dat = await updateAvatar({ avatarUrl: result });
+
+        console.log("Avatar update response:", dat);
+
+        console.log("Profile picture after change ", profileImage);
+
+        // Log here to see the actual Base64 string
+      };
+
+      reader.readAsDataURL(file); // Correctly passing the File object
+      console.log("Raw file object:", file); // This log is fine here
     }
   };
 
@@ -45,15 +74,15 @@ function ProfileComponent() {
         {/* Header */}
         <div className="flex justify-between items-center flex-wrap gap-4">
           <div className="text-gray-700 font-medium text-sm">
-            <span className="text-gray-500">@</span>
-            {username}
+            <span className="text-gray-500">#</span>
+            {isAdmin ? "ADMIN" : "USER"}
           </div>
 
           <div className="relative group">
             {/* Profile Image */}
             <div className="w-28 h-28 rounded-full overflow-hidden border-4 border-purple-300 shadow-md">
               <img
-                src={image || profileImage}
+                src={profileImage}
                 alt="Profile"
                 className="w-full h-full object-cover"
               />
@@ -81,13 +110,15 @@ function ProfileComponent() {
         </div>
 
         {/* Body */}
-        <form className="flex flex-col gap-5">
+        <form className="flex flex-col gap-5" onSubmit={handleSubmit}>
           {/* Name */}
           <div className="flex flex-col sm:flex-row gap-3 items-center">
             <input
               type="text"
               placeholder={name || "No name"}
+              value={name}
               disabled={!isEditing}
+              onChange={(e) => setName(e.target.value)}
               className={`w-full sm:w-3/4 px-4 py-2 border rounded-lg text-gray-700 focus:outline-none focus:ring-2 ${
                 isEditing
                   ? "focus:ring-purple-400"
@@ -99,8 +130,10 @@ function ProfileComponent() {
           {/* Email */}
           <div className="flex flex-col sm:flex-row gap-3 items-center">
             <input
-              type="email"
-              placeholder={email || "No email"}
+              type="username"
+              placeholder={username || "No username"}
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
               disabled={!isEditing}
               className={`w-full sm:w-3/4 px-4 py-2 border rounded-lg text-gray-700 focus:outline-none focus:ring-2 ${
                 isEditing
@@ -114,6 +147,8 @@ function ProfileComponent() {
           <div className="flex flex-col sm:flex-row gap-3 items-center">
             <textarea
               placeholder={bio || "This is Ritik Sharma. Nothing scares me."}
+              value={bio}
+              onChange={(e) => setBio(e.target.value)}
               disabled={!isEditing}
               className={`w-full sm:w-3/4 px-4 py-2 border rounded-lg resize-none text-gray-700 focus:outline-none focus:ring-2 ${
                 isEditing
