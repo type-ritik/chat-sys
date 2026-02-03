@@ -5,7 +5,7 @@ export const fetchServer = async (payload: {
   email: string;
   password: string;
 }) => {
-  console.log(payload);
+  // console.log(payload);
   const res = await fetch(baseUrl, {
     method: "POST",
     headers: {

@@ -19,7 +19,7 @@ export const USER_DATA = gql`
 `;
 
 export const updateAvatar = async (payload: { avatarUrl: string }) => {
-  console.log(payload.avatarUrl);
+  // console.log(payload.avatarUrl);
 
   const res = await fetch(baseUrl, {
     method: "POST",
@@ -40,7 +40,7 @@ export const updateAvatar = async (payload: { avatarUrl: string }) => {
   });
 
   const result = await res.json();
-  console.log("Updated: ", result);
+  // console.log("Updated: ", result);
   if (result.errors) {
     return result;
   }
@@ -52,7 +52,7 @@ export const updateData = async (payload: {
   username: string;
   bio: string;
 }) => {
-  console.log("MY paylaod: ", payload);
+  // console.log("MY paylaod: ", payload);
   const res = await fetch(baseUrl, {
     method: "POST",
     headers: {
