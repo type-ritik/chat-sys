@@ -34,6 +34,14 @@ type FriendReqListItem = {
   };
 };
 
+interface ChatRoomCellPayload {
+  chatRoomCell: {
+    id: string;
+    friendshipId: string;
+    createdAt: Date;
+  };
+}
+
 // FriendReqData: Structure for friend request query response.
 type FriendReqData = {
   friendRequestList: FriendReqListItem[];
@@ -45,7 +53,7 @@ function FriendsComponent() {
 
   // Query for the friend list.
   const { loading, error, data } = useQuery<{ friendList: FriendListItem[] }>(
-    FRIEND_LIST
+    FRIEND_LIST,
   );
 
   // Query for the friend requests.
@@ -57,11 +65,11 @@ function FriendsComponent() {
 
   // State for the list of friend requests.
   const [friendReqLis, setFriendReqList] = useState<FriendReqListItem[] | null>(
-    null
+    null,
   );
 
   // Create ChatRoom
-  const [chatRoomCellData] = useMutation(CREATE_CHATROOM_CELL);
+  const [chatRoomCellData] = useMutation<ChatRoomCellPayload>(CREATE_CHATROOM_CELL);
 
   const navigate = useNavigate();
 
