@@ -28,7 +28,7 @@ function NotificationComponent() {
     if (loading) console.log("Query is loading...");
     if (error) console.log("Query Error", error);
     if (data) {
-      console.log("Query data:", data.retrieveNotification);
+      // console.log("Query data:", data.retrieveNotification);
       setNotificationLength(data.retrieveNotification.length);
       setNotificationData(data.retrieveNotification);
     }
