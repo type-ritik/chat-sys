@@ -67,14 +67,14 @@ function ChatRoomComponent() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    console.log(chatRoomData?.chatRoomList);
+    // console.log(chatRoomData?.chatRoomList);
     if (chatRoomData?.chatRoomList) setChatRoomList(chatRoomData?.chatRoomList);
   }, [chatRoomData]);
 
   const handleChat = async (id: string | null) => {
     const payload = await chatData({ variables: { friendshipId: id } });
 
-    console.log("Chat DAta", payload);
+    // console.log("Chat DAta", payload);
 
     if (payload.error) {
       console.log("Error: ", payload.error);
@@ -97,7 +97,7 @@ function ChatRoomComponent() {
       const { data } = await getFriend({
         variables: { username: searchInput },
       });
-      console.log(data);
+      // console.log(data);
 
       if (!data?.exploreChatFriend) {
         setErrMsg("No user found");

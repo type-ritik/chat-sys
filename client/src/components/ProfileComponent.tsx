@@ -73,19 +73,19 @@ function ProfileComponent() {
       reader.onload = async () => {
         const result = reader.result as string;
         setProfileImage(result);
-        console.log("Profile (Base64):", result);
+        // console.log("Profile (Base64):", result);
 
-        const dat = await updateAvatar({ avatarUrl: result });
+        await updateAvatar({ avatarUrl: result });
 
-        console.log("Avatar update response:", dat);
+        // console.log("Avatar update response:", dat);
 
-        console.log("Profile picture after change ", profileImage);
+        // console.log("Profile picture after change ", profileImage);
 
         // Log here to see the actual Base64 string
       };
 
       reader.readAsDataURL(file); // Correctly passing the File object
-      console.log("Raw file object:", file); // This log is fine here
+      // console.log("Raw file object:", file); // This log is fine here
     }
   };
 

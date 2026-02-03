@@ -142,7 +142,7 @@ function FriendsComponent() {
       });
 
       if (data) {
-        console.log("ChatRoomCell Data", data);
+        // console.log("ChatRoomCell Data", data);
 
         navigate(`chat/${data.chatRoomCell.id}`);
       }
