@@ -1,27 +1,42 @@
 import { useEffect, useState } from "react";
-import { Camera } from "lucide-react";
 import { useQuery } from "@apollo/client/react";
 import {
   updateAvatar,
   updateData,
   USER_DATA,
 } from "../services/ProfileService";
+import { Camera } from "lucide-react";
+
+interface UserData {
+  userData: {
+    id: string;
+    name: string;
+    isAdmin: boolean;
+    username: string;
+    profile: {
+      bio: string;
+      avatarUrl: string;
+      isActive: boolean;
+    };
+  };
+}
 
 function ProfileComponent() {
-  const { error, data, loading } = useQuery(USER_DATA);
+  const { error, data, loading } = useQuery<UserData | null>(USER_DATA);
   const [name, setName] = useState("");
   const [isAdmin, setIsAdmin] = useState(false);
   const [bio, setBio] = useState("");
   const [username, setUsername] = useState("");
   const [isOnline, setIsOnline] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
-  const [profileImage, setProfileImage] = useState(null);
+  const [profileImage, setProfileImage] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     if (loading) console.log("User data is loading...");
     if (error) console.log("User data error: ", error.message);
     if (data) {
-      setName(data.userData.name);
+      console.log(data);
+      setName(data?.userData?.name);
       setUsername(data.userData.username);
       setIsAdmin(data.userData.isAdmin);
       setBio(data.userData.profile.bio);
@@ -37,8 +52,14 @@ function ProfileComponent() {
       await updateData({ name, username, bio });
       setIsEditing(false);
     } catch (error) {
+      if (error instanceof TypeError) {
+        console.log("Code Logic Error: ", error.message);
+      } else if (error instanceof Error) {
+        console.log("Error updating profile: ", error.message);
+      } else {
+        console.log("An unexpected error occured");
+      }
       // dispatch(signInFailure(error.message));
-      console.log("Error updating profile: ", error.message);
       return;
     }
   };
