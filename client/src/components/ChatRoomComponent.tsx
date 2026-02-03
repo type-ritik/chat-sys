@@ -1,5 +1,5 @@
 import { useQuery, useLazyQuery, useMutation } from "@apollo/client/react";
-import { ChartBarIcon, SearchIcon } from "lucide-react";
+import { ChartBarIcon } from "lucide-react";
 import {
   CREATE_CHATROOM_CELL,
   EXPLORE_FRIEND,
@@ -8,31 +8,79 @@ import {
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-function ChatRoomComponent() {
-  const { loading, data, error } = useQuery(RETRIEVE_CHATROOM_LIST);
-  const [chatData] = useMutation(CREATE_CHATROOM_CELL);
-  const [getFriend, { data: explData, loading: expLoading, error: expError }] =
-    useLazyQuery(EXPLORE_FRIEND);
+interface ChatRoomCellPayload {
+  chatRoomCell: {
+    id: string;
+    friendshipId: string;
+    createdAt: Date;
+  };
+}
 
-  const [chatRoomList, setChatRoomList] = useState([]);
+interface ExploreChatFriendResult {
+  id: string;
+  name: string;
+  userId: string;
+  username: string;
+  createdAt: Date;
+}
+
+interface ExploreFriendResult {
+  exploreChatFriend: ExploreChatFriendResult | null;
+}
+
+interface ChatPayload {
+  id: string;
+  friendship: {
+    otherUser: {
+      username: string;
+      name: string;
+      id: string;
+    };
+  };
+  lastMsg: {
+    id: string;
+    userId: string;
+    message: string;
+    createdAt: Date;
+  };
+}
+
+interface ChatRoomList {
+  chatRoomList: ChatPayload[] | null;
+}
+
+function ChatRoomComponent() {
+  const {
+    loading: chatRoomLoading,
+    data: chatRoomData,
+    error: chatRoomError,
+  } = useQuery<ChatRoomList | null>(RETRIEVE_CHATROOM_LIST);
+  const [chatData] = useMutation<ChatRoomCellPayload>(CREATE_CHATROOM_CELL);
+  const [getFriend, { loading: exploreFriendLoading }] =
+    useLazyQuery<ExploreFriendResult>(EXPLORE_FRIEND);
+
+  const [chatRoomList, setChatRoomList] = useState<ChatPayload[]>([]);
   const [searchInput, setSearchInput] = useState("");
-  const [searchResult, setSearchResult] = useState(null);
+  const [searchResult, setSearchResult] =
+    useState<ExploreChatFriendResult | null>(null);
   const [errMsg, setErrMsg] = useState("");
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (data?.chatRoomList) setChatRoomList(data.chatRoomList);
-  }, [data]);
+    // console.log(chatRoomData?.chatRoomList);
+    if (chatRoomData?.chatRoomList) setChatRoomList(chatRoomData?.chatRoomList);
+  }, [chatRoomData]);
 
-  const handleChat = async (id) => {
+  const handleChat = async (id: string | null) => {
     const payload = await chatData({ variables: { friendshipId: id } });
 
+    // console.log("Chat DAta", payload);
+
     if (payload.error) {
-      console.log("Error: ", error);
+      console.log("Error: ", payload.error);
       return;
     }
-
-    navigate(`/friends/chat/${payload.data.chatRoomCell.id}`);
+    navigate(`/friends/chat/${payload?.data?.chatRoomCell?.id}`);
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -49,10 +97,12 @@ function ChatRoomComponent() {
       const { data } = await getFriend({
         variables: { username: searchInput },
       });
+      // console.log(data);
+
       if (!data?.exploreChatFriend) {
         setErrMsg("No user found");
       } else {
-        setSearchResult(data.exploreChatFriend);
+        setSearchResult(data?.exploreChatFriend);
       }
     } catch {
       setErrMsg("Error fetching user data");
@@ -81,10 +131,10 @@ function ChatRoomComponent() {
           </div>
           <button
             type="submit"
-            disabled={expLoading}
+            disabled={exploreFriendLoading}
             className="px-5 py-2 bg-purple-600 text-white font-semibold rounded-md hover:bg-purple-500 active:scale-95 transition-all duration-200"
           >
-            {expLoading ? "..." : "Find"}
+            {exploreFriendLoading ? "..." : "Find"}
           </button>
         </form>
 
@@ -155,7 +205,7 @@ function ChatRoomComponent() {
             </div>
           ))}
 
-          {!loading && chatRoomList.length === 0 && (
+          {!chatRoomLoading && chatRoomList.length === 0 && !chatRoomError && (
             <div className="text-center text-gray-500 italic mt-6">
               No chat rooms yet. Start chatting!
             </div>
