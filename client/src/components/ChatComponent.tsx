@@ -2,30 +2,80 @@ import { useParams } from "react-router-dom";
 import { useQuery } from "@apollo/client/react";
 import { useEffect, useState } from "react";
 import ChatEditor from "./ChatEditor";
-import { RETRIEVE_CHAT_MSG, RETRIEVE_CHATROOM_DATA } from "../services/ChatService";
+import {
+  RETRIEVE_CHAT_MSG,
+  RETRIEVE_CHATROOM_DATA,
+} from "../services/ChatService";
+
+interface UserPayload {
+  id: string;
+  name: string;
+  username: string;
+  profile: {
+    id: string;
+    isActive: boolean;
+    avatarUrl: string;
+  };
+}
+
+interface ChatCellPayload {
+  id: string;
+  friendshipId: string;
+  friendship: {
+    id: string;
+    friend: UserPayload | null;
+    user: UserPayload | null;
+  };
+}
+
+interface ChatRoomCellPayload {
+  chatCellData: ChatCellPayload;
+  friendshipId: string;
+}
+
+interface ChatMessagePayload {
+  id: string;
+  userId: string;
+  chatRoomId: string;
+  message: string;
+  createdAt: Date;
+}
+
+interface ChatMessageListPayload {
+  chatMessageList: ChatMessagePayload[] | [];
+}
 
 function ChatComponent() {
   const params = useParams();
   const userId = localStorage.getItem("userId");
 
-  const { loading, data, error } = useQuery(RETRIEVE_CHATROOM_DATA, {
-    variables: { chatRoomId: params.id },
-  });
+  const { data } = useQuery<ChatRoomCellPayload | null>(
+    RETRIEVE_CHATROOM_DATA,
+    {
+      variables: { chatRoomId: params.id },
+    },
+  );
 
-  const { data: chatMsgData } = useQuery(RETRIEVE_CHAT_MSG, {
-    variables: { chatRoomId: params.id },
-    pollInterval: 2000, // refresh every 2 sec for real-time feel
-  });
+  const { data: chatMsgData } = useQuery<ChatMessageListPayload | null>(
+    RETRIEVE_CHAT_MSG,
+    {
+      variables: { chatRoomId: params.id },
+      pollInterval: 2000, // refresh every 2 sec for real-time feel
+    },
+  );
 
-  const [friendState, setFriendState] = useState(null);
-  const [chatMsg, setChatMsg] = useState([]);
+  const [friendState, setFriendState] = useState<ChatCellPayload | null>(null);
+  const [chatMsg, setChatMsg] = useState<ChatMessagePayload[]>([]);
 
   useEffect(() => {
-    if (data) setFriendState(data.chatCellData);
+    // console.log("FriendState: ", data);
+    // console.log("Extra: ", data?.chatCellData);
+    if (data) setFriendState(data?.chatCellData);
   }, [data]);
 
   useEffect(() => {
-    if (chatMsgData) setChatMsg(chatMsgData.chatMessageList);
+    // console.log("Msg", chatMsgData);
+    if (chatMsgData) setChatMsg(chatMsgData?.chatMessageList);
   }, [chatMsgData]);
 
   return (
@@ -45,7 +95,10 @@ function ChatComponent() {
         {chatMsg.map((item) => {
           const isSender = item.userId === userId;
           return (
-            <div key={item.id} className={`flex ${isSender ? "justify-end" : "justify-start"}`}>
+            <div
+              key={item.id}
+              className={`flex ${isSender ? "justify-end" : "justify-start"}`}
+            >
               <div
                 className={`px-4 py-2 rounded-2xl shadow-md max-w-[75%] text-sm md:text-base transition-all duration-300 ${
                   isSender
