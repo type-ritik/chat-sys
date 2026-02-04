@@ -73,6 +73,63 @@ function ChatComponent() {
     if (data) setFriendState(data?.chatCellData);
   }, [data]);
 
+  const handleTime = (dateInput: string | Date) => {
+    const d = new Date(dateInput);
+    const time = d.toLocaleTimeString("en-IN", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true, // Set to false for 24hr format
+    });
+    return { time };
+  };
+
+  const handleDayChatMessage = (userDate: string | Date) => {
+    const today = new Date();
+    const userD = new Date(userDate);
+
+    // Normalize both to midnight to compare days accurately
+    const todayReset = new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      today.getDate(),
+    );
+    const userDReset = new Date(
+      userD.getFullYear(),
+      userD.getMonth(),
+      userD.getDate(),
+    );
+
+    // Calculate difference in days
+    const diffTime = todayReset.getTime() - userDReset.getTime();
+    const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
+
+    const timeStr = handleTime(userDate).time;
+
+    // 1. Today
+    if (diffDays === 0) {
+      return { time: timeStr, date: "Today" };
+    }
+
+    // 2. Yesterday
+    if (diffDays === 1) {
+      return { time: timeStr, date: "Yesterday" };
+    }
+
+    // 3. Within the last 7 days (Monday - Sunday)
+    if (diffDays > 1 && diffDays < 7) {
+      const weekday = userD.toLocaleString("en-IN", { weekday: "long" });
+      return { time: timeStr, date: weekday };
+    }
+
+    // 4. Older than a week (e.g., 24 January 2026)
+    const fullDate = userD.toLocaleString("en-IN", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    });
+    return { time: timeStr, date: fullDate };
+  };
+
   useEffect(() => {
     // console.log("Msg", chatMsgData);
     if (chatMsgData) setChatMsg(chatMsgData?.chatMessageList);
@@ -90,23 +147,47 @@ function ChatComponent() {
       {/* Chat Inbox */}
       <div
         id="chat-inbox"
-        className="flex-1 overflow-y-auto p-4 space-y-3 scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-900"
+        className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-900 scrollbar-thin scrollbar-thumb-blue-600"
       >
-        {chatMsg.map((item) => {
+        {chatMsg.map((item, index) => {
           const isSender = item.userId === userId;
+          const msgDateInfo = handleDayChatMessage(item.createdAt);
+
+          // Logic to show Date Header only when the day changes
+          const prevMsg = chatMsg[index - 1];
+          const showDateHeader =
+            !prevMsg ||
+            handleDayChatMessage(prevMsg.createdAt).date !== msgDateInfo.date;
+
           return (
-            <div
-              key={item.id}
-              className={`flex ${isSender ? "justify-end" : "justify-start"}`}
-            >
+            <div key={item.id} className="flex flex-col">
+              {/* Centered Date Header */}
+              {showDateHeader && (
+                <div className="flex justify-center my-4">
+                  <span className="bg-gray-800 text-gray-400 text-xs px-3 py-1 rounded-full shadow-sm border border-gray-700">
+                    {msgDateInfo.date}
+                  </span>
+                </div>
+              )}
+
+              {/* Message Bubble */}
               <div
-                className={`px-4 py-2 rounded-2xl shadow-md max-w-[75%] text-sm md:text-base transition-all duration-300 ${
-                  isSender
-                    ? "bg-green-600 rounded-br-none"
-                    : "bg-gray-600 rounded-bl-none"
-                }`}
+                className={`flex ${isSender ? "justify-end" : "justify-start"} mb-1`}
               >
-                {item.message}
+                <div
+                  className={`px-4 py-2 rounded-2xl shadow-md max-w-[75%] text-sm md:text-base transition-all ${
+                    isSender
+                      ? "bg-green-600 text-white rounded-br-none"
+                      : "bg-gray-700 text-gray-100 rounded-bl-none"
+                  }`}
+                >
+                  <p>{item.message}</p>
+                  <div
+                    className={`text-[10px] mt-1 flex ${isSender ? "justify-end" : "justify-start"} opacity-70`}
+                  >
+                    {msgDateInfo.time}
+                  </div>
+                </div>
               </div>
             </div>
           );

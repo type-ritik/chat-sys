@@ -59,11 +59,11 @@ function ExploreFriendComponent() {
             setSearchInput(e.target.value);
             if (errorMsg) setErrorMsg("");
           }}
-          className="flex-1 px-3 py-2 rounded-md border border-gray-300 outline-none focus:ring-2 focus:ring-purple-400 transition"
+          className="flex-1 px-3 not-md:text-sm not-md:font-normal py-2 rounded-md border border-gray-300 outline-none focus:ring-2 focus:ring-purple-400 transition"
         />
         <button
           type="submit"
-          className="px-4 py-2 bg-purple-600 text-white font-semibold rounded-md hover:bg-purple-500 transition"
+          className="px-4 py-2 bg-purple-600 not-md:text-base text-white font-semibold rounded-md hover:bg-purple-500 transition"
         >
           Find
         </button>
