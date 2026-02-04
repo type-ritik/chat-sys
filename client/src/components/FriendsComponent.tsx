@@ -202,7 +202,7 @@ function FriendsComponent() {
             ))}
           </div>
         ) : (
-          <div className="text-gray-500 italic">No friends found!</div>
+          <div className="text-gray-500 not-md:text-sm italic">No friends found!</div>
         )}
       </div>
 
@@ -260,7 +260,7 @@ function FriendsComponent() {
             ))}
           </div>
         ) : (
-          <div className="text-gray-500 italic">No requests found!</div>
+          <div className="text-gray-500 not-md:text-sm italic">No requests found!</div>
         )}
       </div>
     </div>
