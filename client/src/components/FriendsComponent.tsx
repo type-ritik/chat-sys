@@ -202,7 +202,9 @@ function FriendsComponent() {
             ))}
           </div>
         ) : (
-          <div className="text-gray-500 not-md:text-sm italic">No friends found!</div>
+          <div className="text-gray-500 not-md:text-sm italic">
+            No friends found!
+          </div>
         )}
       </div>
 
@@ -235,22 +237,22 @@ function FriendsComponent() {
                     <h3 className="text-base md:text-lg font-semibold text-gray-800 truncate">
                       {item.user.name}
                     </h3>
-                    <span className="text-sm text-gray-500 truncate">
+                    <span className="text-sm not-md:text-[12px] text-gray-500 truncate">
                       @{item.user.username}
                     </span>
                   </div>
                 </div>
 
                 {/* Action Buttons */}
-                <div className="flex flex-col gap-2">
+                <div className="flex not-md:flex-col gap-4 not-md:gap-2">
                   <button
-                    className="px-2 md:px-4 py-1 text-sm font-normal bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
+                    className="px-2 md:px-4 py-1 text-medium font-normal not-md:px-2 not-md:py-1 not-md:text-[10px] not-md:font-normal cursor-pointer bg-green-500 text-white rounded-lg not-md:rounded-sm hover:bg-green-600 transition-colors"
                     onClick={() => handleAcceptReq(item.id)}
                   >
                     Accept
                   </button>
                   <button
-                    className="px-2 md:px-4 py-1 text-sm font-normal bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+                    className="px-2 md:px-4 py-1 text-medium font-normal cursor-pointer not-md:rounded-sm not-md:px-2 not-md:py-1 bg-red-500 not-md:text-[10px] not-md:font-normal text-white rounded-lg hover:bg-red-600 transition-colors"
                     onClick={() => handleRejectReq(item.id)}
                   >
                     Reject
@@ -260,7 +262,9 @@ function FriendsComponent() {
             ))}
           </div>
         ) : (
-          <div className="text-gray-500 not-md:text-sm italic">No requests found!</div>
+          <div className="text-gray-500 not-md:text-sm italic">
+            No requests found!
+          </div>
         )}
       </div>
     </div>
