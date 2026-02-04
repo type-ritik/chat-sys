@@ -10,8 +10,8 @@ const getContext = async ({ req, res }) => {
   const user = token ? verifyToken(token) : null;
 
   return {
-    prisma, // DB client
-    pubsub, // Redis pub/sub instance
+    // prisma, // DB client
+    // pubsub, // Redis pub/sub instance
     user, // Current authenticated user
     req,
     res, // Access request/response if needed
