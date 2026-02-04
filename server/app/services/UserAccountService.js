@@ -27,19 +27,11 @@ async function loginUser(_, { email, password }, context) {
     // Find User by Email
     const userCheck = await findUserByEmail(email);
 
-    // If user not found, report "User Found Error" message
-    // if (!userCheck.res) {
-    //   console.log("User Error", userCheck.err);
-    //   return {
-    //     error: userCheck.err,
-    //   };
-    // }
-
     const now = new Date();
 
     const ipAddress = context.req.ip.replace("::ffff:", "");
 
-    const record = await isSuspiciousLogin(userCheck.id, ipAddress);
+    const record = await isSuspiciousLogin(userCheck.id);
 
     if (
       record &&
@@ -127,7 +119,7 @@ async function createUser(_, { name, email, password }, context) {
 async function updateUserData(_, { name, username, bio }, context) {
   const userId = context.user.userId;
 
-  console.log(bio)
+  console.log(bio);
 
   try {
     const payload = await updateProifle(userId, name, username, bio);

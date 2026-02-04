@@ -224,7 +224,7 @@ async function isValidUsername(username) {
   );
 }
 
-async function isSuspiciousLogin(userId, ip) {
+async function isSuspiciousLogin(userId) {
   const record = await prisma.loginAttempts.findFirst({
     where: { userId },
   });
