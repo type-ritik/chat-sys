@@ -1,17 +1,35 @@
-import { useState, useRef, useEffect } from "react";
+import {
+  useState,
+  useRef,
+  useEffect,
+  type Dispatch,
+  type SetStateAction,
+} from "react";
 import { Send, Smile, Paperclip } from "lucide-react";
 import { useMutation } from "@apollo/client/react";
 import { SEND_MSG } from "../services/ChatService";
 
-interface Props {
+interface ChatMessagePayload {
+   id: string;
+  userId: string;
   chatRoomId: string;
-  setChatMsg: [];
+  message: string;
+  createdAt: Date;
+}
+
+interface MessageSendPayload {
+  sendMessage: boolean;
+}
+
+interface Props {
+  chatRoomId: string | undefined;
+  setChatMsg: Dispatch<SetStateAction<ChatMessagePayload[]>>;
 }
 
 function ChatEditor({ chatRoomId, setChatMsg }: Props) {
   const [text, setText] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const [sendMsg] = useMutation(SEND_MSG);
+  const [sendMsg] = useMutation<MessageSendPayload>(SEND_MSG);
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const el = textareaRef.current;
@@ -30,16 +48,34 @@ function ChatEditor({ chatRoomId, setChatMsg }: Props) {
       id: Date.now().toString(),
       userId: localStorage.getItem("userId"),
       message: text,
+      chatRoomId: chatRoomId!,
+      createdAt: new Date(),
     };
-    setChatMsg((prev) => [...prev, newMsg]);
+    // console.log("New Msg",newMsg);
+
+    setChatMsg((prev) => [
+      ...prev,
+      {
+        id: newMsg.id,
+        userId: newMsg.userId!,
+        message: newMsg.message,
+        chatRoomId: newMsg.chatRoomId,
+        createdAt: newMsg.createdAt,
+      },
+    ]);
 
     const isMsgSend = await sendMsg({
       variables: { chatRoomId: chatRoomId, text: text },
     });
     if (isMsgSend.error) {
-      throw new Error("Error: ", isMsgSend.error);
+      if (isMsgSend.error instanceof Error) {
+        console.error("Error sending message:", isMsgSend.error.message);
+      } else {
+        console.log("Message Erro: ", isMsgSend.error);
+        throw new Error("Unexpected error occured");
+      }
     }
-    console.log("Message sent:", isMsgSend.data);
+    // console.log("Message sent:", isMsgSend.data);
     setText("");
   };
 
