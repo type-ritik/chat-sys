@@ -19,7 +19,7 @@ function LoginPage() {
   const [successMsg, setSuccessMsg] = useState("");
   const navigate = useNavigate();
   const { loading, error: errMsg } = useSelector(
-    (state: store.RootState) => state.user
+    (state: store.RootState) => state.user,
   );
   const dispatch = useDispatch();
 
@@ -34,7 +34,7 @@ function LoginPage() {
     if (password.length < 8) {
       setErrorMsg("Password length should be greater than 8 Characters");
       return dispatch(
-        signInFailure("Password length should be greater than 8 Characters")
+        signInFailure("Password length should be greater than 8 Characters"),
       );
     }
 
@@ -53,7 +53,13 @@ function LoginPage() {
       setErrorMsg("");
       navigate("/");
     } catch (error) {
-      dispatch(signInFailure(error.message));
+      if (error instanceof Error) {
+        console.log("Error : ", error);
+        dispatch(signInFailure(error.message));
+      } else {
+        console.log("Unexpected unknown error : ", error);
+        dispatch(signInFailure("An unknown error occurred"));
+      }
     }
   };
 
@@ -128,9 +134,10 @@ function LoginPage() {
         {/* Submit */}
         <button
           type="submit"
+          disabled={loading}
           className="w-full py-3 bg-gradient-to-r from-green-400 to-green-600 text-white font-semibold rounded-lg shadow-md hover:from-green-300 hover:to-green-500 hover:scale-105 transition-transform duration-300 cursor-pointer"
         >
-          Login
+          {loading ? "Loginup..." : "Login"}
         </button>
 
         {/* Need account? */}
