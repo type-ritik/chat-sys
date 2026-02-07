@@ -18,6 +18,7 @@ export const fetchServer = async (payload: {
                     name
                     username
                     isAdmin
+                    status
                     createdAt
                     profile {
                       id

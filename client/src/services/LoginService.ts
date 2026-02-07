@@ -18,6 +18,7 @@ export const fetchServer = async (payload: {
               id
               username
               name
+              status
               email
               profile {
                 id
