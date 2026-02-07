@@ -11,6 +11,7 @@ const typeDefs = gql`
     isAdmin: Boolean!
     createdAt: DateTime!
     profile: Profile
+    status: String
     token: String
   }
 
