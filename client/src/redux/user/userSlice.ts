@@ -1,7 +1,23 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 
+export interface userObj {
+  id: string;
+  name: string;
+  username: string;
+  isAdmin: boolean;
+  status: string;
+  createdAt: Date;
+  profile: {
+    id: string;
+    bio: string;
+    avatarUrl: string;
+    isActive: boolean;
+  };
+  token: string;
+}
+
 export interface UserState {
-  currentUser: object;
+  currentUser: userObj | object;
   error: string;
   loading: boolean;
 }

@@ -4,12 +4,20 @@ import { isValidEmail } from "../config";
 import { Link, useNavigate } from "react-router-dom";
 import { Eye, EyeOff } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
-import * as store from "../redux/store.js";
 import {
   signInFailure,
   signInStart,
   signInSuccess,
+  type userObj,
 } from "../redux/user/userSlice";
+
+interface UserInterface {
+  user: {
+    currentUser: userObj;
+    error: string;
+    loading: boolean;
+  };
+}
 
 function LoginPage() {
   const [email, setEmail] = useState("");
@@ -19,7 +27,7 @@ function LoginPage() {
   const [successMsg, setSuccessMsg] = useState("");
   const navigate = useNavigate();
   const { loading, error: errMsg } = useSelector(
-    (state: store.RootState) => state.user,
+    (state: UserInterface) => state.user,
   );
   const dispatch = useDispatch();
 
