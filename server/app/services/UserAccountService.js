@@ -58,7 +58,6 @@ async function loginUser(_, { email, password }, context) {
     }
 
     const token = genToken(userCheck.id, userCheck.isAdmin);
-    console.log("Login Success:", userCheck);
 
     return { ...userCheck, token };
   } catch (error) {
