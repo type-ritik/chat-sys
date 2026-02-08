@@ -29,7 +29,9 @@ function ProfileComponent() {
   const [username, setUsername] = useState("");
   const [isOnline, setIsOnline] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
-  const [profileImage, setProfileImage] = useState<string | undefined>(undefined);
+  const [profileImage, setProfileImage] = useState<string | undefined>(
+    undefined,
+  );
 
   useEffect(() => {
     if (loading) console.log("User data is loading...");
@@ -116,6 +118,7 @@ function ProfileComponent() {
               <Camera className="w-4 h-4" />
               <input
                 id="profileUpload"
+                name="profileUpload"
                 type="file"
                 accept="image/*"
                 className="hidden"
@@ -131,11 +134,18 @@ function ProfileComponent() {
         </div>
 
         {/* Body */}
-        <form className="flex flex-col gap-5" onSubmit={handleSubmit}>
+        <form
+          className="flex flex-col gap-5"
+          id="userForm"
+          name="userForm"
+          onSubmit={handleSubmit}
+        >
           {/* Name */}
           <div className="flex flex-col sm:flex-row gap-3 items-center">
             <input
               type="text"
+              id="inputName"
+              name="inputName"
               placeholder={name || "No name"}
               value={name}
               disabled={!isEditing}
@@ -152,6 +162,8 @@ function ProfileComponent() {
           <div className="flex flex-col sm:flex-row gap-3 items-center">
             <input
               type="username"
+              id="inputUsername"
+              name="inputUsername"
               placeholder={username || "No username"}
               value={username}
               onChange={(e) => setUsername(e.target.value)}
@@ -169,6 +181,8 @@ function ProfileComponent() {
             <textarea
               placeholder={bio || "This is Ritik Sharma. Nothing scares me."}
               value={bio}
+              id="inputBio"
+              name="inputBio"
               onChange={(e) => setBio(e.target.value)}
               disabled={!isEditing}
               className={`w-full sm:w-3/4 px-4 py-2 border rounded-lg resize-none text-gray-700 focus:outline-none focus:ring-2 ${
