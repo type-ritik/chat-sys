@@ -1,6 +1,11 @@
 const { genToken } = require("../utils/auth");
 const { comparePassword } = require("../utils/passKey");
-const { validateAuthInput, findUserByEmail } = require("../utils/user.config");
+const {
+  validateAuthInput,
+  findUserByEmail,
+  userList,
+  chatMessageList,
+} = require("../utils/user.config");
 
 // Admin Login
 async function adminLogin(_, { email, password }, context) {
@@ -48,6 +53,48 @@ async function adminLogin(_, { email, password }, context) {
   }
 }
 
+async function usersRecordData(_, obj, context) {
+  try {
+    const userId = context.user.userId;
+
+    if (!userId) {
+      throw new Error("Unauthorized: User not logged in");
+    }
+
+    if (!context.user.role) {
+      throw new Error("Unauthorized: Admin access required");
+    }
+
+    const users = await userList();
+    return users;
+  } catch (error) {
+    console.error("Error fetching users:", error.message);
+    throw new Error("Error fetching users");
+  }
+}
+
+async function chatMessagesRecordData(_, obj, context) {
+  try {
+    const userId = context.user.userId;
+
+    if (!userId) {
+      throw new Error("Unauthorized: User not logged in");
+    }
+
+    if (!context.user.role) {
+      throw new Error("Unauthorized: Admin access required");
+    }
+
+    const chatMessage = await chatMessageList();
+    return chatMessage;
+  } catch (error) {
+    console.error("Error fetching users:", error.message);
+    throw new Error("Error fetching users");
+  }
+}
+
 module.exports = {
   adminLogin,
+  usersRecordData,
+  chatMessagesRecordData,
 };
