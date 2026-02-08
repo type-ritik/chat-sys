@@ -254,6 +254,7 @@ async function createLoginAttempt(userId, ip) {
   return createAttempt;
 }
 
+// User Blocked
 async function blockUser(userId) {
   const blockUntil = await prisma.loginAttempts.update({
     where: {
@@ -270,6 +271,29 @@ async function blockUser(userId) {
   };
 }
 
+// User List
+async function userList() {
+  const list = await prisma.user.findMany({
+    take: 12,
+    orderBy: {
+      id: "asc",
+    },
+  });
+
+  return list;
+}
+
+// Message List
+async function chatMessageList() {
+  const list = await prisma.chatRoomMessage.findMany({
+    take: 12,
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+  return list;
+}
+
 module.exports = {
   userRecord,
   findUserByEmail,
@@ -282,4 +306,6 @@ module.exports = {
   blockUser,
   updateProifle,
   alterAvatar,
+  userList,
+  chatMessageList,
 };

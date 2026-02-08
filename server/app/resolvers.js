@@ -22,6 +22,11 @@ const { pubsub } = require("./data/pubsub");
 const { followFriend, followResponse } = require("./services/FollowFriend");
 const { retrieveNotification } = require("./services/Notification");
 const { GraphQLScalarType, Kind } = require("graphql");
+const {
+  adminLogin,
+  usersRecordData,
+  chatMessagesRecordData,
+} = require("./services/AdminService");
 
 const resolvers = {
   Friendship: {
@@ -62,6 +67,9 @@ const resolvers = {
     retrieveNotification,
     friendRequestList,
     chatCellData,
+    adminLogin,
+    usersRecordData,
+    chatMessagesRecordData,
   },
 
   Mutation: {

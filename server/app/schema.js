@@ -108,6 +108,9 @@ const typeDefs = gql`
     friendRequestList: [FriendReqPayload!]!
     chatCellData(chatRoomId: String!): ChatRoomCellData
     userData: User!
+    adminLogin(email: String!, password: String!): User!
+    usersRecordData: [User!]!
+    chatMessagesRecordData: [ChatMsgPayload!]!
   }
 
   type Mutation {
