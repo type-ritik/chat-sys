@@ -22,10 +22,13 @@ const { pubsub } = require("./data/pubsub");
 const { followFriend, followResponse } = require("./services/FollowFriend");
 const { retrieveNotification } = require("./services/Notification");
 const { GraphQLScalarType, Kind } = require("graphql");
+const GraphQLJSON = require("graphql-type-json");
 const {
   adminLogin,
   usersRecordData,
   chatMessagesRecordData,
+  userAuditLogsData,
+  adminActionOnUserAvalability,
 } = require("./services/AdminService");
 
 const resolvers = {
@@ -40,6 +43,7 @@ const resolvers = {
       }
     },
   },
+  JSON: GraphQLJSON,
   DateTime: new GraphQLScalarType({
     name: "DateTime",
     description: "ISO-8601 DateTime scalar",
@@ -70,6 +74,7 @@ const resolvers = {
     adminLogin,
     usersRecordData,
     chatMessagesRecordData,
+    userAuditLogsData,
   },
 
   Mutation: {
@@ -80,6 +85,7 @@ const resolvers = {
     followResponse,
     updateUserData,
     updateAvatar,
+    adminActionOnUserAvalability,
   },
 
   Subscription: {

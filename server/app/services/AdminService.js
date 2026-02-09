@@ -5,6 +5,11 @@ const {
   findUserByEmail,
   userList,
   chatMessageList,
+  retriveAuditLogs,
+  isValidUUID,
+  findUserById,
+  suspend,
+  suspensionResolve,
 } = require("../utils/user.config");
 
 // Admin Login
@@ -54,17 +59,17 @@ async function adminLogin(_, { email, password }, context) {
 }
 
 async function usersRecordData(_, obj, context) {
+  const userId = context.user.userId;
+
+  if (!userId) {
+    throw new Error("Unauthorized: User not logged in");
+  }
+
+  if (!context.user.role) {
+    throw new Error("Unauthorized: Admin access required");
+  }
+
   try {
-    const userId = context.user.userId;
-
-    if (!userId) {
-      throw new Error("Unauthorized: User not logged in");
-    }
-
-    if (!context.user.role) {
-      throw new Error("Unauthorized: Admin access required");
-    }
-
     const users = await userList();
     return users;
   } catch (error) {
@@ -74,17 +79,17 @@ async function usersRecordData(_, obj, context) {
 }
 
 async function chatMessagesRecordData(_, obj, context) {
+  const userId = context.user.userId;
+
+  if (!userId) {
+    throw new Error("Unauthorized: User not logged in");
+  }
+
+  if (!context.user.role) {
+    throw new Error("Unauthorized: Admin access required");
+  }
+
   try {
-    const userId = context.user.userId;
-
-    if (!userId) {
-      throw new Error("Unauthorized: User not logged in");
-    }
-
-    if (!context.user.role) {
-      throw new Error("Unauthorized: Admin access required");
-    }
-
     const chatMessage = await chatMessageList();
     return chatMessage;
   } catch (error) {
@@ -93,8 +98,75 @@ async function chatMessagesRecordData(_, obj, context) {
   }
 }
 
+async function userAuditLogsData(_, obj, context) {
+  const userId = context.user.userId;
+
+  if (!userId) {
+    throw new Error("Unauthorized: User not logged in");
+  }
+
+  if (!context.user.role) {
+    throw new Error("Unauthorized: Admin access required");
+  }
+
+  try {
+    const logs = await retriveAuditLogs();
+    return logs;
+  } catch (error) {
+    console.log("Error fetching user logs: ", error.message);
+    throw new Error("Error fetching user logs");
+  }
+}
+
+async function adminActionOnUserAvalability(_, { userId, action }, context) {
+  if (!context.user.userId) {
+    throw new Error("Unauthorized: User not logged in");
+  }
+
+  if (!context.user.role) {
+    throw new Error("Unauthorized: Admin access required");
+  }
+
+  if (!userId) {
+    throw new Error("UserId can't be empty");
+  }
+
+  const userExists = await findUserById(userId);
+
+  if (!userExists) {
+    throw new Error("User not found");
+  }
+
+  if (!isValidUUID(userId)) {
+    throw new Error("Invalid userId format");
+  }
+
+  if (!action) {
+    throw new Error("Define action");
+  }
+
+  if (action !== "SUSPEND" || action !== "UNSUSPEND") {
+    throw new Error("Invalid action");
+  }
+
+  try {
+    if (action === "SUSPEND") {
+      const res = await suspend(userId);
+      return res;
+    } else {
+      const res = await suspensionResolve(userId);
+      return res;
+    }
+  } catch (error) {
+    console.log("Error suspending user:", error.message);
+    throw new Error("Error suspending user");
+  }
+}
+
 module.exports = {
   adminLogin,
   usersRecordData,
   chatMessagesRecordData,
+  userAuditLogsData,
+  adminActionOnUserAvalability,
 };

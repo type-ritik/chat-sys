@@ -2,6 +2,7 @@ const { gql } = require("graphql-tag");
 
 const typeDefs = gql`
   scalar DateTime
+  scalar JSON
 
   type User {
     id: ID!
@@ -13,6 +14,17 @@ const typeDefs = gql`
     profile: Profile
     status: String
     token: String
+  }
+
+  type AuditLogs {
+    id: ID!
+    table_name: String!
+    action_type: String!
+    record_id: String
+    old_data: JSON
+    new_data: JSON
+    performed_by: String
+    created_at: DateTime!
   }
 
   type UserProfile {
@@ -111,6 +123,7 @@ const typeDefs = gql`
     adminLogin(email: String!, password: String!): User!
     usersRecordData: [User!]!
     chatMessagesRecordData: [ChatMsgPayload!]!
+    userAuditLogsData: [AuditLogs!]!
   }
 
   type Mutation {
@@ -122,6 +135,7 @@ const typeDefs = gql`
     chatRoomCell(friendshipId: String!): ChatRoomPayload
     updateUserData(name: String, username: String, bio: String): UserProfile
     updateAvatar(avatarUrl: String!): Profile
+    adminActionOnUserAvalability(userId: String!, action: String!): User
   }
 
   type Subscription {
