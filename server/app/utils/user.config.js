@@ -294,6 +294,62 @@ async function chatMessageList() {
   return list;
 }
 
+// Audit logs
+async function retriveAuditLogs() {
+  const logs = await prisma.auditLog.findMany({
+    take: 12,
+    orderBy: {
+      created_at: "desc",
+    },
+  });
+
+  return logs;
+}
+
+// Is already suspended
+async function isSuspended(userId) {
+  const res = await prisma.user.findFirst({
+    where: { id: userId, status: "SUSPENDED" },
+  });
+
+  console.log("Suspended response: ", res);
+  if (!res) {
+    return false;
+  }
+  return true;
+}
+
+// Suspend User
+async function suspend(userId) {
+  if (isSuspended(userId)) {
+    throw new Error("User is already suspended");
+  }
+
+  const res = await prisma.user.update({
+    where: { id: userId },
+    data: {
+      status: "SUSPENDED",
+    },
+  });
+  return res;
+}
+
+// Resolve suspendsion
+async function suspensionResolve(userId) {
+  if (!isSuspended(userId)) {
+    throw new Error("User is not suspended");
+  }
+
+  const res = await prisma.user.update({
+    where: { id: userId },
+    data: {
+      status: "ACTIVE",
+    },
+  });
+
+  return res;
+}
+
 module.exports = {
   userRecord,
   findUserByEmail,
@@ -308,4 +364,7 @@ module.exports = {
   alterAvatar,
   userList,
   chatMessageList,
+  retriveAuditLogs,
+  suspend,
+  suspensionResolve,
 };

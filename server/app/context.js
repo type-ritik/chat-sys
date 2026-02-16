@@ -1,4 +1,4 @@
-const {pubsub} = require("./data/pubsub");
+const { pubsub } = require("./data/pubsub");
 const { prisma } = require("./data/prisma");
 const { verifyToken } = require("./utils/auth");
 
