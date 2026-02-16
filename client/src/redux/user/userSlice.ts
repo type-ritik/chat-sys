@@ -17,13 +17,13 @@ export interface userObj {
 }
 
 export interface UserState {
-  currentUser: userObj | object;
+  currentUser: userObj | null;
   error: string;
   loading: boolean;
 }
 
 const initialState: UserState = {
-  currentUser: {},
+  currentUser: null,
   error: "",
   loading: false,
 };
@@ -36,7 +36,7 @@ const userSlice = createSlice({
       state.loading = true;
       state.error = "";
     },
-    signInSuccess: (state, action: PayloadAction<object>) => {
+    signInSuccess: (state, action: PayloadAction<userObj>) => {
       state.currentUser = action.payload;
       state.loading = false;
       state.error = "";
@@ -45,9 +45,15 @@ const userSlice = createSlice({
       state.loading = false;
       state.error = action.payload;
     },
+    updateAvatarUrl: (state, action: PayloadAction<string>) => {
+      if (state.currentUser && state.currentUser.profile) {
+        state.currentUser.profile.avatarUrl = action.payload;
+      }
+    },
   },
 });
 
-export const { signInFailure, signInStart, signInSuccess } = userSlice.actions;
+export const { signInFailure, signInStart, signInSuccess, updateAvatarUrl } =
+  userSlice.actions;
 
 export default userSlice.reducer;

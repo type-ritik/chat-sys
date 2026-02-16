@@ -1,14 +1,15 @@
-import { ApolloClient, InMemoryCache, split, HttpLink } from "@apollo/client";
+import { ApolloClient, InMemoryCache, split } from "@apollo/client";
 import { GraphQLWsLink } from "@apollo/client/link/subscriptions";
 import { createClient } from "graphql-ws";
+import createUploadLink from "apollo-upload-client/UploadHttpLink.mjs";
 import { getMainDefinition } from "@apollo/client/utilities";
 import { baseUrl } from "./config";
 import { ApolloLink } from "@apollo/client";
 
 // 1. HTTP link for queries & mutation
-const httpLink = new HttpLink({
-  uri: baseUrl, // server HTTP endpoint
-});
+// const httpLink = new HttpLink({
+//   uri: baseUrl, // server HTTP endpoint
+// });
 
 // Configure token on Apollo Client to inject it automatically
 const authLink = new ApolloLink((operation, forward) => {
@@ -21,24 +22,29 @@ const authLink = new ApolloLink((operation, forward) => {
   return forward(operation);
 });
 
-
 // Detect if we are on SSL (Render) or local
-const isSecure = window.location.protocol === 'https:';
-const wsProtocol = isSecure ? 'wss' : 'ws';
+const isSecure = window.location.protocol === "https:";
+const wsProtocol = isSecure ? "wss" : "ws";
 
 // Use your Render backend URL (e.g., chat-sys-server.onrender.com)
-const API_DOMAIN = baseUrl?.replace(/^https?:\/\//, '') || 'localhost:5000';
+const API_DOMAIN = baseUrl?.replace(/^https?:\/\//, "") || "localhost:5000";
 
 // 2. WebSocket link for subscriptions
 const wsLink = new GraphQLWsLink(
   createClient({
     url: `${wsProtocol}://${API_DOMAIN}`,
     connectionParams: {
-      authToken: localStorage.getItem("token")
-    }
-  })
+      authToken: localStorage.getItem("token"),
+    },
+  }),
 );
 
+const uploadLink = new createUploadLink({
+  uri: baseUrl,
+  headers: {
+    "x-apollo-operation-name": "true",
+  },
+});
 
 // const wsLink = new GraphQLWsLink(
 //   createClient({
@@ -58,7 +64,7 @@ const splitLink = split(
     );
   },
   wsLink, // subscriptions go here
-  authLink.concat(httpLink) // apply auth here for queries/mutations
+  authLink.concat(uploadLink), // apply auth and upload for queries/mutations
 );
 
 // 4. Create client
