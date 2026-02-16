@@ -18,6 +18,7 @@ const {
   chatMessageList,
   chatCellData,
 } = require("./services/chatServices");
+const {GraphQLUpload} = require('graphql-upload-minimal');
 const { pubsub } = require("./data/pubsub");
 const { followFriend, followResponse } = require("./services/FollowFriend");
 const { retrieveNotification } = require("./services/Notification");
@@ -32,6 +33,7 @@ const {
 } = require("./services/AdminService");
 
 const resolvers = {
+  Upload: GraphQLUpload,
   Friendship: {
     otherUser: (parent, _, context) => {
       const { userId } = context.user; // logged-in user ID

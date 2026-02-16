@@ -10,6 +10,9 @@ const { ApolloServer } = require("@apollo/server");
 // Body parser
 const bodyParser = require("body-parser");
 
+// For file upload
+const { graphqlUploadExpress } = require("graphql-upload-minimal");
+
 // Apollo integration for express middleware
 const { expressMiddleware } = require("@as-integrations/express4");
 
@@ -29,16 +32,25 @@ const { redisClient } = require("./data/pubsub");
 async function startServer() {
   const app = express();
 
+  // const { default: graphqlUploadExpress } =
+  //   await import("graphql-upload/graphqlUploadExpress.mjs");
+
   // Increase the size of json
   app.use(express.json({ limit: "10mb" }));
   app.use(express.urlencoded({ limit: "10mb", extended: true }));
 
-  app.set('trust proxy', true);
+  app.use(graphqlUploadExpress());
+
+  app.set("trust proxy", true);
 
   // Apollo Server setup
   const server = new ApolloServer({
     typeDefs,
     resolvers,
+    csrfPrevention: {
+      // This allows multipart/form-data used by graphql-upload
+      requestHeaders: ["x-apollo-operation-name", "apollo-require-preflight"],
+    },
   });
 
   redisClient.on("connecting", () => {

@@ -3,6 +3,7 @@ const { gql } = require("graphql-tag");
 const typeDefs = gql`
   scalar DateTime
   scalar JSON
+  scalar Upload
 
   type User {
     id: ID!
@@ -134,7 +135,7 @@ const typeDefs = gql`
     followResponse(friendshipId: String!, status: String!): Boolean
     chatRoomCell(friendshipId: String!): ChatRoomPayload
     updateUserData(name: String, username: String, bio: String): UserProfile
-    updateAvatar(avatarUrl: String!): Profile
+    updateAvatar(file: Upload): Profile
     adminActionOnUserAvalability(userId: String!, action: String!): User
   }
 
