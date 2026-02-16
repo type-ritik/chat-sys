@@ -1,11 +1,17 @@
 import { useEffect, useState } from "react";
-import { useQuery } from "@apollo/client/react";
+import { useMutation, useQuery } from "@apollo/client/react";
 import {
-  updateAvatar,
+  UPDATE_AVATAR,
   updateData,
   USER_DATA,
 } from "../services/ProfileService";
+import imageCompression from "browser-image-compression";
 import { Camera } from "lucide-react";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  updateAvatarUrl,
+  type userObj,
+} from "../redux/user/userSlice";
 
 interface UserData {
   userData: {
@@ -21,6 +27,14 @@ interface UserData {
   };
 }
 
+interface UserInterface {
+  user: {
+    currentUser: userObj;
+    error: string;
+    loading: boolean;
+  };
+}
+
 function ProfileComponent() {
   const { error, data, loading } = useQuery<UserData | null>(USER_DATA);
   const [name, setName] = useState("");
@@ -29,21 +43,28 @@ function ProfileComponent() {
   const [username, setUsername] = useState("");
   const [isOnline, setIsOnline] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
-  const [profileImage, setProfileImage] = useState<string | undefined>(
-    undefined,
-  );
+  // const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imageFileUrl, setImageFileUrl] = useState<string | null>(null);
+  const { currentUser } = useSelector((state: UserInterface) => state.user);
+  interface UpdateAvatarData {
+    updateAvatar: {
+      avatarUrl: string;
+    };
+  }
+  const [updateAvatar] = useMutation<UpdateAvatarData>(UPDATE_AVATAR);
+
+  const dispatch = useDispatch();
 
   useEffect(() => {
     if (loading) console.log("User data is loading...");
     if (error) console.log("User data error: ", error.message);
     if (data) {
-      console.log(data);
+      // console.log(data);
       setName(data?.userData?.name);
       setUsername(data.userData.username);
       setIsAdmin(data.userData.isAdmin);
       setBio(data.userData.profile.bio);
       setIsOnline(data.userData.profile.isActive);
-      setProfileImage(data.userData.profile.avatarUrl);
     }
   }, [error, data, loading]);
 
@@ -58,37 +79,74 @@ function ProfileComponent() {
         console.log("Code Logic Error: ", error.message);
       } else if (error instanceof Error) {
         console.log("Error updating profile: ", error.message);
-      } else {
-        console.log("An unexpected error occured");
       }
       // dispatch(signInFailure(error.message));
       return;
     }
   };
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null;
+    // setImageFile(file);
     if (file) {
-      const reader = new FileReader();
-
-      reader.onload = async () => {
-        const result = reader.result as string;
-        setProfileImage(result);
-        // console.log("Profile (Base64):", result);
-
-        await updateAvatar({ avatarUrl: result });
-
-        // console.log("Avatar update response:", dat);
-
-        // console.log("Profile picture after change ", profileImage);
-
-        // Log here to see the actual Base64 string
-      };
-
-      reader.readAsDataURL(file); // Correctly passing the File object
-      // console.log("Raw file object:", file); // This log is fine here
+      setImageFileUrl(URL.createObjectURL(file));
+    } else {
+      setImageFileUrl(null);
     }
+
+    // console.log(`Original file size: ${file?.size / 1024 / 1024} MB`);
+    // const fileName = new Date().getTime() + file.name;
+
+    const options = {
+      maxSizeMB: 1,
+      maxWidthOrHeight: 1024,
+      useWebWorker: true,
+      fileType: "image/*",
+    };
+
+    try {
+      if (file) {
+        const compressedFile = await imageCompression(file, options);
+        // console.log("Compressed file: ", compressedFile);
+        const { data: avatarData } = await updateAvatar({
+          variables: { file: compressedFile },
+        });
+
+        // console.log("DAta: ", avatarData);
+
+        const newUrl = avatarData?.updateAvatar?.avatarUrl;
+
+        // console.log(newUrl);
+        if (newUrl) {
+          dispatch(updateAvatarUrl(newUrl));
+        }
+      }
+    } catch (error) {
+      if (error instanceof Error) {
+        // console.log("Error compressing image: ", error.message);
+      }
+    }
+
+    // if (file) {
+    //   const reader = new FileReader();
+
+    //   reader.onload = async () => {
+    //     const result = reader.result as string;
+    //     setProfileImage(result);
+    //     // console.log("Profile (Base64):", result);
+
+    //     await updateAvatar({ avatarUrl: result });
+
+    //     // console.log("Avatar update response:", dat);
+
+    //     // console.log("Profile picture after change ", profileImage);
+
+    //     // Log here to see the actual Base64 string
+    //   };
+
+    //   reader.readAsDataURL(file); // Correctly passing the File object
+    //   // console.log("Raw file object:", file); // This log is fine here
+    // }
   };
 
   return (
@@ -105,7 +163,7 @@ function ProfileComponent() {
             {/* Profile Image */}
             <div className="w-28 h-28 rounded-full overflow-hidden border-4 border-purple-300 shadow-md">
               <img
-                src={profileImage}
+                src={imageFileUrl || currentUser.profile.avatarUrl}
                 alt="Profile"
                 className="w-full h-full object-cover"
               />
@@ -146,7 +204,7 @@ function ProfileComponent() {
               type="text"
               id="inputName"
               name="inputName"
-              placeholder={name || "No name"}
+              placeholder={currentUser.name || "No name"}
               value={name}
               disabled={!isEditing}
               onChange={(e) => setName(e.target.value)}
@@ -164,7 +222,7 @@ function ProfileComponent() {
               type="username"
               id="inputUsername"
               name="inputUsername"
-              placeholder={username || "No username"}
+              placeholder={currentUser.username || "No username"}
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               disabled={!isEditing}
@@ -179,7 +237,7 @@ function ProfileComponent() {
           {/* Bio */}
           <div className="flex flex-col sm:flex-row gap-3 items-center">
             <textarea
-              placeholder={bio || "This is Ritik Sharma. Nothing scares me."}
+              placeholder={currentUser.profile.bio}
               value={bio}
               id="inputBio"
               name="inputBio"

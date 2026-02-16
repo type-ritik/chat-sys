@@ -18,34 +18,14 @@ export const USER_DATA = gql`
   }
 `;
 
-export const updateAvatar = async (payload: { avatarUrl: string }) => {
-  // console.log(payload.avatarUrl);
-
-  const res = await fetch(baseUrl, {
-    method: "POST",
-    headers: {
-      Authorization: window.localStorage.getItem("token") || "",
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      query: `mutation($avatarUrl: String!){
-                updateAvatar(avatarUrl: $avatarUrl) {
-                  id
-                  bio
-                  avatarUrl
-                }
-              }`,
-      variables: payload,
-    }),
-  });
-
-  const result = await res.json();
-  // console.log("Updated: ", result);
-  if (result.errors) {
-    return result;
+export const UPDATE_AVATAR = gql`
+  mutation ($file: Upload) {
+    updateAvatar(file: $file) {
+      id
+      avatarUrl
+    }
   }
-  return result;
-};
+`;
 
 export const updateData = async (payload: {
   name: string;
