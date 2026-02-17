@@ -1,9 +1,10 @@
-import { Outlet, Link, Navigate } from "react-router-dom";
-import type { userObj } from "../redux/user/userSlice";
+import { Outlet, Link, Navigate, useNavigate } from "react-router-dom";
+import { updateCurrentUser, type userObj } from "../redux/user/userSlice";
 import { CHATMSG_SUBS, NOTIFICATION_SUBSCRIPTION } from "../config";
 import { useEffect, useState } from "react";
-import { useSubscription } from "@apollo/client/react";
-import { useSelector } from "react-redux";
+import { useQuery, useSubscription } from "@apollo/client/react";
+import { useDispatch, useSelector } from "react-redux";
+import { USER_DATA } from "../services/ProfileService";
 
 const navLink = [
   { label: "Home", route: "/" },
@@ -54,11 +55,34 @@ interface UserInterface {
   };
 }
 
+interface UserData {
+  userData: {
+    id: string;
+    name: string;
+    isAdmin: boolean;
+    username: string;
+    profile: {
+      id: string;
+      bio: string;
+      avatarUrl: string;
+      isActive: boolean;
+    };
+  };
+}
+
 function IndexPage() {
   const { currentUser } = useSelector((state: UserInterface) => state.user);
   const [notify, setNotificationData] = useState<
     NotificationSubscriptionData["subNotify"] | null
   >(null);
+
+  const {
+    error: userError,
+    data: userData,
+    loading: userLoading,
+  } = useQuery<UserData | null>(USER_DATA);
+
+  const navigate = useNavigate();
 
   const [chatify, setChatMsgState] = useState<
     ChatMsgSubsData["chatMsg"] | null
@@ -66,7 +90,7 @@ function IndexPage() {
 
   const { data, loading, error } =
     useSubscription<NotificationSubscriptionData>(NOTIFICATION_SUBSCRIPTION, {
-      variables: { userId: currentUser.id },
+      variables: { userId: currentUser ? currentUser.id : navigate("/signup") },
     });
 
   const {
@@ -74,8 +98,19 @@ function IndexPage() {
     loading: chatMsgLoading,
     error: chatMsgError,
   } = useSubscription<ChatMsgSubsData>(CHATMSG_SUBS, {
-    variables: { userId: currentUser.id },
+    variables: { userId: currentUser ? currentUser.id : navigate("/signup") },
   });
+
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    if (userLoading) console.log("User data loading...");
+    if (userError) console.log("User data error: ", userError.message);
+    if (userData?.userData) {
+      console.log("User data fetched: ", userData.userData);
+      dispatch(updateCurrentUser(userData));
+    }
+  }, [dispatch, userData, userError, userLoading]);
 
   useEffect(() => {
     if (loading) console.log("Notification Subscription loading...");
@@ -97,7 +132,7 @@ function IndexPage() {
 
   return (
     <>
-      {currentUser.id ? (
+      {currentUser ? (
         <div className="w-full h-screen flex flex-col">
           {/* Header */}
           <header className="w-full flex items-center justify-between px-6 py-3 border-b border-purple-300 bg-white shadow-sm">
