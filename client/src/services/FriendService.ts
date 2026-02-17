@@ -14,6 +14,10 @@ export const fetchFriend = async (payload: string) => {
                         id
                         name
                         username
+                        profile {
+                          id
+                          avatarUrl
+                        }
                     }
                 }
             `,
@@ -58,11 +62,10 @@ export const FRIEND_LIST = gql`
   query {
     friendList {
       id
-      status
-      otherUser {
-        id
-        username
-        name
+      username
+      name
+      profile {
+        avatarUrl
       }
     }
   }
@@ -72,13 +75,11 @@ export const FRIEND_REQUEST = gql`
   query {
     friendRequestList {
       id
-      user {
-        id
-        name
-        username
+      name
+      username
+      profile {
+        avatarUrl
       }
-      createdAt
-      status
     }
   }
 `;

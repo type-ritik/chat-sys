@@ -41,28 +41,14 @@ export const SEND_MSG = gql`
 export const RETRIEVE_CHATROOM_DATA = gql`
   query ChatCellData($chatRoomId: String!) {
     chatCellData(chatRoomId: $chatRoomId) {
-      id
-      friendshipId
-      friendship {
-        user {
+      chatRoomId
+      otherUser {
+        id
+        name
+        username
+        profile {
           id
-          name
-          username
-          profile {
-            id
-            isActive
-            avatarUrl
-          }
-        }
-        friend {
-          id
-          name
-          username
-          profile {
-            id
-            isActive
-            avatarUrl
-          }
+          avatarUrl
         }
       }
     }
@@ -75,8 +61,11 @@ export const EXPLORE_FRIEND = gql`
       id
       userId
       username
+      profile {
+        id
+        avatarUrl
+      }
       name
-      createdAt
     }
   }
 `;
@@ -85,11 +74,13 @@ export const RETRIEVE_CHATROOM_LIST = gql`
   query {
     chatRoomList {
       id
-      friendship {
-        otherUser {
-          username
-          name
+      otherUser {
+        id
+        name
+        username
+        profile {
           id
+          avatarUrl
         }
       }
       lastMsg {

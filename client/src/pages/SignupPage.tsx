@@ -62,7 +62,7 @@ function SignupPage() {
       }
 
       setSuccessMsg(`Welcome ${resData.data.createUser.username}`);
-      console.log("Success");
+      // console.log("Success");
       dispatch(signInSuccess(resData.data.createUser));
       setErrorMsg("");
       navigate("/");

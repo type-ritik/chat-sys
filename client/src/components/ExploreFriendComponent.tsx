@@ -7,6 +7,10 @@ function ExploreFriendComponent() {
     id: string;
     name: string;
     email: string;
+    profile: {
+      id: string;
+      avatarUrl: string;
+    };
   };
 
   const [searchResult, setSearchResult] = useState<Friend | null>(null);
@@ -73,11 +77,17 @@ function ExploreFriendComponent() {
       <div className="mt-6 w-full max-w-md">
         {searchResult ? (
           <div className="flex items-center justify-between bg-gradient-to-r from-purple-100 to-blue-100 p-4 rounded-lg shadow hover:shadow-lg transition">
-            <div>
-              <h3 className="text-lg font-bold text-gray-800">
+            <div className="flex justify-center items-center">
+              <div className="not-md:w-10 not-md:h-10 w-12 h-12 rounded-full overflow-hidden border-2 border-blue-300">
+                <img
+                  src={searchResult.profile.avatarUrl}
+                  alt="User"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <h3 className="not-md:text-[12px] ml-2 text-base md:text-lg font-semibold text-gray-800 truncate">
                 {searchResult.name}
               </h3>
-              <p className="text-sm text-gray-600">{searchResult.email}</p>
             </div>
             <button
               onClick={handleSendRequest}

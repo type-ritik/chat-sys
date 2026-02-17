@@ -43,6 +43,7 @@ const uploadLink = new createUploadLink({
   uri: baseUrl,
   headers: {
     "x-apollo-operation-name": "true",
+    "apollo-require-preflight": "true",
   },
 });
 
