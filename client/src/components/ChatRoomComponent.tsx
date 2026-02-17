@@ -21,6 +21,10 @@ interface ExploreChatFriendResult {
   name: string;
   userId: string;
   username: string;
+  profile: {
+    id: string;
+    avatarUrl: string;
+  };
   createdAt: Date;
 }
 
@@ -30,11 +34,13 @@ interface ExploreFriendResult {
 
 interface ChatPayload {
   id: string;
-  friendship: {
-    otherUser: {
-      username: string;
-      name: string;
+  otherUser: {
+    username: string;
+    name: string;
+    id: string;
+    profile: {
       id: string;
+      avatarUrl: string;
     };
   };
   lastMsg: {
@@ -150,7 +156,7 @@ function ChatRoomComponent() {
             <div className="flex items-center justify-between bg-gradient-to-r from-purple-100 to-blue-100 p-4 rounded-xl shadow hover:shadow-lg hover:scale-[1.02] transition-all duration-300 ease-in-out">
               <div className="flex items-center gap-3">
                 <img
-                  src="https://images.unsplash.com/photo-1502685104226-ee32379fefbe?q=80&w=688"
+                  src={searchResult.profile.avatarUrl}
                   alt="User avatar"
                   className="w-11 h-11 rounded-full object-cover border-2 border-purple-400"
                 />
@@ -189,14 +195,14 @@ function ChatRoomComponent() {
             >
               <div className="not-md:w-10 not-md:h-10 w-12 h-12 rounded-full overflow-hidden border-2 border-blue-300">
                 <img
-                  src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=688"
+                  src={item.otherUser.profile.avatarUrl}
                   alt="User"
                   className="w-full h-full object-cover"
                 />
               </div>
               <div className="flex flex-col truncate">
                 <h3 className="not-md:text-[12px] text-base md:text-lg font-semibold text-gray-800 truncate">
-                  {item.friendship.otherUser.name}
+                  {item.otherUser.name}
                 </h3>
                 <span className="not-md:text-[12px] text-sm text-gray-500 truncate">
                   {item.lastMsg?.message || "No messages yet"}

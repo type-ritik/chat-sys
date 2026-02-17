@@ -5,6 +5,9 @@ import { useEffect, useState } from "react";
 type NotificationItem = {
   sender: {
     username: string;
+    profile: {
+      avatarUrl: string;
+    };
   };
   content: string;
   timestamp: string | number;
@@ -21,7 +24,7 @@ function NotificationComponent() {
     NotificationQueryData["retrieveNotification"] | null
   >(null);
   const [notificationLength, setNotificationLength] = useState<number | null>(
-    null
+    null,
   );
 
   useEffect(() => {
@@ -55,9 +58,7 @@ function NotificationComponent() {
                 {/* Avatar */}
                 <div className="flex-shrink-0">
                   <img
-                    src={
-                      "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=688&auto=format&fit=crop&ixlib=rb-4.1.0"
-                    }
+                    src={item.sender.profile.avatarUrl}
                     alt="Profile"
                     className="not-md:w-11 not-md:h-11 w-12 h-12 rounded-full border-2 border-purple-400 object-cover"
                   />
@@ -81,7 +82,7 @@ function NotificationComponent() {
                   })}
                 </div>
               </div>
-            )
+            ),
           )}
         </div>
       ) : (

@@ -13,24 +13,20 @@ import { useNavigate } from "react-router-dom";
 // FriendListItem: Represents a single friend relationship, including the other user's info and status.
 type FriendListItem = {
   id: string;
-  otherUser: {
-    id: string;
-    username: string;
-    name: string;
-    avatarUrl?: string;
+  username: string;
+  name: string;
+  profile: {
+    avatarUrl: string;
   };
-  status: string;
 };
 
 // FriendReqListItem: Represents a single incoming friend request, including the requesting user's info and status.
 type FriendReqListItem = {
   id: string;
-  status: string;
-  user: {
-    id: string;
-    name: string;
-    username: string;
-    avatarUrl?: string;
+  name: string;
+  username: string;
+  profile: {
+    avatarUrl: string;
   };
 };
 
@@ -69,7 +65,8 @@ function FriendsComponent() {
   );
 
   // Create ChatRoom
-  const [chatRoomCellData] = useMutation<ChatRoomCellPayload>(CREATE_CHATROOM_CELL);
+  const [chatRoomCellData] =
+    useMutation<ChatRoomCellPayload>(CREATE_CHATROOM_CELL);
 
   const navigate = useNavigate();
 
@@ -171,11 +168,8 @@ function FriendsComponent() {
                 {/* Avatar */}
                 <div className="not-md:w-10 not-md:h-10 h-12 w-12 rounded-full overflow-hidden border-2 border-pink-300 flex-shrink-0">
                   <img
-                    src={
-                      item.otherUser.avatarUrl ||
-                      "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=688&auto=format&fit=crop&ixlib=rb-4.1.0"
-                    }
-                    alt={item.otherUser.name}
+                    src={item.profile.avatarUrl}
+                    alt={item.name}
                     className="h-full w-full object-cover"
                   />
                 </div>
@@ -183,10 +177,10 @@ function FriendsComponent() {
                 {/* Info */}
                 <div className="flex flex-col flex-1">
                   <h3 className="not-md:text-sm text-base md:text-lg font-bold text-gray-700 truncate">
-                    {item.otherUser.name}
+                    {item.name}
                   </h3>
                   <span className="not-md:text-[10px] text-sm text-gray-500 truncate">
-                    @{item.otherUser.username}
+                    @{item.username}
                   </span>
                 </div>
 
@@ -225,20 +219,17 @@ function FriendsComponent() {
                 <div className="flex items-center gap-3 flex-1 min-w-0">
                   <div className="w-11 h-11 rounded-full overflow-hidden border-2 border-blue-300 flex-shrink-0">
                     <img
-                      src={
-                        item.user.avatarUrl ||
-                        "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=688&auto=format&fit=crop&ixlib=rb-4.1.0"
-                      }
-                      alt={item.user.name}
+                      src={item.profile.avatarUrl}
+                      alt={item.name}
                       className="w-full h-full object-cover"
                     />
                   </div>
                   <div className="flex flex-col min-w-0">
                     <h3 className="text-base md:text-lg font-semibold text-gray-800 truncate">
-                      {item.user.name}
+                      {item.name}
                     </h3>
                     <span className="text-sm not-md:text-[12px] text-gray-500 truncate">
-                      @{item.user.username}
+                      @{item.username}
                     </span>
                   </div>
                 </div>

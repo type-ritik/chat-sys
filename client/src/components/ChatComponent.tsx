@@ -19,13 +19,8 @@ interface UserPayload {
 }
 
 interface ChatCellPayload {
-  id: string;
-  friendshipId: string;
-  friendship: {
-    id: string;
-    friend: UserPayload | null;
-    user: UserPayload | null;
-  };
+  chatRoomId: string;
+  otherUser: UserPayload;
 }
 
 interface ChatRoomCellPayload {
@@ -139,9 +134,16 @@ function ChatComponent() {
     <div className="relative w-full h-[80vh] bg-gradient-to-b from-blue-900 to-blue-950 rounded-xl text-white shadow-lg overflow-hidden flex flex-col">
       {/* Header */}
       <div className="h-14 bg-blue-800 flex items-center justify-center border-b border-blue-700 text-lg font-semibold tracking-wide">
-        {friendState?.friendship?.user?.name ||
-          friendState?.friendship?.friend?.name ||
-          "Chat"}
+        <div className="not-md:w-10 not-md:h-10 w-12 h-12 rounded-full overflow-hidden border-2 border-blue-300">
+          <img
+            src={friendState?.otherUser.profile.avatarUrl}
+            alt="User"
+            className="w-full h-full object-cover"
+          />
+        </div>
+        <h3 className="not-md:text-[12px] ml-2 text-base md:text-lg font-semibold text-white truncate">
+          {friendState?.otherUser.name}
+        </h3>
       </div>
 
       {/* Chat Inbox */}
@@ -199,7 +201,10 @@ function ChatComponent() {
         id="chat-editor"
         className="border-t border-blue-800 bg-blue-900/80 backdrop-blur-md p-3 sticky bottom-0 left-0 z-10"
       >
-        <ChatEditor chatRoomId={friendState?.id} setChatMsg={setChatMsg} />
+        <ChatEditor
+          chatRoomId={friendState?.chatRoomId}
+          setChatMsg={setChatMsg}
+        />
       </div>
     </div>
   );

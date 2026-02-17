@@ -9,6 +9,9 @@ export const NOTIFICATION_LIST = gql`
       sender {
         username
         name
+        profile {
+          avatarUrl
+        }
       }
       receiver {
         username

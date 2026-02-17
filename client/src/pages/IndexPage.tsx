@@ -107,7 +107,7 @@ function IndexPage() {
     if (userLoading) console.log("User data loading...");
     if (userError) console.log("User data error: ", userError.message);
     if (userData?.userData) {
-      console.log("User data fetched: ", userData.userData);
+      // console.log("User data fetched: ", userData.userData);
       dispatch(updateCurrentUser(userData));
     }
   }, [dispatch, userData, userError, userLoading]);
@@ -116,7 +116,7 @@ function IndexPage() {
     if (loading) console.log("Notification Subscription loading...");
     if (error) console.log("Notification Subscription error:", error);
     if (data) {
-      console.log("Notification Subscription active, new data:", data);
+      // console.log("Notification Subscription active, new data:", data);
       setNotificationData(data.subNotify);
     }
   }, [data, error, loading]);
@@ -125,7 +125,7 @@ function IndexPage() {
     if (chatMsgLoading) console.log("ChatMsg Subscription loading...");
     if (chatMsgError) console.log("ChatMsg Subscription error:", chatMsgError);
     if (chatMsgData) {
-      console.log("ChatMsg Subscription active, new data:", chatMsgData);
+      // console.log("ChatMsg Subscription active, new data:", chatMsgData);
       setChatMsgState(chatMsgData.chatMsg);
     }
   }, [chatMsgData, chatMsgLoading, chatMsgError]);
@@ -158,8 +158,14 @@ function IndexPage() {
 
             {/* Profile */}
             <div className="flex items-center gap-2 cursor-pointer hover:scale-105 transition-transform duration-300">
-              <div className="w-8 h-8 rounded-full bg-purple-400 flex items-center justify-center text-white font-bold">
-                R
+              {/* <div className="w-8 h-8 rounded-full bg-purple-400 flex items-center justify-center text-white font-bold"> */}
+              <div className="not-md:w-10 not-md:h-10 w-12 h-12 rounded-full overflow-hidden border-2 border-blue-300">
+                <img
+                  src={currentUser.profile.avatarUrl}
+                  alt="User"
+                  className="w-full h-full object-cover"
+                />
+                {/* </div> */}
               </div>
               <span className="hidden sm:inline text-lg font-semibold text-purple-900">
                 {currentUser.username}
