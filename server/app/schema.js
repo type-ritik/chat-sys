@@ -43,8 +43,7 @@ const typeDefs = gql`
 
   type ChatRoomPayload {
     id: String!
-    friendshipId: String!
-    friendship: Friendship
+    otherUser: User!
     lastMsg: LastMsg
     createdAt: DateTime!
   }
@@ -58,10 +57,8 @@ const typeDefs = gql`
   }
 
   type ChatRoomCellData {
-    id: String!
-    friendshipId: String!
-    friendship: Friendship!
-    createdAt: DateTime!
+    chatRoomId: String
+    otherUser: User
   }
 
   type Message {
@@ -94,19 +91,34 @@ const typeDefs = gql`
     otherUser: User
   }
 
+  type ChatRoomPayloadData {
+    id: String!
+    friendshipId: String!
+    friendship: Friendship
+    lastMsg: LastMsg
+    createdAt: DateTime!
+  }
+
+  type FriendListPayload {
+    id: ID!
+    username: String
+    name: String
+    profile: Profile
+  }
+
   type FriendReqPayload {
     id: ID!
-    user: User!
-    status: String!
-    createdAt: DateTime!
+    username: String
+    name: String
+    profile: Profile
   }
 
   type ChatFriendPayload {
     id: ID!
     userId: String
     username: String
+    profile: Profile
     name: String
-    createdAt: DateTime!
   }
 
   type Query {
@@ -114,7 +126,7 @@ const typeDefs = gql`
     exploreFriends(username: String!): User!
     exploreChatFriend(username: String): ChatFriendPayload
     hello: String!
-    friendList: [Friendship!]!
+    friendList: [FriendListPayload!]!
     chatRoomList: [ChatRoomPayload!]!
     chatMessageList(chatRoomId: String!): [ChatMsgPayload!]!
     retrieveNotification: [Message!]!
@@ -133,7 +145,7 @@ const typeDefs = gql`
     createUser(name: String!, email: String!, password: String!): User!
     followFriend(friendId: String!): Boolean
     followResponse(friendshipId: String!, status: String!): Boolean
-    chatRoomCell(friendshipId: String!): ChatRoomPayload
+    chatRoomCell(friendshipId: String!): ChatRoomPayloadData
     updateUserData(name: String, username: String, bio: String): UserProfile
     updateAvatar(file: Upload): Profile
     adminActionOnUserAvalability(userId: String!, action: String!): User

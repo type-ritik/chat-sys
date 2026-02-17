@@ -42,70 +42,98 @@ async function exploreChatFriend(_, { username }, context) {
   }
 
   // Find friendship exist of user with friends username
-  const user = await prisma.friendship.findFirst({
+  const friendship = await prisma.friendship.findFirst({
     where: {
+      status: "ACCEPTED", // Ensure they are actually friends
       OR: [
-        {
-          userId: userId,
-          friend: {
-            username: username,
-          },
-        },
-        {
-          friendId: userId,
-          user: {
-            username: username,
-          },
-        },
+        { userId: userId, friend: { username: username } },
+        { friendId: userId, user: { username: username } },
       ],
     },
-    include: {
-      user: true,
-      friend: true,
+    select: {
+      id: true,
+      createdAt: true,
+      userId: true,
+      friendId: true,
+      user: {
+        select: {
+          id: true,
+          name: true,
+          username: true,
+          profile: {
+            select: { id: true, isActive: true, avatarUrl: true },
+          },
+        },
+      },
+      friend: {
+        select: {
+          id: true,
+          name: true,
+          username: true,
+          profile: {
+            select: { id: true, isActive: true, avatarUrl: true },
+          },
+        },
+      },
     },
   });
 
-  // If not throw error
-  if (!user) {
-    throw new Error(`You don't have a friend name ${username}.`);
+  if (!friendship) {
+    throw new Error(`You don't have a friend named ${username}.`);
   }
 
-  let payload;
+  // Extract the "other" person using a simple ternary
+  const isInitiator = userId === friendship.userId;
+  const targetUser = isInitiator ? friendship.friend : friendship.user;
 
-  if (userId === user.userId) {
-    payload = {
-      id: user.id,
-      userId: user.friendId,
-      name: user.friend.name,
-      username: user.friend.username,
-      createdAt: user.createdAt,
-    };
-  } else {
-    payload = {
-      id: user.id,
-      userId: user.userId,
-      name: user.user.name,
-      username: user.user.username,
-      createdAt: user.createdAt,
-    };
-  }
+  const payload = {
+    id: friendship.id,
+    userId: targetUser.id,
+    name: targetUser.name,
+    username: targetUser.username,
+    profile: {
+      id: targetUser.profile.id,
+      avatarUrl: targetUser.profile.avatarUrl,
+    },
+  };
 
-  // Return the friendship payload
   return payload;
 }
 
 async function friendList(_, obj, context) {
   const userId = context.user.userId;
-  const friends = await prisma.friendship.findMany({
+  const friendships = await prisma.friendship.findMany({
     where: {
+      status: "ACCEPTED",
       OR: [{ userId: userId }, { friendId: userId }],
-      AND: [{ status: "ACCEPTED" }],
     },
-    include: {
-      user: true,
-      friend: true,
+    select: {
+      // Only select what you actually need to reduce payload size
+      user: {
+        select: {
+          id: true,
+          username: true,
+          name: true,
+          profile: { select: { id: true, avatarUrl: true } },
+        },
+      },
+      friend: {
+        select: {
+          id: true,
+          username: true,
+          name: true,
+          profile: { select: { id: true, avatarUrl: true } },
+        },
+      },
     },
   });
+
+  // Transform the data so the UI doesn't have to guess who the friend is
+  const friends = friendships.map((f) =>
+    f.user.id === userId ? f.friend : f.user,
+  );
+
+  // console.log("Friendlist", friends);
 
   if (friends.length <= 0) {
     throw new Error("Don't have any friends");
@@ -116,20 +144,29 @@ async function friendList(_, obj, context) {
 
 async function friendRequestList(_, obj, context) {
   const userId = context.user.userId;
-  const friendsReq = await prisma.friendship.findMany({
-    where: {
-      friendId: userId,
-      status: "PENDING",
-    },
-    include: {
-      user: true,
+  const requests = await prisma.friendship.findMany({
+    where: { friendId: userId, status: "PENDING" },
+    select: {
+      user: {
+        select: {
+          id: true,
+          username: true,
+          name: true,
+          profile: { select: { id: true, avatarUrl: true } },
+        },
+      },
     },
   });
+
+  // Immediately flatten the response for the UI
+  const requesterList = requests.map((req) => req.user);
+
+  // console.log("RequesterList", requesterList);
 
   if (friendList.length <= 0) {
     throw new Error("Don't have any request");
   }
-  return friendsReq;
+  return requesterList;
 }
 
 module.exports = {

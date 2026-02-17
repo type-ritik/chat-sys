@@ -135,7 +135,7 @@ async function chatRoomCell(_, { friendshipId }, context) {
 
 async function chatRoomList(_, obj, context) {
   const userId = context.user.userId;
-  const roomList = await prisma.chatRoom.findMany({
+  const rooms = await prisma.chatRoom.findMany({
     where: {
       friendship: {
         OR: [{ userId: userId }, { friendId: userId }],
@@ -143,29 +143,55 @@ async function chatRoomList(_, obj, context) {
     },
     include: {
       friendship: {
-        select: {
-          friend: true,
-          user: true,
+        include: {
+          user: {
+            select: {
+              id: true,
+              name: true,
+              username: true,
+              profile: {
+                select: { id: true, isActive: true, avatarUrl: true },
+              },
+            },
+          },
+          friend: {
+            select: {
+              id: true,
+              name: true,
+              username: true,
+              profile: {
+                select: { id: true, isActive: true, avatarUrl: true },
+              },
+            },
+          },
         },
+      },
+      // Get only the most recent message for each room
+      messages: {
+        orderBy: { createdAt: "desc" },
+        take: 1,
       },
     },
   });
 
-  if (roomList <= 0) {
-    throw new Error("Zero ChatRoom");
-  }
+  if (rooms.length === 0) throw new Error("Zero ChatRoom");
 
-  const roomListWithLastMsg = await Promise.all(
-    roomList.map(async (room) => {
-      const lastMsg = await prisma.chatRoomMessage.findFirst({
-        where: { chatRoomId: room.id },
-        orderBy: { createdAt: "desc" },
-      });
-      return { ...room, lastMsg };
-    })
-  );
+  // 2. Transform the data for the UI
+  const roomListWithLastMsg = rooms.map((room) => {
+    const { friendship, messages } = room;
 
-  console.log(roomListWithLastMsg);
+    // Determine who the "other" person is
+    const otherUser =
+      friendship.userId === userId ? friendship.friend : friendship.user;
+
+    return {
+      id: room.id,
+      otherUser,
+      lastMsg: messages[0] || null, // Handle rooms with no messages
+    };
+  });
+
+  // console.log("Chat room list", roomListWithLastMsg);
 
   return roomListWithLastMsg;
 }
@@ -197,23 +223,20 @@ async function chatCellData(_, { chatRoomId }, context) {
   if (!isValidUUID(chatRoomId)) {
     throw new Error("Invalid UUID");
   }
-
-  const chatCellPayload = await prisma.chatRoom.findFirst({
+  const chatRoom = await prisma.chatRoom.findUnique({
     where: { id: chatRoomId },
-    include: {
+    select: {
+      id: true,
       friendship: {
-        include: {
+        select: {
+          userId: true,
           user: {
             select: {
               id: true,
               name: true,
               username: true,
               profile: {
-                select: {
-                  id: true,
-                  isActive: true,
-                  avatarUrl: true,
-                },
+                select: { id: true, isActive: true, avatarUrl: true },
               },
             },
           },
@@ -223,11 +246,7 @@ async function chatCellData(_, { chatRoomId }, context) {
               name: true,
               username: true,
               profile: {
-                select: {
-                  id: true,
-                  isActive: true,
-                  avatarUrl: true,
-                },
+                select: { id: true, isActive: true, avatarUrl: true },
               },
             },
           },
@@ -236,15 +255,21 @@ async function chatCellData(_, { chatRoomId }, context) {
     },
   });
 
-  if (chatCellPayload.friendship.userId === userId) {
-    delete chatCellPayload.friendship.user;
-  } else {
-    delete chatCellPayload.friendship.friend;
-  }
+  if (!chatRoom) return null;
 
-  console.log(chatCellPayload);
+  // Determine who the "other" person is
+  const { friendship } = chatRoom;
+  const otherUser =
+    friendship.userId === userId ? friendship.friend : friendship.user;
 
-  return chatCellPayload;
+  // Return a clean object
+  const chatCellData = {
+    chatRoomId: chatRoom.id,
+    otherUser,
+  };
+
+  console.log("ChatCellData", chatCellData);
+  return chatCellData;
 }
 
 module.exports = {
