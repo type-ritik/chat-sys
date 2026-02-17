@@ -11,6 +11,7 @@ const {
 } = require("../utils/user.config");
 const { comparePassword } = require("../utils/passKey");
 const { genToken } = require("../utils/auth");
+const cloudinary = require("../config/cloudinary");
 
 // User Login
 async function loginUser(_, { email, password }, context) {
@@ -129,11 +130,43 @@ async function updateUserData(_, { name, username, bio }, context) {
   }
 }
 
-async function updateAvatar(_, { avatarUrl }, context) {
+async function updateAvatar(_, { file }, context) {
   const userId = context.user.userId;
 
+  if (!userId) {
+    throw new Error("Unauthorized");
+  }
+
+  const uploadedFile = await file;
+
+  console.log(file);
   try {
-    const payload = await alterAvatar(userId, avatarUrl);
+    const { createReadStream } = uploadedFile;
+
+    if (typeof createReadStream !== "function") {
+      console.log("Invalid file upload");
+      throw new Error("Invalid file upload");
+    }
+
+    if (!cloudinary || !cloudinary.uploader) {
+      console.log("Cloudinary configuration error");
+      throw new Error("Cloudinary configuration error");
+    }
+    const result = await new Promise((resolve, reject) => {
+      const uploadStream = cloudinary.uploader.upload_stream(
+        {
+          folder: "avatars",
+        },
+        (error, result) => {
+          if (result) resolve(result);
+          else reject(error);
+        },
+      );
+      createReadStream().pipe(uploadStream);
+    });
+
+    console.log("Result: ", result);
+    const payload = await alterAvatar(userId, result.secure_url);
     return payload;
   } catch (error) {
     console.log("Error updating avatar", error.message);
