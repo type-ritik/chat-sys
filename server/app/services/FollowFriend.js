@@ -2,7 +2,6 @@ const { prisma } = require("../data/prisma");
 const { pubsub } = require("../data/pubsub");
 const { isValidUUID, findUserById } = require("../utils/user.config");
 
-
 async function followFriend(_, { friendId }, context) {
   const userId = context.user.userId;
 
@@ -10,10 +9,13 @@ async function followFriend(_, { friendId }, context) {
     throw new Error("Invalid UUID");
   }
 
+  if (friendId === userId) {
+    throw new Error("You cannot follow yourself.");
+  }
+
   // Check if both users exist
   const sender = await findUserById(userId);
   const receiver = await findUserById(friendId);
-
 
   // const sender = await prisma.user.findUnique({ where: { id: userId } }); // Sender
   // const receiver = await prisma.user.findUnique({ where: { id: friendId } }); // Receiver
@@ -32,7 +34,7 @@ async function followFriend(_, { friendId }, context) {
     },
   });
 
-  console.log("Friendship record created:", follow);
+  // console.log("Friendship record created:", follow);
 
   //   Notify the friend about the follow request (implementation depends on your notification system)
   const notification = await prisma.message.create({
@@ -59,14 +61,14 @@ async function followFriend(_, { friendId }, context) {
     },
   });
 
-  console.log("Notification record created:", notification);
+  // console.log("Notification record created:", notification);
 
   // Publish the notification to subscribers (if using subscriptions)
   pubsub.publish(`NOTIFICATIONS:${receiver.id}`, {
     subNotify: notification,
   });
 
-  console.log("Notification is live-on user:", sender.username);
+  // console.log("Notification is live-on user:", sender.username);
 
   return true;
 }
@@ -84,6 +86,8 @@ async function followResponse(_, { friendshipId, status }, context) {
       id: friendshipId,
     },
   });
+
+  // console.log("Friend: ", friend);
 
   // If record is invalid
   if (!friend) {
@@ -157,7 +161,7 @@ async function followResponse(_, { friendshipId, status }, context) {
   console.log(
     "Notification sent to user: ",
     friendPayload.username,
-    "Successfully."
+    "Successfully.",
   );
 
   return true;
