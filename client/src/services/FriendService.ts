@@ -51,9 +51,6 @@ export const fetchFollowFriend = async (payload: string) => {
   });
 
   const result = await res.json();
-  if (result.errors) {
-    return { res: false, msg: result.errors[0].message };
-  }
 
   return result;
 };
@@ -75,10 +72,13 @@ export const FRIEND_REQUEST = gql`
   query {
     friendRequestList {
       id
-      name
-      username
-      profile {
-        avatarUrl
+      user {
+        id
+        name
+        username
+        profile {
+          avatarUrl
+        }
       }
     }
   }

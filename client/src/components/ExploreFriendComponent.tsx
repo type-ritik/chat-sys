@@ -1,8 +1,20 @@
 import React, { useState } from "react";
 import { fetchFollowFriend, fetchFriend } from "../services/FriendService";
+import { useSelector } from "react-redux";
+import type { userObj } from "../redux/user/userSlice";
+
+interface UserInterface {
+  user: {
+    currentUser: userObj;
+    error: string;
+    loading: boolean;
+  };
+}
 
 function ExploreFriendComponent() {
   const [searchInput, setSearchInput] = useState("");
+  const { currentUser } = useSelector((state: UserInterface) => state.user);
+
   type Friend = {
     id: string;
     name: string;
@@ -39,9 +51,17 @@ function ExploreFriendComponent() {
 
   const handleSendRequest = async () => {
     if (!searchResult) return;
+
+    if (searchResult.id === currentUser.id) {
+      setErrorMsg("You cannot send a friend request to yourself.");
+      alert(`You cannot send friend request to yourself.`);
+      return;
+    }
     const resData = await fetchFollowFriend(searchResult.id);
-    if (resData.res === false) {
-      setErrorMsg(resData.msg);
+    if (!resData.data.folloFriend) {
+      setErrorMsg(resData.errors[0].message);
+      alert(resData.errors[0].message);
+      return;
     }
     alert(`Friend request sent to ${searchResult.name}`);
   };
