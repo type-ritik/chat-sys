@@ -147,6 +147,7 @@ async function friendRequestList(_, obj, context) {
   const requests = await prisma.friendship.findMany({
     where: { friendId: userId, status: "PENDING" },
     select: {
+      id: true,
       user: {
         select: {
           id: true,
@@ -159,14 +160,14 @@ async function friendRequestList(_, obj, context) {
   });
 
   // Immediately flatten the response for the UI
-  const requesterList = requests.map((req) => req.user);
+  // const requesterList = requests.map((req) => req.user);
 
   // console.log("RequesterList", requesterList);
 
   if (friendList.length <= 0) {
     throw new Error("Don't have any request");
   }
-  return requesterList;
+  return requests;
 }
 
 module.exports = {

@@ -107,10 +107,8 @@ const typeDefs = gql`
   }
 
   type FriendReqPayload {
-    id: ID!
-    username: String
-    name: String
-    profile: Profile
+    id: String
+    user: User
   }
 
   type ChatFriendPayload {
