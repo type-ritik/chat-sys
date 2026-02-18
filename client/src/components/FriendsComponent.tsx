@@ -23,10 +23,13 @@ type FriendListItem = {
 // FriendReqListItem: Represents a single incoming friend request, including the requesting user's info and status.
 type FriendReqListItem = {
   id: string;
-  name: string;
-  username: string;
-  profile: {
-    avatarUrl: string;
+  user: {
+    id: string;
+    name: string;
+    username: string;
+    profile: {
+      avatarUrl: string;
+    };
   };
 };
 
@@ -219,17 +222,17 @@ function FriendsComponent() {
                 <div className="flex items-center gap-3 flex-1 min-w-0">
                   <div className="w-11 h-11 rounded-full overflow-hidden border-2 border-blue-300 flex-shrink-0">
                     <img
-                      src={item.profile.avatarUrl}
-                      alt={item.name}
+                      src={item.user.profile.avatarUrl}
+                      alt={item.user.name}
                       className="w-full h-full object-cover"
                     />
                   </div>
                   <div className="flex flex-col min-w-0">
                     <h3 className="text-base md:text-lg font-semibold text-gray-800 truncate">
-                      {item.name}
+                      {item.user.name}
                     </h3>
                     <span className="text-sm not-md:text-[12px] text-gray-500 truncate">
-                      @{item.username}
+                      @{item.user.username}
                     </span>
                   </div>
                 </div>
