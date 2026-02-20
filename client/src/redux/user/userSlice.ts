@@ -65,6 +65,11 @@ const userSlice = createSlice({
         state.currentUser.profile.avatarUrl = action.payload;
       }
     },
+    logOut: (state) => {
+      state.currentUser = null;
+      state.error = "";
+      state.loading = false;
+    },
     updateCurrentUser: (state, action: PayloadAction<UserData>) => {
       // if (state.currentUser && state.currentUser.profile) {
       //   state.currentUser.profile.bio = action.payload.profile.bio;
@@ -103,6 +108,7 @@ export const {
   signInSuccess,
   updateAvatarUrl,
   updateCurrentUser,
+  logOut,
 } = userSlice.actions;
 
 export default userSlice.reducer;

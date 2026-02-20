@@ -38,6 +38,7 @@ function SignupPage() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setErrorMsg("");
 
     if (!isValidEmail(email)) {
       setErrorMsg("Invalid Email");
@@ -55,9 +56,9 @@ function SignupPage() {
       dispatch(signInStart());
       const resData = await fetchServer({ name, email, password });
 
-      if (resData.errors) {
-        setErrorMsg(resData.msg);
-        dispatch(signInFailure(resData.msg));
+      if (!resData.data) {
+        setErrorMsg(resData.errors[0].message);
+        dispatch(signInFailure(resData.errors[0].message));
         return;
       }
 

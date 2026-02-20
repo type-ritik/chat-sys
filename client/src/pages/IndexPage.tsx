@@ -84,13 +84,20 @@ function IndexPage() {
 
   const navigate = useNavigate();
 
+  useEffect(() => {
+    if (!currentUser) {
+      navigate("/signup");
+    }
+  }, [currentUser, navigate]);
+
   const [chatify, setChatMsgState] = useState<
     ChatMsgSubsData["chatMsg"] | null
   >(null);
 
   const { data, loading, error } =
     useSubscription<NotificationSubscriptionData>(NOTIFICATION_SUBSCRIPTION, {
-      variables: { userId: currentUser ? currentUser.id : navigate("/signup") },
+      variables: { userId: currentUser?.id },
+      skip: !currentUser,
     });
 
   const {
@@ -98,7 +105,8 @@ function IndexPage() {
     loading: chatMsgLoading,
     error: chatMsgError,
   } = useSubscription<ChatMsgSubsData>(CHATMSG_SUBS, {
-    variables: { userId: currentUser ? currentUser.id : navigate("/signup") },
+    variables: { userId: currentUser?.id },
+    skip: !currentUser,
   });
 
   const dispatch = useDispatch();
@@ -129,6 +137,8 @@ function IndexPage() {
       setChatMsgState(chatMsgData.chatMsg);
     }
   }, [chatMsgData, chatMsgLoading, chatMsgError]);
+
+  if (!currentUser) return null;
 
   return (
     <>
