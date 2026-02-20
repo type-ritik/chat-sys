@@ -51,11 +51,12 @@ async function loginUser(_, { email, password }, context) {
       console.log("Validation Error:", "Not valid password");
       const updated = await createLoginAttempt(userCheck.id, ipAddress);
 
-      if (updated.attempts >= 100) {
+      if (updated.attempts >= 50) {
         const msg = await blockUser(userCheck.id);
         throw new Error(msg.error);
+      } else {
+        throw new Error("Invalid password");
       }
-      throw new Error("Invalid password");
     }
 
     const token = genToken(userCheck.id, userCheck.isAdmin);
@@ -64,7 +65,7 @@ async function loginUser(_, { email, password }, context) {
   } catch (error) {
     console.log("Error login user", error.message);
 
-    throw new Error("Error login user");
+    throw new Error(error.message);
   }
 }
 

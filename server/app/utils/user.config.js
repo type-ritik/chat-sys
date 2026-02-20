@@ -249,7 +249,7 @@ async function createLoginAttempt(userId, ip) {
     },
   });
 
-  console.log(createAttempt);
+  // console.log(createAttempt);
 
   return createAttempt;
 }
@@ -308,21 +308,24 @@ async function retriveAuditLogs() {
 
 // Is already suspended
 async function isSuspended(userId) {
-  const res = await prisma.user.findFirst({
-    where: { id: userId, status: "SUSPENDED" },
+  const res = await prisma.user.findUnique({
+    where: { id: userId },
   });
 
-  console.log("Suspended response: ", res);
-  if (!res) {
-    return false;
+  if (res.status === "SUSPENDED") {
+    return true;
   }
-  return true;
+  return false;
 }
 
 // Suspend User
 async function suspend(userId) {
   if (isSuspended(userId)) {
     throw new Error("User is already suspended");
+  }
+
+  if (findUserById(userId).then((data) => data.isAdmin)) {
+    throw new Error("Admin users cannot be suspended");
   }
 
   const res = await prisma.user.update({
@@ -338,6 +341,10 @@ async function suspend(userId) {
 async function suspensionResolve(userId) {
   if (!isSuspended(userId)) {
     throw new Error("User is not suspended");
+  }
+
+  if (findUserById(userId).then((data) => data.isAdmin)) {
+    throw new Error("Admin users cannot be suspended");
   }
 
   const res = await prisma.user.update({
