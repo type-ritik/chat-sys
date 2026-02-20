@@ -32,6 +32,7 @@ function LoginPage() {
   const dispatch = useDispatch();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    setErrorMsg("");
     e.preventDefault();
 
     if (!isValidEmail(email)) {
@@ -51,9 +52,10 @@ function LoginPage() {
 
       const resData = await fetchServer({ email, password });
 
-      if (resData.errors) {
-        setErrorMsg(resData.msg);
-        return dispatch(signInFailure(resData.msg));
+      if (!resData.data) {
+        setErrorMsg(resData.errors[0].message);
+        dispatch(signInFailure(resData.errors[0].message));
+        return;
       }
 
       setSuccessMsg(`Welcome back ${resData.data.loginUser.username}`);
@@ -63,9 +65,11 @@ function LoginPage() {
     } catch (error) {
       if (error instanceof Error) {
         console.log("Error : ", error);
+        setErrorMsg(error.message);
         dispatch(signInFailure(error.message));
       } else {
         console.log("Unexpected unknown error : ", error);
+        setErrorMsg("An unknown error occurred");
         dispatch(signInFailure("An unknown error occurred"));
       }
     }

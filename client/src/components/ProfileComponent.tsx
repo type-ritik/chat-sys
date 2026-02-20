@@ -8,10 +8,8 @@ import {
 import imageCompression from "browser-image-compression";
 import { Camera } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  updateAvatarUrl,
-  type userObj,
-} from "../redux/user/userSlice";
+import { logOut, updateAvatarUrl, type userObj } from "../redux/user/userSlice";
+// import { useNavigate } from "react-router-dom";
 
 interface UserData {
   userData: {
@@ -54,6 +52,7 @@ function ProfileComponent() {
   const [updateAvatar] = useMutation<UpdateAvatarData>(UPDATE_AVATAR);
 
   const dispatch = useDispatch();
+  // const navigate = useNavigate();
 
   useEffect(() => {
     if (loading) console.log("User data is loading...");
@@ -147,6 +146,12 @@ function ProfileComponent() {
     //   reader.readAsDataURL(file); // Correctly passing the File object
     //   // console.log("Raw file object:", file); // This log is fine here
     // }
+  };
+
+  const handleLogOut = () => {
+    window.sessionStorage.clear();
+    window.localStorage.clear();
+    dispatch(logOut());
   };
 
   return (
@@ -257,7 +262,7 @@ function ProfileComponent() {
             <button
               type="button"
               onClick={() => setIsEditing((prev) => !prev)}
-              className="px-6 py-2 rounded-full bg-purple-500 text-white font-medium hover:bg-purple-600 transition-all duration-200"
+              className="px-6 py-2 rounded-full bg-purple-500 text-white cursor-pointer font-medium hover:bg-purple-600 transition-all duration-200"
             >
               {isEditing ? "Cancel" : "Edit Profile"}
             </button>
@@ -265,20 +270,28 @@ function ProfileComponent() {
             {isEditing && (
               <button
                 type="submit"
-                className="px-6 py-2 rounded-full bg-green-500 text-white font-medium hover:bg-green-600 transition-all duration-200"
+                className="px-6 py-2 rounded-full cursor-pointer bg-green-500 text-white font-medium hover:bg-green-600 transition-all duration-200"
               >
                 Save Changes
               </button>
             )}
-
-            <button
-              type="button"
-              className="px-6 py-2 rounded-full bg-red-500 text-white font-medium hover:bg-red-600 transition-all duration-200"
-            >
-              Logout
-            </button>
           </div>
         </form>
+        <div className="flex items-center justify-between py-1">
+          <button
+            type="button"
+            onClick={() => handleLogOut()}
+            className="px-6 py-2 rounded cursor-pointer bg-red-500 text-white font-medium hover:bg-red-600 transition-colors duration-200"
+          >
+            Logout
+          </button>
+          <button
+            type="button"
+            className="px-6 py-2 rounded cursor-pointer bg-blue-500 font-medium hover:bg-blue-600 text-white transition-colors duration-200"
+          >
+            Reset Password
+          </button>
+        </div>
       </div>
     </div>
   );

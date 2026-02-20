@@ -34,7 +34,7 @@ export const fetchServer = async (payload: {
   });
 
   const result = await res.json();
-  if (result.errors) {
+  if (!result.data) {
     return result;
   }
 
