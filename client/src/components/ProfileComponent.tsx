@@ -258,11 +258,11 @@ function ProfileComponent() {
           </div>
 
           {/* Buttons */}
-          <div className="flex justify-center gap-4 mt-6 flex-wrap">
+          <div className="flex not-md:flex-col justify-center gap-4 mt-6 flex-wrap">
             <button
               type="button"
               onClick={() => setIsEditing((prev) => !prev)}
-              className="px-6 py-2 rounded-full bg-purple-500 text-white cursor-pointer font-medium hover:bg-purple-600 transition-all duration-200"
+              className="px-6 not-md:text-sm py-2 rounded-full bg-purple-500 text-white cursor-pointer font-medium hover:bg-purple-600 transition-all duration-200"
             >
               {isEditing ? "Cancel" : "Edit Profile"}
             </button>
@@ -270,24 +270,24 @@ function ProfileComponent() {
             {isEditing && (
               <button
                 type="submit"
-                className="px-6 py-2 rounded-full cursor-pointer bg-green-500 text-white font-medium hover:bg-green-600 transition-all duration-200"
+                className="px-6 not-md:text-sm py-2 rounded-full cursor-pointer bg-green-500 text-white font-medium hover:bg-green-600 transition-all duration-200"
               >
                 Save Changes
               </button>
             )}
           </div>
         </form>
-        <div className="flex items-center justify-between py-1">
+        <div className="flex not-md:flex-col not-md:gap-3 items-center justify-between py-1">
           <button
             type="button"
             onClick={() => handleLogOut()}
-            className="px-6 py-2 rounded cursor-pointer bg-red-500 text-white font-medium hover:bg-red-600 transition-colors duration-200"
+            className="px-6 not-md:text-sm py-2 rounded cursor-pointer not-md:w-full bg-red-500 text-white font-medium hover:bg-red-600 transition-colors duration-200"
           >
             Logout
           </button>
           <button
             type="button"
-            className="px-6 py-2 rounded cursor-pointer bg-blue-500 font-medium hover:bg-blue-600 text-white transition-colors duration-200"
+            className="px-6 not-md:w-full not-md:text-sm py-2 rounded cursor-pointer bg-blue-500 font-medium hover:bg-blue-600 text-white transition-colors duration-200"
           >
             Reset Password
           </button>
