@@ -26,13 +26,18 @@ async function loginUser(_, { email, password }, context) {
     }
 
     // Find User by Email
-    const userCheck = await findUserByEmail(email);
+    const user = await findUserByEmail(email);
+
+    if (!user) {
+      console.log("Validation Error:", "User not found");
+      throw new Error("User not found");
+    }
 
     const now = new Date();
 
     const ipAddress = context.req.ip.replace("::ffff:", "");
 
-    const record = await isSuspiciousLogin(userCheck.id);
+    const record = await isSuspiciousLogin(user.id);
 
     if (
       record &&
@@ -44,24 +49,24 @@ async function loginUser(_, { email, password }, context) {
     }
 
     // Match the password
-    const isValidPass = await comparePassword(password, userCheck.password);
+    const isValidPass = await comparePassword(password, user.password);
 
     // If not matched, report "Incorrect password Error" message
     if (!isValidPass) {
       console.log("Validation Error:", "Not valid password");
-      const updated = await createLoginAttempt(userCheck.id, ipAddress);
+      const updated = await createLoginAttempt(user.id, ipAddress);
 
       if (updated.attempts >= 50) {
-        const msg = await blockUser(userCheck.id);
+        const msg = await blockUser(user.id);
         throw new Error(msg.error);
       } else {
         throw new Error("Invalid password");
       }
     }
 
-    const token = genToken(userCheck.id, userCheck.isAdmin);
+    const token = genToken(user.id, user.isAdmin);
 
-    return { ...userCheck, token };
+    return { ...user, token };
   } catch (error) {
     console.log("Error login user", error.message);
 
@@ -101,7 +106,7 @@ async function createUser(_, { name, email, password }, context) {
       throw new Error("User creation failed");
     }
 
-    console.log("User created successfully:", user.email);
+    // console.log("User created successfully:", user.email);
 
     // 4. Generate token
     const token = genToken(user.id, user.isAdmin);
@@ -166,7 +171,7 @@ async function updateAvatar(_, { file }, context) {
       createReadStream().pipe(uploadStream);
     });
 
-    console.log("Result: ", result);
+    // console.log("Result: ", result);
     const payload = await alterAvatar(userId, result.secure_url);
     return payload;
   } catch (error) {
@@ -182,6 +187,7 @@ async function userData(_, obj, context) {
 
   return payload;
 }
+
 module.exports = {
   loginUser,
   createUser,
