@@ -78,6 +78,7 @@ const typeDefs = gql`
     id: ID!
     userId: String!
     message: String!
+    status: String!
     chatRoomId: String
     createdAt: DateTime!
   }
@@ -89,6 +90,12 @@ const typeDefs = gql`
     status: String!
     createdAt: DateTime!
     otherUser: User
+  }
+
+  type ChatMessagePayload {
+    success: Boolean!
+    message: ChatMsgPayload
+    timestamp: DateTime
   }
 
   type ChatRoomPayloadData {
@@ -139,7 +146,7 @@ const typeDefs = gql`
 
   type Mutation {
     sayHello(friendId: String!, msg: String): Boolean!
-    sendMessage(chatRoomId: String!, text: String!): Boolean!
+    sendMessage(chatRoomId: String!, text: String!): ChatMessagePayload!
     createUser(name: String!, email: String!, password: String!): User!
     followFriend(friendId: String!): Boolean
     followResponse(friendshipId: String!, status: String!): Boolean
