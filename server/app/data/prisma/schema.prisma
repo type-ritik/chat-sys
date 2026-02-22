@@ -69,13 +69,14 @@ model ChatRoom {
 }
 
 model ChatRoomMessage {
-  id         String   @id @default(uuid())
+  id         String          @id @default(uuid())
   chatRoomId String
   userId     String
   message    String
-  createdAt  DateTime @default(now())
-  chatRoom   ChatRoom @relation("ChatRoomMessages", fields: [chatRoomId], references: [id])
-  user       User     @relation("UserRoomMessages", fields: [userId], references: [id])
+  createdAt  DateTime        @default(now())
+  status     message_status? @default(DRAFT)
+  chatRoom   ChatRoom        @relation("ChatRoomMessages", fields: [chatRoomId], references: [id])
+  user       User            @relation("UserRoomMessages", fields: [userId], references: [id])
 }
 
 model LoginAttempts {
@@ -115,4 +116,10 @@ enum FriendshipStatus {
 enum user_status {
   ACTIVE
   SUSPENDED
+}
+
+enum message_status {
+  DRAFT
+  SENT
+  FAILED
 }

@@ -3,7 +3,13 @@ const { prisma } = require("../data/prisma");
 const { pubsub } = require("../data/pubsub");
 const { isValidUUID } = require("../utils/user.config");
 
-// On Click Send Messages
+const MESSAGE_STATE = {
+  DRAFT: "DRAFT",
+  SENT: "SENT",
+  FAILED: "FAILED",
+};
+
+// On Click Send Messages - Now Stateful
 async function sendMessage(_, { chatRoomId, text }, context) {
   const userId = context.user.userId;
 
@@ -11,88 +17,133 @@ async function sendMessage(_, { chatRoomId, text }, context) {
     throw new Error("Invalid UUID");
   }
 
-  // Create the new record for chatmessage
-  const messagePayload = await prisma.chatRoomMessage.create({
-    data: {
-      userId: userId,
-      message: text,
-      chatRoomId: chatRoomId,
-    },
-  });
+  try {
+    // Step 1: Create the new record for chatmessage with DRAFT status
+    console.log(`[Message State] Creating message with status: ${MESSAGE_STATE.DRAFT}`);
+    let messagePayload = await prisma.chatRoomMessage.create({
+      data: {
+        userId: userId,
+        message: text,
+        chatRoomId: chatRoomId,
+        status: MESSAGE_STATE.DRAFT,
+      },
+    });
 
-  // Retrieve the chatRoom payload data for friend and user ids
-  const chatRoomPayload = await prisma.chatRoom.findFirst({
-    where: {
-      id: chatRoomId,
-    },
-    include: {
-      friendship: {
-        include: {
-          user: {
-            select: {
-              id: true,
-              username: true,
+    console.log(`[Message State] Message created with ID: ${messagePayload.id}, Status: ${messagePayload.status}`);
+
+    // Step 2: Retrieve the chatRoom payload data for friend and user ids
+    const chatRoomPayload = await prisma.chatRoom.findFirst({
+      where: {
+        id: chatRoomId,
+      },
+      include: {
+        friendship: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                username: true,
+              },
             },
-          },
-          friend: {
-            select: {
-              id: true,
-              username: true,
+            friend: {
+              select: {
+                id: true,
+                username: true,
+              },
             },
           },
         },
       },
-    },
-  });
+    });
 
-  // Remove unwanted payload from chatRoomPayload
-  delete chatRoomPayload.friendship.friendId;
-  delete chatRoomPayload.friendship.userId;
-  delete chatRoomPayload.friendship.status;
-  delete chatRoomPayload.createdAt;
-  delete chatRoomPayload.friendshipId;
-  delete chatRoomPayload.id;
+    if (!chatRoomPayload) {
+      throw new Error("ChatRoom not found");
+    }
 
-  console.log("chatRoomPayload ", chatRoomPayload);
-  // Record the notification about friend send you a message
+    // Remove unwanted payload from chatRoomPayload
+    delete chatRoomPayload.friendship.friendId;
+    delete chatRoomPayload.friendship.userId;
+    delete chatRoomPayload.friendship.status;
+    delete chatRoomPayload.createdAt;
+    delete chatRoomPayload.friendshipId;
+    delete chatRoomPayload.id;
 
-  const notification = await prisma.message.create({
-    data: {
-      content: `You got a message from ${
-        userId === chatRoomPayload.friendship.user.id
-          ? chatRoomPayload.friendship.user.username
-          : chatRoomPayload.friendship.friend.username
-      }`,
-      senderId: userId,
-      requestedId: chatRoomId,
-      receiverId:
-        userId === chatRoomPayload.friendship.user.id
-          ? chatRoomPayload.friendship.friend.id
-          : chatRoomPayload.friendship.user.id,
-    },
-  });
+    console.log("chatRoomPayload ", chatRoomPayload);
 
-  // Publish the new chat message event to Redis for live chat
-  if (userId === chatRoomPayload.friendship.friend.id) {
-    pubsub.publish(`CHATMSG:${chatRoomPayload.friendship.user.id}`, {
+    // Step 3: Record the notification about friend sending you a message
+    const notification = await prisma.message.create({
+      data: {
+        content: `You got a message from ${
+          userId === chatRoomPayload.friendship.user.id
+            ? chatRoomPayload.friendship.user.username
+            : chatRoomPayload.friendship.friend.username
+        }`,
+        senderId: userId,
+        requestedId: chatRoomId,
+        receiverId:
+          userId === chatRoomPayload.friendship.user.id
+            ? chatRoomPayload.friendship.friend.id
+            : chatRoomPayload.friendship.user.id,
+      },
+    });
+
+    // Step 4: Publish the new chat message event to Redis for live chat
+    const recipientId =
+      userId === chatRoomPayload.friendship.friend.id
+        ? chatRoomPayload.friendship.user.id
+        : chatRoomPayload.friendship.friend.id;
+
+    pubsub.publish(`CHATMSG:${recipientId}`, {
       chatMsg: messagePayload,
     });
 
-    pubsub.publish(`NOTIFICATIONS:${chatRoomPayload.friendship.user.id}`, {
+    pubsub.publish(`NOTIFICATIONS:${recipientId}`, {
       subNotify: notification,
-    });
-  } else {
-    pubsub.publish(`CHATMSG:${chatRoomPayload.friendship.friend.id}`, {
-      chatMsg: messagePayload,
     });
 
-    pubsub.publish(`NOTIFICATIONS:${chatRoomPayload.friendship.friend.id}`, {
-      subNotify: notification,
+    // Step 5: Update message status to SENT after successful operations
+    console.log(`[Message State] Updating message status to: ${MESSAGE_STATE.SENT}`);
+    messagePayload = await prisma.chatRoomMessage.update({
+      where: { id: messagePayload.id },
+      data: { status: MESSAGE_STATE.SENT },
     });
+
+    console.log(`[Message State] Message sent successfully with status: ${messagePayload.status}`);
+
+    // Return the complete message object with status
+    return {
+      success: true,
+      message: messagePayload,
+      timestamp: messagePayload.createdAt,
+    };
+  } catch (error) {
+    console.error(`[Message State] Error sending message: ${error.message}`);
+
+    // Try to find and update the message to FAILED status if it was created
+    try {
+      const failedMessage = await prisma.chatRoomMessage.findFirst({
+        where: {
+          chatRoomId: chatRoomId,
+          userId: userId,
+          message: text,
+        },
+        orderBy: { createdAt: "desc" },
+        take: 1,
+      });
+
+      if (failedMessage) {
+        console.log(`[Message State] Updating message status to: ${MESSAGE_STATE.FAILED}`);
+        await prisma.chatRoomMessage.update({
+          where: { id: failedMessage.id },
+          data: { status: MESSAGE_STATE.FAILED },
+        });
+      }
+    } catch (updateError) {
+      console.error(`[Message State] Failed to update message status to FAILED:`, updateError);
+    }
+
+    throw new Error(`Failed to send message: ${error.message}`);
   }
-
-  // Return true payload to say its send
-  return true;
 }
 
 async function chatRoomCell(_, { friendshipId }, context) {
