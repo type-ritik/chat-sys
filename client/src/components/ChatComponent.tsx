@@ -6,6 +6,9 @@ import {
   RETRIEVE_CHAT_MSG,
   RETRIEVE_CHATROOM_DATA,
 } from "../services/ChatService";
+import { useSelector } from "react-redux";
+import type { userObj } from "../redux/user/userSlice";
+import { Check, CloudAlert, Ellipsis } from "lucide-react";
 
 interface UserPayload {
   id: string;
@@ -23,6 +26,14 @@ interface ChatCellPayload {
   otherUser: UserPayload;
 }
 
+interface UserInterface {
+  user: {
+    currentUser: userObj;
+    error: string;
+    loading: boolean;
+  };
+}
+
 interface ChatRoomCellPayload {
   chatCellData: ChatCellPayload;
   friendshipId: string;
@@ -32,6 +43,7 @@ interface ChatMessagePayload {
   id: string;
   userId: string;
   chatRoomId: string;
+  status: string;
   message: string;
   createdAt: Date;
 }
@@ -42,7 +54,7 @@ interface ChatMessageListPayload {
 
 function ChatComponent() {
   const params = useParams();
-  const userId = localStorage.getItem("userId");
+  const { currentUser } = useSelector((state: UserInterface) => state.user);
 
   const { data } = useQuery<ChatRoomCellPayload | null>(
     RETRIEVE_CHATROOM_DATA,
@@ -152,7 +164,7 @@ function ChatComponent() {
         className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-900 scrollbar-thin scrollbar-thumb-blue-600"
       >
         {chatMsg.map((item, index) => {
-          const isSender = item.userId === userId;
+          const isSender = item.userId === currentUser.id;
           const msgDateInfo = handleDayChatMessage(item.createdAt);
 
           // Logic to show Date Header only when the day changes
@@ -185,9 +197,22 @@ function ChatComponent() {
                 >
                   <p>{item.message}</p>
                   <div
-                    className={`text-[10px] mt-1 flex ${isSender ? "justify-end" : "justify-start"} opacity-70`}
+                    className={`mt-1 gap-1 flex ${isSender ? "justify-end" : "justify-start"} opacity-70`}
                   >
-                    {msgDateInfo.time}
+                    <p className="text-[10px]">{msgDateInfo.time}</p>
+                    {isSender && (
+                      <p className="text-[10px] ">
+                        {item.status === "SENT" && (
+                          <Check size={"15px"} color="blue" />
+                        )}
+                        {item.status === "SENDING" && (
+                          <Ellipsis size={"15px"} color="white" />
+                        )}
+                        {item.status === "FAILED" && (
+                          <CloudAlert size={"15px"} color="red" />
+                        )}
+                      </p>
+                    )}
                   </div>
                 </div>
               </div>
