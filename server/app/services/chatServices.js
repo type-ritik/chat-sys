@@ -17,9 +17,17 @@ async function sendMessage(_, { chatRoomId, text }, context) {
     throw new Error("Invalid UUID");
   }
 
+  if (isSuspended(userId)) {
+    throw new Error(
+      "You are suspended from sending messages. Please contact support.",
+    );
+  }
+
   try {
     // Step 1: Create the new record for chatmessage with DRAFT status
-    console.log(`[Message State] Creating message with status: ${MESSAGE_STATE.DRAFT}`);
+    console.log(
+      `[Message State] Creating message with status: ${MESSAGE_STATE.DRAFT}`,
+    );
     let messagePayload = await prisma.chatRoomMessage.create({
       data: {
         userId: userId,
@@ -29,7 +37,9 @@ async function sendMessage(_, { chatRoomId, text }, context) {
       },
     });
 
-    console.log(`[Message State] Message created with ID: ${messagePayload.id}, Status: ${messagePayload.status}`);
+    console.log(
+      `[Message State] Message created with ID: ${messagePayload.id}, Status: ${messagePayload.status}`,
+    );
 
     // Step 2: Retrieve the chatRoom payload data for friend and user ids
     const chatRoomPayload = await prisma.chatRoom.findFirst({
@@ -58,6 +68,18 @@ async function sendMessage(_, { chatRoomId, text }, context) {
 
     if (!chatRoomPayload) {
       throw new Error("ChatRoom not found");
+    }
+
+    if (
+      isSuspended(
+        chatRoomPayload.friendship.friendId === userId
+          ? chatRoomPayload.friendship.userId
+          : chatRoomPayload.friendship.friendId,
+      )
+    ) {
+      throw new Error(
+        "The recipient is suspended from receiving messages. Please contact support.",
+      );
     }
 
     // Remove unwanted payload from chatRoomPayload
@@ -102,13 +124,17 @@ async function sendMessage(_, { chatRoomId, text }, context) {
     });
 
     // Step 5: Update message status to SENT after successful operations
-    console.log(`[Message State] Updating message status to: ${MESSAGE_STATE.SENT}`);
+    console.log(
+      `[Message State] Updating message status to: ${MESSAGE_STATE.SENT}`,
+    );
     messagePayload = await prisma.chatRoomMessage.update({
       where: { id: messagePayload.id },
       data: { status: MESSAGE_STATE.SENT },
     });
 
-    console.log(`[Message State] Message sent successfully with status: ${messagePayload.status}`);
+    console.log(
+      `[Message State] Message sent successfully with status: ${messagePayload.status}`,
+    );
 
     // Return the complete message object with status
     return {
@@ -132,14 +158,19 @@ async function sendMessage(_, { chatRoomId, text }, context) {
       });
 
       if (failedMessage) {
-        console.log(`[Message State] Updating message status to: ${MESSAGE_STATE.FAILED}`);
+        console.log(
+          `[Message State] Updating message status to: ${MESSAGE_STATE.FAILED}`,
+        );
         await prisma.chatRoomMessage.update({
           where: { id: failedMessage.id },
           data: { status: MESSAGE_STATE.FAILED },
         });
       }
     } catch (updateError) {
-      console.error(`[Message State] Failed to update message status to FAILED:`, updateError);
+      console.error(
+        `[Message State] Failed to update message status to FAILED:`,
+        updateError,
+      );
     }
 
     throw new Error(`Failed to send message: ${error.message}`);
