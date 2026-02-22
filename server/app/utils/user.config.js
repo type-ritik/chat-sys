@@ -157,6 +157,7 @@ function validateAuthInput(email, password) {
   if (!emailRegex.test(email)) {
     errors.push("Invalid email format");
   }
+
   if (!password || password.length < 8) {
     errors.push("Password must be at least 6 characters long");
   }
