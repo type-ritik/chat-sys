@@ -26,6 +26,7 @@ export const RETRIEVE_CHAT_MSG = gql`
       id
       userId
       message
+      status
       chatRoomId
       createdAt
     }
@@ -34,7 +35,14 @@ export const RETRIEVE_CHAT_MSG = gql`
 
 export const SEND_MSG = gql`
   mutation SendMessage($chatRoomId: String!, $text: String!) {
-    sendMessage(chatRoomId: $chatRoomId, text: $text)
+    sendMessage(chatRoomId: $chatRoomId, text: $text) {
+      success
+      message {
+        id
+        status
+      }
+      timestamp
+    }
   }
 `;
 

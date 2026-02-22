@@ -8,19 +8,36 @@ import {
 import { Send, Smile, Paperclip } from "lucide-react";
 import { useMutation } from "@apollo/client/react";
 import { SEND_MSG } from "../services/ChatService";
+import type { userObj } from "../redux/user/userSlice";
+import { useSelector } from "react-redux";
 
 interface ChatMessagePayload {
-   id: string;
+  id: string;
   userId: string;
   chatRoomId: string;
+  status: string;
   message: string;
   createdAt: Date;
 }
 
 interface MessageSendPayload {
-  sendMessage: boolean;
+  sendMessage: {
+    success: boolean;
+    message: {
+      id: string;
+      status: string;
+    };
+    timestamp: Date;
+  };
 }
 
+interface UserInterface {
+  user: {
+    currentUser: userObj;
+    error: string;
+    loading: boolean;
+  };
+}
 interface Props {
   chatRoomId: string | undefined;
   setChatMsg: Dispatch<SetStateAction<ChatMessagePayload[]>>;
@@ -28,8 +45,11 @@ interface Props {
 
 function ChatEditor({ chatRoomId, setChatMsg }: Props) {
   const [text, setText] = useState("");
+  const [loading, setLoading] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [sendMsg] = useMutation<MessageSendPayload>(SEND_MSG);
+
+  const { currentUser } = useSelector((state: UserInterface) => state.user);
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const el = textareaRef.current;
@@ -41,13 +61,15 @@ function ChatEditor({ chatRoomId, setChatMsg }: Props) {
   };
 
   const showChatMsg = async () => {
+    setLoading(true);
     if (!text.trim()) return;
 
     // Create local preview message
     const newMsg = {
       id: Date.now().toString(),
-      userId: localStorage.getItem("userId"),
+      userId: currentUser.id,
       message: text,
+      status: "SENDING",
       chatRoomId: chatRoomId!,
       createdAt: new Date(),
     };
@@ -58,60 +80,81 @@ function ChatEditor({ chatRoomId, setChatMsg }: Props) {
       {
         id: newMsg.id,
         userId: newMsg.userId!,
+        status: newMsg.status,
         message: newMsg.message,
         chatRoomId: newMsg.chatRoomId,
         createdAt: newMsg.createdAt,
       },
     ]);
 
-    const isMsgSend = await sendMsg({
-      variables: { chatRoomId: chatRoomId, text: text },
-    });
-    if (isMsgSend.error) {
-      if (isMsgSend.error instanceof Error) {
-        console.error("Error sending message:", isMsgSend.error.message);
-      } else {
-        console.log("Message Erro: ", isMsgSend.error);
-        throw new Error("Unexpected error occured");
-      }
-    }
-    // console.log("Message sent:", isMsgSend.data);
     setText("");
+
+    try {
+      const { data } = await sendMsg({
+        variables: { chatRoomId: chatRoomId, text: newMsg.message },
+      });
+
+      if (!data) {
+        console.error("Error sending message: No data returned");
+        alert("Error sending message!");
+        setLoading(false);
+        return;
+      }
+
+      const payload = data?.sendMessage;
+
+      if (!payload.success) {
+        console.error("Error sending message: ", payload);
+        alert("Network error");
+        setLoading(false);
+        return;
+      }
+
+      setLoading(false);
+    } catch (error) {
+      console.error("Error sending message:", error);
+      alert("Unexpected error!");
+      setLoading(false);
+      return;
+    }
   };
 
   useEffect(() => {}, []);
 
   return (
-    <div className="flex items-end gap-2 w-full">
-      {/* Input Area */}
-      <div className="flex items-center bg-gray-200 rounded-full px-4 py-2 flex-1 shadow-sm border border-black focus-within:ring-2 focus-within:ring-blue-400 transition-all">
-        <button className="text-black hover:text-blue-500 transition-colors">
-          <Smile size={20} />
-        </button>
+    <>
+      <div className="flex items-end gap-2 w-full">
+        {/* Input Area */}
+        <div className="flex items-center bg-gray-200 rounded-full px-4 py-2 flex-1 shadow-sm border border-black focus-within:ring-2 focus-within:ring-blue-400 transition-all">
+          <button className="text-black hover:text-blue-500 transition-colors">
+            <Smile size={20} />
+          </button>
 
-        <textarea
-          ref={textareaRef}
-          rows={1}
-          value={text}
-          onChange={handleChange}
-          placeholder="Type a message..."
-          className="w-full mx-2 bg-transparent resize-none focus:outline-none text-black text-base leading-5 overflow-hidden"
-        />
+          <textarea
+            ref={textareaRef}
+            rows={1}
+            value={text}
+            onChange={handleChange}
+            placeholder="Type a message..."
+            className="w-full mx-2 bg-transparent resize-none focus:outline-none text-black text-base leading-5 overflow-hidden"
+          />
 
-        <button className="text-black hover:text-blue-500 transition-colors">
-          <Paperclip size={20} />
+          <button className="text-black hover:text-blue-500 transition-colors">
+            <Paperclip size={20} />
+          </button>
+        </div>
+
+        {/* Send Button */}
+        <button
+          type="button"
+          onClick={showChatMsg}
+          disabled={loading}
+          className="p-2 rounded-full bg-white hover:bg-blue-600 transition-colors cursor-pointer text-gray-700 shadow-sm active:scale-95"
+        >
+          <Send size={20} />
         </button>
       </div>
-
-      {/* Send Button */}
-      <button
-        type="button"
-        onClick={showChatMsg}
-        className="p-2 rounded-full bg-white hover:bg-blue-600 transition-colors text-gray-700 shadow-sm active:scale-95"
-      >
-        <Send size={20} />
-      </button>
-    </div>
+    </>
   );
 }
 
