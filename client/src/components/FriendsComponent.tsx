@@ -76,7 +76,10 @@ function FriendsComponent() {
   // Effect to handle query results and errors.
   useEffect(() => {
     if (loading) console.log("FriendList is loading...");
-    if (error) console.log("FriendList Error", error);
+    if (error) {
+      console.log("FriendList Error", error.message);
+      alert(error.message);
+    }
     if (data) {
       setFriendList(data.friendList);
       setFriendList(data.friendList);
@@ -85,7 +88,9 @@ function FriendsComponent() {
 
   useEffect(() => {
     if (reqLoading) console.log("FriendReqList is loading...");
-    if (reqError) console.log("FriendReqList Error", reqError);
+    if (reqError) {
+      console.log("FriendReqList Error", reqError.message);
+    }
     if (reqData) {
       setFriendReqList(reqData.friendRequestList);
     }

@@ -6,6 +6,7 @@ export const fetchFriend = async (payload: string) => {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
+      Authorization: window.localStorage.getItem("token") || "",
     },
     body: JSON.stringify({
       query: `
