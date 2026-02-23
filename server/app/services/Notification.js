@@ -10,6 +10,7 @@ async function retrieveNotification(_, obj, context) {
 
   if (isSuspiciousLogin(userId)) {
     console.log("Suspicious activity detected. Please try again later.");
+    throw new Error("Suspicious activity detected. Please try again later.");
   }
 
   const notiPayload = await prisma.message.findMany({
