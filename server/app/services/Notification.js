@@ -1,10 +1,15 @@
 const { prisma } = require("../data/prisma");
+const { isSuspiciousLogin } = require("../utils/user.config");
 
 async function retrieveNotification(_, obj, context) {
   const userId = context.user.userId;
   if (!userId) {
     console.log("UserId Error");
     throw new Error("UserId is not found");
+  }
+
+  if (isSuspiciousLogin(userId)) {
+    console.log("Suspicious activity detected. Please try again later.");
   }
 
   const notiPayload = await prisma.message.findMany({

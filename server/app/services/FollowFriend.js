@@ -1,12 +1,28 @@
 const { prisma } = require("../data/prisma");
 const { pubsub } = require("../data/pubsub");
-const { isValidUUID, findUserById } = require("../utils/user.config");
+const {
+  isValidUUID,
+  findUserById,
+  isSuspiciousLogin,
+} = require("../utils/user.config");
 
 async function followFriend(_, { friendId }, context) {
   const userId = context.user.userId;
 
+  if (!userId) {
+    throw new Error("Unauthorized access");
+  }
+
   if (!isValidUUID(friendId)) {
     throw new Error("Invalid UUID");
+  }
+
+  if (isSuspiciousLogin(userId)) {
+    throw new Error("Suspicious activity detected. Please try again later.");
+  }
+
+  if (isSuspiciousLogin(friendId)) {
+    throw new Error("Cannot be friend with suspended user");
   }
 
   if (friendId === userId) {
@@ -77,6 +93,14 @@ async function followFriend(_, { friendId }, context) {
 async function followResponse(_, { friendshipId, status }, context) {
   const userId = context.user.userId;
   // Check if friend record is valid
+
+  if (!userId) {
+    throw new Error("Unauthorized access");
+  }
+
+  if (isSuspiciousLogin(userId)) {
+    throw new Error("Suspicious activity detected. Please try again later.");
+  }
 
   if (!isValidUUID(friendshipId)) {
     throw new Error("Invalid UUID");
