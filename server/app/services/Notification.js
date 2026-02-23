@@ -1,5 +1,5 @@
 const { prisma } = require("../data/prisma");
-const { isSuspiciousLogin } = require("../utils/user.config");
+const { isSuspended } = require("../utils/user.config");
 
 async function retrieveNotification(_, obj, context) {
   const userId = context.user.userId;
@@ -8,8 +8,9 @@ async function retrieveNotification(_, obj, context) {
     throw new Error("UserId is not found");
   }
 
-  if (isSuspiciousLogin(userId)) {
-    console.log("Suspicious activity detected. Please try again later.");
+  const isSuspend = await isSuspended(userId);
+
+  if (isSuspend) {
     throw new Error("Suspicious activity detected. Please try again later.");
   }
 

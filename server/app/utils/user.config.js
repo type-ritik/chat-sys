@@ -375,4 +375,5 @@ module.exports = {
   retriveAuditLogs,
   suspend,
   suspensionResolve,
+  isSuspended,
 };

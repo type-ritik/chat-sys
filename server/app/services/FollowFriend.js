@@ -3,7 +3,7 @@ const { pubsub } = require("../data/pubsub");
 const {
   isValidUUID,
   findUserById,
-  isSuspiciousLogin,
+  isSuspended,
 } = require("../utils/user.config");
 
 async function followFriend(_, { friendId }, context) {
@@ -17,12 +17,16 @@ async function followFriend(_, { friendId }, context) {
     throw new Error("Invalid UUID");
   }
 
-  if (isSuspiciousLogin(userId)) {
+  const isUserSuspend = await isSuspended(userId);
+
+  if (isUserSuspend) {
     throw new Error("Suspicious activity detected. Please try again later.");
   }
 
-  if (isSuspiciousLogin(friendId)) {
-    throw new Error("Cannot be friend with suspended user");
+  const isFriendSuspend = await isSuspended(friendId);
+
+  if (isFriendSuspend) {
+    throw new Error("Suspicious activity detected. Please try again later.");
   }
 
   if (friendId === userId) {
@@ -98,7 +102,9 @@ async function followResponse(_, { friendshipId, status }, context) {
     throw new Error("Unauthorized access");
   }
 
-  if (isSuspiciousLogin(userId)) {
+  const isSuspend = await isSuspended(userId);
+
+  if (isSuspend) {
     throw new Error("Suspicious activity detected. Please try again later.");
   }
 

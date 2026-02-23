@@ -1,5 +1,5 @@
 const { prisma } = require("../data/prisma");
-const { isValidUsername, isSuspiciousLogin } = require("../utils/user.config");
+const { isValidUsername, isSuspended } = require("../utils/user.config");
 
 async function exploreFriends(_, { username }, context) {
   const userId = context.user.userId;
@@ -8,7 +8,9 @@ async function exploreFriends(_, { username }, context) {
     throw new Error("Unauthorized access");
   }
 
-  if (isSuspiciousLogin(userId)) {
+  const isSuspend = await isSuspended(userId);
+
+  if (isSuspend) {
     throw new Error("Suspicious activity detected. Please try again later.");
   }
 
@@ -51,7 +53,9 @@ async function exploreChatFriend(_, { username }, context) {
     throw new Error("Unauthorized access");
   }
 
-  if (isSuspiciousLogin(userId)) {
+  const isSuspend = await isSuspended(userId);
+
+  if (isSuspend) {
     throw new Error("Suspicious activity detected. Please try again later.");
   }
 
@@ -125,7 +129,9 @@ async function friendList(_, obj, context) {
     throw new Error("Unauthorized access");
   }
 
-  if (isSuspiciousLogin(userId)) {
+  const isSuspend = await isSuspended(userId);
+
+  if (isSuspend) {
     throw new Error("Suspicious activity detected. Please try again later.");
   }
 
@@ -176,7 +182,9 @@ async function friendRequestList(_, obj, context) {
     throw new Error("Unauthorized access");
   }
 
-  if (isSuspiciousLogin(userId)) {
+  const isSuspend = await isSuspended(userId);
+
+  if (isSuspend) {
     throw new Error("Suspicious activity detected. Please try again later.");
   }
 

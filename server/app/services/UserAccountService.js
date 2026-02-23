@@ -4,10 +4,11 @@ const {
   findUserById,
   userRecord,
   updateProifle,
-  isSuspiciousLogin,
   createLoginAttempt,
   blockUser,
   alterAvatar,
+  isSuspiciousLogin,
+  isSuspended,
 } = require("../utils/user.config");
 const { comparePassword } = require("../utils/passKey");
 const { genToken } = require("../utils/auth");
@@ -133,7 +134,9 @@ async function updateUserData(_, { name, username, bio }, context) {
   // console.log(bio);
 
   try {
-    if (isSuspiciousLogin(userId)) {
+    const isSuspend = await isSuspended(userId);
+
+    if (isSuspend) {
       throw new Error("Suspicious activity detected. Please try again later.");
     }
 
@@ -154,7 +157,9 @@ async function updateAvatar(_, { file }, context) {
       throw new Error("Unauthorized");
     }
 
-    if (isSuspiciousLogin(userId)) {
+    const isSuspend = await isSuspended(userId);
+
+    if (isSuspend) {
       throw new Error("Suspicious activity detected. Please try again later.");
     }
 
@@ -201,7 +206,9 @@ async function userData(_, obj, context) {
       throw new Error("Unauthorized");
     }
 
-    if (isSuspiciousLogin(userId)) {
+    const isSuspend = await isSuspended(userId);
+
+    if (isSuspend) {
       throw new Error("Suspicious activity detected. Please try again later.");
     }
 
@@ -213,7 +220,7 @@ async function userData(_, obj, context) {
 
     return payload;
   } catch (error) {
-    console.log("Error fetching user data", error.message);
+    console.log("Error fetching user data", error);
     // throw new Error("[500 Server Error]:", error.message);
     throw new Error(error.message);
   }
