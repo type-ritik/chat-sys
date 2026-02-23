@@ -1,7 +1,7 @@
 // Description: Services for handling chat operations
 const { prisma } = require("../data/prisma");
 const { pubsub } = require("../data/pubsub");
-const { isValidUUID } = require("../utils/user.config");
+const { isValidUUID, isSuspended } = require("../utils/user.config");
 
 const MESSAGE_STATE = {
   DRAFT: "DRAFT",
@@ -17,7 +17,9 @@ async function sendMessage(_, { chatRoomId, text }, context) {
     throw new Error("Invalid UUID");
   }
 
-  if (isSuspended(userId)) {
+  const isSuspend = await isSuspended(userId);
+
+  if (isSuspend) {
     throw new Error(
       "You are suspended from sending messages. Please contact support.",
     );
@@ -178,6 +180,12 @@ async function sendMessage(_, { chatRoomId, text }, context) {
 }
 
 async function chatRoomCell(_, { friendshipId }, context) {
+  const userId = context.user.userId;
+
+  if (!userId) {
+    throw new Error("Unauthorized access");
+  }
+
   if (!isValidUUID(friendshipId)) {
     throw new Error("Invalid UUID");
   }
@@ -189,10 +197,23 @@ async function chatRoomCell(_, { friendshipId }, context) {
     },
   });
 
-  // If not throw error
   if (!friend) {
     throw new Error("Friend is not found");
   }
+
+  const isUserSuspend = await isSuspended(friend.friendId);
+
+  if (isUserSuspend) {
+    throw new Error("Suspicious activity detected. Please try again later.");
+  }
+
+  const isFriendSuspend = await isSuspended(friend.userId);
+
+  if (isFriendSuspend) {
+    throw new Error("Suspicious activity detected. Please try again later.");
+  }
+
+  // If not throw error
 
   // Check the chatRoom is exist using friendship id
   let chatRoom = await prisma.chatRoom.findFirst({
@@ -217,6 +238,13 @@ async function chatRoomCell(_, { friendshipId }, context) {
 
 async function chatRoomList(_, obj, context) {
   const userId = context.user.userId;
+
+  const isSuspend = await isSuspended(userId);
+
+  if (isSuspend) {
+    throw new Error("Suspicious activity detected. Please try again later.");
+  }
+
   const rooms = await prisma.chatRoom.findMany({
     where: {
       friendship: {
@@ -279,6 +307,18 @@ async function chatRoomList(_, obj, context) {
 }
 
 async function chatMessageList(_, { chatRoomId }, context) {
+  const userId = context.user.userId;
+
+  if (!userId) {
+    throw new Error("Unauthorized access");
+  }
+
+  const isSuspend = await isSuspended(userId);
+
+  if (isSuspend) {
+    throw new Error("Suspicious activity detected. Please try again later.");
+  }
+
   if (!isValidUUID(chatRoomId)) {
     throw new Error("Invalid UUID");
   }
@@ -302,9 +342,20 @@ async function chatMessageList(_, { chatRoomId }, context) {
 async function chatCellData(_, { chatRoomId }, context) {
   const userId = context.user.userId;
 
+  if (!userId) {
+    throw new Error("Unauthorized access");
+  }
+
+  const isSuspend = await isSuspended(userId);
+
+  if (isSuspend) {
+    throw new Error("Suspicious activity detected. Please try again later.");
+  }
+
   if (!isValidUUID(chatRoomId)) {
     throw new Error("Invalid UUID");
   }
+
   const chatRoom = await prisma.chatRoom.findUnique({
     where: { id: chatRoomId },
     select: {
@@ -350,7 +401,7 @@ async function chatCellData(_, { chatRoomId }, context) {
     otherUser,
   };
 
-  console.log("ChatCellData", chatCellData);
+  // console.log("ChatCellData", chatCellData);
   return chatCellData;
 }
 

@@ -1,7 +1,19 @@
 const { prisma } = require("../data/prisma");
-const { isValidUsername } = require("../utils/user.config");
+const { isValidUsername, isSuspended } = require("../utils/user.config");
 
 async function exploreFriends(_, { username }, context) {
+  const userId = context.user.userId;
+
+  if (!userId) {
+    throw new Error("Unauthorized access");
+  }
+
+  const isSuspend = await isSuspended(userId);
+
+  if (isSuspend) {
+    throw new Error("Suspicious activity detected. Please try again later.");
+  }
+
   if (!isValidUsername(username)) {
     throw new Error("Invalid username");
   }
@@ -36,6 +48,16 @@ async function exploreFriends(_, { username }, context) {
 
 async function exploreChatFriend(_, { username }, context) {
   const userId = context.user.userId;
+
+  if (!userId) {
+    throw new Error("Unauthorized access");
+  }
+
+  const isSuspend = await isSuspended(userId);
+
+  if (isSuspend) {
+    throw new Error("Suspicious activity detected. Please try again later.");
+  }
 
   if (!isValidUsername(username)) {
     throw new Error("Invalid username");
@@ -102,6 +124,17 @@ async function exploreChatFriend(_, { username }, context) {
 
 async function friendList(_, obj, context) {
   const userId = context.user.userId;
+
+  if (!userId) {
+    throw new Error("Unauthorized access");
+  }
+
+  const isSuspend = await isSuspended(userId);
+
+  if (isSuspend) {
+    throw new Error("Suspicious activity detected. Please try again later.");
+  }
+
   const friendships = await prisma.friendship.findMany({
     where: {
       status: "ACCEPTED",
@@ -144,6 +177,17 @@ async function friendList(_, obj, context) {
 
 async function friendRequestList(_, obj, context) {
   const userId = context.user.userId;
+
+  if (!userId) {
+    throw new Error("Unauthorized access");
+  }
+
+  const isSuspend = await isSuspended(userId);
+
+  if (isSuspend) {
+    throw new Error("Suspicious activity detected. Please try again later.");
+  }
+
   const requests = await prisma.friendship.findMany({
     where: { friendId: userId, status: "PENDING" },
     select: {

@@ -4,10 +4,11 @@ const {
   findUserById,
   userRecord,
   updateProifle,
-  isSuspiciousLogin,
   createLoginAttempt,
   blockUser,
   alterAvatar,
+  isSuspiciousLogin,
+  isSuspended,
 } = require("../utils/user.config");
 const { comparePassword } = require("../utils/passKey");
 const { genToken } = require("../utils/auth");
@@ -31,6 +32,11 @@ async function loginUser(_, { email, password }, context) {
     if (!user) {
       console.log("Validation Error:", "User not found");
       throw new Error("User not found");
+    }
+
+    if (user.status !== "ACTIVE") {
+      console.log("Validation Error:", "User account is not active");
+      throw new Error("User account is not active, Please contact support.");
     }
 
     const now = new Date();
@@ -125,9 +131,15 @@ async function createUser(_, { name, email, password }, context) {
 async function updateUserData(_, { name, username, bio }, context) {
   const userId = context.user.userId;
 
-  console.log(bio);
+  // console.log(bio);
 
   try {
+    const isSuspend = await isSuspended(userId);
+
+    if (isSuspend) {
+      throw new Error("Suspicious activity detected. Please try again later.");
+    }
+
     const payload = await updateProifle(userId, name, username, bio);
     return payload;
   } catch (error) {
@@ -139,14 +151,20 @@ async function updateUserData(_, { name, username, bio }, context) {
 async function updateAvatar(_, { file }, context) {
   const userId = context.user.userId;
 
-  if (!userId) {
-    throw new Error("Unauthorized");
-  }
-
-  const uploadedFile = await file;
-
-  console.log(file);
+  // console.log(file);
   try {
+    if (!userId) {
+      throw new Error("Unauthorized");
+    }
+
+    const isSuspend = await isSuspended(userId);
+
+    if (isSuspend) {
+      throw new Error("Suspicious activity detected. Please try again later.");
+    }
+
+    const uploadedFile = await file;
+
     const { createReadStream } = uploadedFile;
 
     if (typeof createReadStream !== "function") {
@@ -183,9 +201,29 @@ async function updateAvatar(_, { file }, context) {
 async function userData(_, obj, context) {
   const userId = context.user.userId;
 
-  const payload = findUserById(userId);
+  try {
+    if (!userId) {
+      throw new Error("Unauthorized");
+    }
 
-  return payload;
+    const isSuspend = await isSuspended(userId);
+
+    if (isSuspend) {
+      throw new Error("Suspicious activity detected. Please try again later.");
+    }
+
+    const payload = findUserById(userId);
+
+    if (!payload) {
+      throw new Error("User not found");
+    }
+
+    return payload;
+  } catch (error) {
+    console.log("Error fetching user data", error);
+    // throw new Error("[500 Server Error]:", error.message);
+    throw new Error(error.message);
+  }
 }
 
 module.exports = {
