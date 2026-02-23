@@ -1,6 +1,10 @@
 import { Outlet, Link, Navigate, useNavigate } from "react-router-dom";
-import { updateCurrentUser, type userObj } from "../redux/user/userSlice";
-import { CHATMSG_SUBS, NOTIFICATION_SUBSCRIPTION } from "../config";
+import {
+  logOut,
+  updateCurrentUser,
+  type userObj,
+} from "../redux/user/userSlice";
+import { CHATMSG_SUBS, logOutMe, NOTIFICATION_SUBSCRIPTION } from "../config";
 import { useEffect, useState } from "react";
 import { useQuery, useSubscription } from "@apollo/client/react";
 import { useDispatch, useSelector } from "react-redux";
@@ -113,7 +117,12 @@ function IndexPage() {
 
   useEffect(() => {
     if (userLoading) console.log("User data loading...");
-    if (userError) console.log("User data error: ", userError.message);
+    if (userError) {
+      console.log("User data error: ", userError.message);
+      alert(userError.message);
+      logOutMe();
+      dispatch(logOut());
+    }
     if (userData?.userData) {
       // console.log("User data fetched: ", userData.userData);
       dispatch(updateCurrentUser(userData));

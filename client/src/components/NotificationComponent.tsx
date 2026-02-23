@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 type NotificationItem = {
   sender: {
     username: string;
+    name: string;
     profile: {
       avatarUrl: string;
     };
@@ -29,7 +30,10 @@ function NotificationComponent() {
 
   useEffect(() => {
     if (loading) console.log("Query is loading...");
-    if (error) console.log("Query Error", error);
+    if (error) {
+      console.log("Query Error", error.message);
+      alert(error.message);
+    }
     if (data) {
       // console.log("Query data:", data.retrieveNotification);
       setNotificationLength(data.retrieveNotification.length);
@@ -67,7 +71,7 @@ function NotificationComponent() {
                 {/* Content */}
                 <div className="flex flex-col flex-1">
                   <h3 className="text-base not-md:text-[13px] capitalize font-bold text-gray-900">
-                    {item.sender.username}
+                    {item.sender.name}
                   </h3>
                   <p className="text-sm not-md:text-[11px] capitalize text-gray-600 leading-snug">
                     {item.content}

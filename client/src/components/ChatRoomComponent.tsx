@@ -74,8 +74,12 @@ function ChatRoomComponent() {
 
   useEffect(() => {
     // console.log(chatRoomData?.chatRoomList);
+    if (chatRoomError) {
+      console.log("Chat Room List Error", chatRoomError.message);
+      alert(chatRoomError.message);
+    }
     if (chatRoomData?.chatRoomList) setChatRoomList(chatRoomData?.chatRoomList);
-  }, [chatRoomData]);
+  }, [chatRoomData, chatRoomError]);
 
   const handleChat = async (id: string | null) => {
     const payload = await chatData({ variables: { friendshipId: id } });

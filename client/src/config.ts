@@ -7,6 +7,11 @@ export const isValidEmail = (email: string) => {
   return regex.test(email);
 };
 
+export const logOutMe = () => {
+  window.sessionStorage.clear();
+  window.localStorage.clear();
+};
+
 export const NOTIFICATION_SUBSCRIPTION = gql`
   subscription ($userId: String!) {
     subNotify(userId: $userId) {
@@ -30,7 +35,7 @@ export const NOTIFICATION_SUBSCRIPTION = gql`
 `;
 
 export const CHATMSG_SUBS = gql`
-  subscription($userId: String!) {
+  subscription ($userId: String!) {
     chatMsg(userId: $userId) {
       id
       userId

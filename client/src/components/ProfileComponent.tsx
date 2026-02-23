@@ -9,6 +9,7 @@ import imageCompression from "browser-image-compression";
 import { Camera } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { logOut, updateAvatarUrl, type userObj } from "../redux/user/userSlice";
+import { logOutMe } from "../config";
 // import { useNavigate } from "react-router-dom";
 
 interface UserData {
@@ -149,8 +150,7 @@ function ProfileComponent() {
   };
 
   const handleLogOut = () => {
-    window.sessionStorage.clear();
-    window.localStorage.clear();
+    logOutMe();
     dispatch(logOut());
   };
 
