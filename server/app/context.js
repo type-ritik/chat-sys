@@ -1,5 +1,5 @@
-const { pubsub } = require("./data/pubsub");
-const { prisma } = require("./data/prisma");
+// const { pubsub } = require("./data/pubsub");
+// const { prisma } = require("./data/prisma");
 const { verifyToken } = require("./utils/auth");
 
 // Context function to provide context to resolvers
