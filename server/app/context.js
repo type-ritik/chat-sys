@@ -7,15 +7,25 @@ const { verifyToken } = require("./utils/auth");
 const getContext = async ({ req, res }) => {
   const token = req.headers.authorization || null;
 
-  const user = token ? verifyToken(token) : null;
+  if (req.body.operationName.toString() == "CreateNewAccessToken") {
+    return {
+      // prisma, // DB client
+      // pubsub, // Redis pub/sub instance
+      // Current authenticated user
+      req,
+      res, // Access request/response if needed
+    };
+  } else {
+    const user = token ? verifyToken(token) : null;
 
-  return {
-    // prisma, // DB client
-    // pubsub, // Redis pub/sub instance
-    user, // Current authenticated user
-    req,
-    res, // Access request/response if needed
-  };
+    return {
+      // prisma, // DB client
+      // pubsub, // Redis pub/sub instance
+      user, // Current authenticated user
+      req,
+      res, // Access request/response if needed
+    };
+  }
 };
 
 module.exports = { getContext };

@@ -11,7 +11,11 @@ const {
   isSuspended,
 } = require("../utils/user.config");
 const { comparePassword } = require("../utils/passKey");
-const { genToken } = require("../utils/auth");
+const {
+  genToken,
+  genRefreshToken,
+  verifyRefreshToken,
+} = require("../utils/auth");
 const cloudinary = require("../config/cloudinary");
 
 // User Login
@@ -72,6 +76,22 @@ async function loginUser(_, { email, password }, context) {
 
     const token = genToken(user.id, user.isAdmin);
 
+    if (!token) {
+      throw new Error("Failed to generate access token");
+    }
+
+    const refreshToken = genRefreshToken(user.id, user.isAdmin);
+
+    if (!refreshToken) {
+      throw new Error("Failed to generate refresh token");
+    }
+
+    context.res.cookie("refreshToken", refreshToken, {
+      httpOnly: true, // Makes the cookie inaccessible to client-side scripts
+      secure: process.env.NODE_ENV === "production", // Ensure the cookie is sent over HTTPS in production
+      maxAge: 32 * 60 * 1000, // Cookie expiration after 32 minutest
+    });
+
     return { ...user, token };
   } catch (error) {
     console.log("Error login user", error.message);
@@ -116,6 +136,22 @@ async function createUser(_, { name, email, password }, context) {
 
     // 4. Generate token
     const token = genToken(user.id, user.isAdmin);
+
+    if (!token) {
+      throw new Error("Failed to generate access token");
+    }
+
+    const refreshToken = genRefreshToken(user.id, user.isAdmin);
+
+    if (!refreshToken) {
+      throw new Error("Failed to generate refresh token");
+    }
+
+    context.res.cookie("refreshToken", refreshToken, {
+      httpOnly: true, // Makes the cookie inaccessible to client-side scripts
+      secure: process.env.NODE_ENV === "production", // Ensure the cookie is sent over HTTPS in production
+      maxAge: 32 * 60 * 1000, // Cookie expiration after 32 minutest
+    });
 
     // 5. Return final response
     return {
@@ -226,10 +262,60 @@ async function userData(_, obj, context) {
   }
 }
 
+async function createNewAccessToken(_, obj, context) {
+  try {
+    const refreshToken = context.req.cookies?.refreshToken;
+    if (!refreshToken) {
+      throw new Error("Unauthorized");
+    }
+
+    if (!verifyRefreshToken(refreshToken)) {
+      throw new Error("Invalid refresh token");
+    }
+
+    const decoded = verifyRefreshToken(refreshToken);
+
+    const userId = decoded.userId;
+    const isAdmin = decoded.role;
+
+    const newToken = genToken(userId, isAdmin);
+
+    if (!newToken) {
+      throw new Error("Failed to generate access token");
+    }
+
+    const newRefreshToken = genRefreshToken(userId, refreshToken);
+
+    if (!newRefreshToken) {
+      throw new Error("Failed to generate refresh token");
+    }
+
+    const user = await findUserById(userId);
+
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    delete user.password;
+
+    context.res.cookie("refreshToken", newRefreshToken, {
+      httpOnly: true, // Makes the cookie inaccessible to client-side scripts
+      secure: process.env.NODE_ENV === "production", // Ensure the cookie is sent over HTTPS in production
+      maxAge: 32 * 60 * 1000, // Cookie expiration after 32 minutest
+    });
+
+    return { token: newToken, user };
+  } catch (error) {
+    console.log("Error refreshing access token", error.message);
+    throw new Error(error.message);
+  }
+}
+
 module.exports = {
   loginUser,
   createUser,
   userData,
   updateUserData,
   updateAvatar,
+  createNewAccessToken,
 };

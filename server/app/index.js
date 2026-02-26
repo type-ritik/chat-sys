@@ -10,6 +10,9 @@ const { ApolloServer } = require("@apollo/server");
 // Body parser
 const bodyParser = require("body-parser");
 
+// Cookie parser
+const cookieParser = require("cookie-parser");
+
 // For file upload
 const { graphqlUploadExpress } = require("graphql-upload-minimal");
 
@@ -38,6 +41,7 @@ async function startServer() {
   // Increase the size of json
   app.use(express.json({ limit: "10mb" }));
   app.use(express.urlencoded({ limit: "10mb", extended: true }));
+  app.use(cookieParser())
 
   app.use(graphqlUploadExpress());
 
