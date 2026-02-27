@@ -167,8 +167,6 @@ async function createUser(_, { name, email, password }, context) {
 async function updateUserData(_, { name, username, bio }, context) {
   const userId = context.user.userId;
 
-  // console.log(bio);
-
   try {
     const isSuspend = await isSuspended(userId);
 
@@ -265,12 +263,9 @@ async function userData(_, obj, context) {
 async function createNewAccessToken(_, obj, context) {
   try {
     const refreshToken = context.req.cookies?.refreshToken;
+
     if (!refreshToken) {
       throw new Error("Unauthorized");
-    }
-
-    if (!verifyRefreshToken(refreshToken)) {
-      throw new Error("Invalid refresh token");
     }
 
     const decoded = verifyRefreshToken(refreshToken);
@@ -284,7 +279,7 @@ async function createNewAccessToken(_, obj, context) {
       throw new Error("Failed to generate access token");
     }
 
-    const newRefreshToken = genRefreshToken(userId, refreshToken);
+    const newRefreshToken = genRefreshToken(userId, isAdmin);
 
     if (!newRefreshToken) {
       throw new Error("Failed to generate refresh token");
