@@ -7,6 +7,7 @@ export const fetchServer = async (payload: {
   // console.log(payload);
   const res = await fetch(baseUrl, {
     method: "POST",
+    credentials: "include",
     headers: {
       "Content-Type": "application/json",
     },

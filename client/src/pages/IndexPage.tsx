@@ -118,7 +118,6 @@ function IndexPage() {
   useEffect(() => {
     if (userLoading) console.log("User data loading...");
     if (userError) {
-      console.log("User data error: ", userError.message);
       alert(userError.message);
       logOutMe();
       dispatch(logOut());
