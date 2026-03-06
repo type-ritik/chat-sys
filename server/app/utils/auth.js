@@ -30,7 +30,7 @@ function genToken(userId, admin) {
       role: admin,
     },
     process.env.JWT_SECRET,
-    { expiresIn: "30min" },
+    { expiresIn: "50min" },
   );
 }
 
@@ -42,7 +42,7 @@ function genRefreshToken(userId, admin) {
         role: admin,
       },
       process.env.REFRESH_SECRET,
-      { expiresIn: "32min" },
+      { expiresIn: "1h" },
     );
   } catch (error) {
     console.error("Error generating refresh token:", error);

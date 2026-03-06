@@ -89,7 +89,7 @@ async function loginUser(_, { email, password }, context) {
     context.res.cookie("refreshToken", refreshToken, {
       httpOnly: true, // Makes the cookie inaccessible to client-side scripts
       secure: process.env.NODE_ENV === "production", // Ensure the cookie is sent over HTTPS in production
-      maxAge: 32 * 60 * 1000, // Cookie expiration after 32 minutest
+      maxAge: 60 * 60 * 1000, // Cookie expiration after 1hr
     });
 
     return { ...user, token };
@@ -150,7 +150,7 @@ async function createUser(_, { name, email, password }, context) {
     context.res.cookie("refreshToken", refreshToken, {
       httpOnly: true, // Makes the cookie inaccessible to client-side scripts
       secure: process.env.NODE_ENV === "production", // Ensure the cookie is sent over HTTPS in production
-      maxAge: 32 * 60 * 1000, // Cookie expiration after 32 minutest
+      maxAge: 60 * 60 * 1000, // Cookie expiration after 32 minutest
     });
 
     // 5. Return final response
@@ -296,7 +296,7 @@ async function createNewAccessToken(_, obj, context) {
     context.res.cookie("refreshToken", newRefreshToken, {
       httpOnly: true, // Makes the cookie inaccessible to client-side scripts
       secure: process.env.NODE_ENV === "production", // Ensure the cookie is sent over HTTPS in production
-      maxAge: 32 * 60 * 1000, // Cookie expiration after 32 minutest
+      maxAge: 60 * 60 * 1000, // Cookie expiration after 1hr
     });
 
     return { token: newToken, user };
