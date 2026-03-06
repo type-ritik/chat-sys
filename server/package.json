@@ -20,6 +20,7 @@
     "bcrypt": "^6.0.0",
     "body-parser": "^2.2.2",
     "cloudinary": "^2.9.0",
+    "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^17.2.2",
     "express": "^4.21.2",

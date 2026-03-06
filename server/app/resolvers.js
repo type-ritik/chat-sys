@@ -4,6 +4,7 @@ const {
   userData,
   updateUserData,
   updateAvatar,
+  createNewAccessToken,
 } = require("./services/UserAccountService");
 const {
   exploreFriends,
@@ -18,7 +19,7 @@ const {
   chatMessageList,
   chatCellData,
 } = require("./services/chatServices");
-const {GraphQLUpload} = require('graphql-upload-minimal');
+const { GraphQLUpload } = require("graphql-upload-minimal");
 const { pubsub } = require("./data/pubsub");
 const { followFriend, followResponse } = require("./services/FollowFriend");
 const { retrieveNotification } = require("./services/Notification");
@@ -88,6 +89,7 @@ const resolvers = {
     updateUserData,
     updateAvatar,
     adminActionOnUserAvalability,
+    createNewAccessToken,
   },
 
   Subscription: {

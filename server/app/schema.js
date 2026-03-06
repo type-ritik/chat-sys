@@ -74,6 +74,11 @@ const typeDefs = gql`
     timestamp: DateTime
   }
 
+  type NewTokenPayload {
+    token: String!
+    user: User
+  }
+
   type ChatMsgPayload {
     id: ID!
     userId: String!
@@ -154,6 +159,7 @@ const typeDefs = gql`
     updateUserData(name: String, username: String, bio: String): UserProfile
     updateAvatar(file: Upload): Profile
     adminActionOnUserAvalability(userId: String!, action: String!): User
+    createNewAccessToken: NewTokenPayload!
   }
 
   type Subscription {
