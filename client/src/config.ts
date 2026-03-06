@@ -1,6 +1,7 @@
 import { gql } from "@apollo/client";
 
-export const baseUrl = "https://type-ritik-chat-sys-api.onrender.com/graphql";
+// export const baseUrl = "";
+export const baseUrl = import.meta.env.VITE_SERVER_BASE_URL;
 
 export const isValidEmail = (email: string) => {
   const regex = /^[a-zA-Z]{1,}[\d?\D]{1,}[@]{1}[a-z]{2,}.[com]{3}$/g;
