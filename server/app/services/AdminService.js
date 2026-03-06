@@ -145,9 +145,11 @@ async function adminActionOnUserAvalability(_, { userId, action }, context) {
     throw new Error("Define action");
   }
 
-  if (action !== "SUSPEND" || action !== "UNSUSPEND") {
+  if (action !== "SUSPEND" && action !== "UNSUSPEND") {
     throw new Error("Invalid action");
   }
+
+  console.log(`ID: ${userId}, Response: ${action}`);
 
   try {
     if (action === "SUSPEND") {
@@ -159,7 +161,7 @@ async function adminActionOnUserAvalability(_, { userId, action }, context) {
     }
   } catch (error) {
     console.log("Error suspending user:", error.message);
-    throw new Error("Error suspending user");
+    throw new Error(error.message);
   }
 }
 
