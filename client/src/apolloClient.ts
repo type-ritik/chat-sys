@@ -1,4 +1,4 @@
-import { ApolloClient, gql, InMemoryCache, split } from "@apollo/client";
+import { ApolloClient, InMemoryCache, split } from "@apollo/client";
 import { GraphQLWsLink } from "@apollo/client/link/subscriptions";
 import { createClient } from "graphql-ws";
 import createUploadLink from "apollo-upload-client/UploadHttpLink.mjs";
@@ -6,7 +6,6 @@ import { getMainDefinition, Observable } from "@apollo/client/utilities";
 import { baseUrl } from "./config";
 import { ApolloLink } from "@apollo/client";
 import { onError } from "@apollo/client/link/error";
-import { c } from "@apollo/client/react/internal/compiler-runtime";
 
 // 1. HTTP link for queries & mutation
 // const httpLink = new HttpLink({
@@ -91,7 +90,9 @@ const uploadLink = new createUploadLink({
 const errorLink = onError((obj) => {
   const { operation, forward, networkError } = obj;
   if (obj.error) {
-    for (let err of obj.error.errors) {
+    if (obj.error.errors[0]) {
+      // console.log(obj.error.errors[0]);
+      const err = obj.error.errors[0];
       // Check the extensions code we set in getContext
       if (
         err.extensions?.code === "UNAUTHORIZED" ||
@@ -126,7 +127,8 @@ const errorLink = onError((obj) => {
     "statusCode" in networkError &&
     networkError.statusCode === 401
   ) {
-    for (let err of obj.error.errors) {
+    if (obj.error.errors[0]) {
+      const err = obj.error.errors[0];
       // Check the extensions code we set in getContext
       if (
         err.extensions?.code === "UNAUTHORIZED" ||
