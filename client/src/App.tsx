@@ -9,6 +9,7 @@ import NotificationComponent from "./components/NotificationComponent";
 import FriendsComponent from "./components/FriendsComponent";
 import ChatComponent from "./components/ChatComponent";
 import ProfileComponent from "./components/ProfileComponent";
+import NotFound from "./pages/NotFound";
 
 function App() {
   return (
@@ -26,6 +27,7 @@ function App() {
           <Route path="notification" element={<NotificationComponent />} />
           <Route path="friends/chat/:id" element={<ChatComponent />} />
           <Route path="friends" element={<FriendsComponent />} />
+          <Route path="*" element={<NotFound />} />
         </Route>
       </Routes>
     </>
