@@ -82,7 +82,8 @@ async function startServer() {
     "/graphql",
     cors({
       credentials: true,
-      origin: process.env.CLIENT_PRODUCTION || "http://localhost:5173",
+      origin: process.env.CLIENT_PRODUCTION,
+      optionsSuccessStatus: 200,
     }),
     express.json(),
     bodyParser.json(),
