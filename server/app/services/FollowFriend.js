@@ -33,9 +33,75 @@ async function followFriend(_, { friendId }, context) {
     throw new Error("You cannot follow yourself.");
   }
 
-  // Check if both users exist
-  const sender = await findUserById(userId);
-  const receiver = await findUserById(friendId);
+  try {
+    const existingFriendship = await prisma.friendship.findFirst({
+      where: {
+        OR: [
+          { userId: userId, friendId: friendId },
+          { userId: friendId, friendId: userId },
+        ],
+      },
+    });
+
+    if (existingFriendship) {
+      throw new Error("You already have a follow relationship with this user.");
+    }
+
+    // Check if both users exist
+    const sender = await findUserById(userId);
+    const receiver = await findUserById(friendId);
+
+    const follow = await prisma.friendship.create({
+      data: {
+        userId: sender.id,
+        friendId: receiver.id,
+        status: "PENDING",
+      },
+    });
+
+    // console.log("Friendship record created:", follow);
+
+    //   Notify the friend about the follow request (implementation depends on your notification system)
+    const notification = await prisma.message.create({
+      data: {
+        content: `${sender.username} has sent you a follow request.`,
+        senderId: sender.id,
+        receiverId: receiver.id,
+        requestedId: follow.id,
+        isSeen: false,
+      },
+      include: {
+        sender: {
+          select: {
+            username: true,
+            name: true,
+          },
+        },
+        receiver: {
+          select: {
+            username: true,
+            name: true,
+          },
+        },
+      },
+    });
+
+    // console.log("Notification record created:", notification);
+
+    // Publish the notification to subscribers (if using subscriptions)
+    pubsub.publish(`NOTIFICATIONS:${receiver.id}`, {
+      subNotify: notification,
+    });
+
+    // console.log("Notification is live-on user:", sender.username);
+
+    return true;
+  } catch (error) {
+    console.error("Error in followFriend:", error);
+    throw new Error(
+      error.message || "An error occurred while trying to follow the user.",
+    );
+  }
 
   // const sender = await prisma.user.findUnique({ where: { id: userId } }); // Sender
   // const receiver = await prisma.user.findUnique({ where: { id: friendId } }); // Receiver
@@ -46,51 +112,6 @@ async function followFriend(_, { friendId }, context) {
   // }
 
   // Create a follow relationship
-  const follow = await prisma.friendship.create({
-    data: {
-      userId: sender.id,
-      friendId: receiver.id,
-      status: "PENDING",
-    },
-  });
-
-  // console.log("Friendship record created:", follow);
-
-  //   Notify the friend about the follow request (implementation depends on your notification system)
-  const notification = await prisma.message.create({
-    data: {
-      content: `${sender.username} has sent you a follow request.`,
-      senderId: sender.id,
-      receiverId: receiver.id,
-      requestedId: follow.id,
-      isSeen: false,
-    },
-    include: {
-      sender: {
-        select: {
-          username: true,
-          name: true,
-        },
-      },
-      receiver: {
-        select: {
-          username: true,
-          name: true,
-        },
-      },
-    },
-  });
-
-  // console.log("Notification record created:", notification);
-
-  // Publish the notification to subscribers (if using subscriptions)
-  pubsub.publish(`NOTIFICATIONS:${receiver.id}`, {
-    subNotify: notification,
-  });
-
-  // console.log("Notification is live-on user:", sender.username);
-
-  return true;
 }
 
 // Everything related to following friends
