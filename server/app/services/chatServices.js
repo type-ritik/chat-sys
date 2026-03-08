@@ -72,25 +72,24 @@ async function sendMessage(_, { chatRoomId, text }, context) {
       throw new Error("ChatRoom not found");
     }
 
-    if (
-      isSuspended(
-        chatRoomPayload.friendship.friendId === userId
-          ? chatRoomPayload.friendship.userId
-          : chatRoomPayload.friendship.friendId,
-      )
-    ) {
+    const receiverId =
+      userId === chatRoomPayload.friendship.friend.id
+        ? chatRoomPayload.friendship.user.id
+        : chatRoomPayload.friendship.friend.id;
+
+    if (isSuspended(receiverId)) {
       throw new Error(
         "The recipient is suspended from receiving messages. Please contact support.",
       );
     }
 
     // Remove unwanted payload from chatRoomPayload
-    delete chatRoomPayload.friendship.friendId;
-    delete chatRoomPayload.friendship.userId;
-    delete chatRoomPayload.friendship.status;
-    delete chatRoomPayload.createdAt;
-    delete chatRoomPayload.friendshipId;
-    delete chatRoomPayload.id;
+    // delete chatRoomPayload.friendship.friendId;
+    // delete chatRoomPayload.friendship.userId;
+    // delete chatRoomPayload.friendship.status;
+    // delete chatRoomPayload.createdAt;
+    // delete chatRoomPayload.friendshipId;
+    // delete chatRoomPayload.id;
 
     console.log("chatRoomPayload ", chatRoomPayload);
 
@@ -179,21 +178,25 @@ async function sendMessage(_, { chatRoomId, text }, context) {
   }
 }
 
-async function chatRoomCell(_, { friendshipId }, context) {
+async function chatRoomCell(_, { friendId }, context) {
   const userId = context.user.userId;
 
   if (!userId) {
     throw new Error("Unauthorized access");
   }
 
-  if (!isValidUUID(friendshipId)) {
+  if (!isValidUUID(friendId)) {
     throw new Error("Invalid UUID");
   }
 
   // Find you are friend with userB
-  const friend = await prisma.friendship.findUnique({
+  const friend = await prisma.friendship.findFirst({
     where: {
-      id: friendshipId,
+      status: "ACCEPTED",
+      OR: [
+        { userId: userId, friendId: friendId },
+        { userId: friendId, friendId: userId },
+      ],
     },
   });
 
@@ -218,7 +221,7 @@ async function chatRoomCell(_, { friendshipId }, context) {
   // Check the chatRoom is exist using friendship id
   let chatRoom = await prisma.chatRoom.findFirst({
     where: {
-      friendshipId: friendshipId,
+      friendshipId: friend.id,
     },
   });
 
@@ -227,7 +230,7 @@ async function chatRoomCell(_, { friendshipId }, context) {
     // Create new ChatRoom
     chatRoom = await prisma.chatRoom.create({
       data: {
-        friendshipId: friendshipId,
+        friendshipId: friend.id,
       },
     });
   }
