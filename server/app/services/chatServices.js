@@ -77,7 +77,7 @@ async function sendMessage(_, { chatRoomId, text }, context) {
         ? chatRoomPayload.friendship.user.id
         : chatRoomPayload.friendship.friend.id;
 
-    if (isSuspended(receiverId)) {
+    if (!isSuspended(receiverId)) {
       throw new Error(
         "The recipient is suspended from receiving messages. Please contact support.",
       );
