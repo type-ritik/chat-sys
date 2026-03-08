@@ -11,8 +11,8 @@ import { gql } from "@apollo/client";
 // `
 
 export const CREATE_CHATROOM_CELL = gql`
-  mutation ChatRoomCell($friendshipId: String!) {
-    chatRoomCell(friendshipId: $friendshipId) {
+  mutation ChatRoomCell($friendId: String!) {
+    chatRoomCell(friendId: $friendId) {
       id
       friendshipId
       createdAt

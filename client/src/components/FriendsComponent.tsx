@@ -143,7 +143,7 @@ function FriendsComponent() {
 
     try {
       const { data } = await chatRoomCellData({
-        variables: { friendshipId: id },
+        variables: { friendId: id },
       });
 
       if (data) {
