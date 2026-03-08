@@ -155,7 +155,7 @@ const typeDefs = gql`
     createUser(name: String!, email: String!, password: String!): User!
     followFriend(friendId: String!): Boolean
     followResponse(friendshipId: String!, status: String!): Boolean
-    chatRoomCell(friendshipId: String!): ChatRoomPayloadData
+    chatRoomCell(friendId: String!): ChatRoomPayloadData
     updateUserData(name: String, username: String, bio: String): UserProfile
     updateAvatar(file: Upload): Profile
     adminActionOnUserAvalability(userId: String!, action: String!): User
