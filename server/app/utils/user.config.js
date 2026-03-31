@@ -179,14 +179,19 @@ async function findUserById(userId) {
 }
 
 async function findUserByEmail(email) {
-  const user = await prisma.user.findFirst({
-    where: { email },
-    include: {
-      profile: true,
-    },
-  });
+  try {
+    const user = await prisma.user.findFirst({
+      where: { email, status: "ACTIVE" },
+      include: {
+        profile: true,
+      },
+    });
 
-  return user;
+    return user;
+  } catch (error) {
+    console.error("Error finding user by email:", error.message);
+    throw new Error("Error finding user by email");
+  }
 }
 
 async function userRecord(name, email, password) {
@@ -308,15 +313,20 @@ async function retriveAuditLogs() {
 }
 
 // Is already suspended
-async function isSuspended(userId) {
+async function isSuspended(id) {
   const res = await prisma.user.findUnique({
-    where: { id: userId },
+    where: { id },
   });
 
-  if (res.status === "SUSPENDED") {
+  // console.log("Data is suspend: ", res);
+
+  if (res.status.toString().toUpperCase().match("SUSPENDED")) {
+    console.log("I am suspended");
     return true;
+  } else {
+    console.log("I am not suspended");
+    return false;
   }
-  return false;
 }
 
 // Suspend User

@@ -22,12 +22,20 @@ const cloudinary = require("../config/cloudinary");
 async function loginUser(_, { email, password }, context) {
   try {
     // User input validation
-    const validationErrors = validateAuthInput(email, password);
+    if (!validator.isEmail(email)) {
+      console.log("Validation Error:", "Invalid email format");
+      throw new Error("Validation Error:", "Invalid email format");
+    }
 
-    // If not valid, report "Validation Error" message
-    if (validationErrors.length > 0) {
-      console.log("Validation Error", validationErrors);
-      throw new Error(validationErrors);
+    if (!validator.isStrongPassword(password)) {
+      console.log(
+        "Validation Error:",
+        "Password does not meet strength requirements",
+      );
+      throw new Error(
+        "Validation Error:",
+        "Password does not meet strength requirements.",
+      );
     }
 
     // Find User by Email
@@ -36,11 +44,6 @@ async function loginUser(_, { email, password }, context) {
     if (!user) {
       console.log("Validation Error:", "User not found");
       throw new Error("User not found");
-    }
-
-    if (user.status !== "ACTIVE") {
-      console.log("Validation Error:", "User account is not active");
-      throw new Error("User account is not active, Please contact support.");
     }
 
     const now = new Date();
@@ -90,7 +93,7 @@ async function loginUser(_, { email, password }, context) {
       httpOnly: true, // Makes the cookie inaccessible to client-side scripts
       secure: process.env.NODE_ENV === "production", // Ensure the cookie is sent over HTTPS in production
       sameSite: "none",
-      partitioned: true,
+      // partitioned: true,
       maxAge: 60 * 60 * 1000, // Cookie expiration after 1hr
     });
 
@@ -153,7 +156,7 @@ async function createUser(_, { name, email, password }, context) {
       httpOnly: true, // Makes the cookie inaccessible to client-side scripts
       secure: process.env.NODE_ENV === "production", // Ensure the cookie is sent over HTTPS in production
       sameSite: "none",
-      partitioned: true,
+      // partitioned: true,
       maxAge: 60 * 60 * 1000, // Cookie expiration after 32 minutest
     });
 
@@ -301,7 +304,7 @@ async function createNewAccessToken(_, obj, context) {
       httpOnly: true, // Makes the cookie inaccessible to client-side scripts
       secure: process.env.NODE_ENV === "production", // Ensure the cookie is sent over HTTPS in production
       sameSite: "none",
-      partitioned: true,
+      // partitioned: true,
       maxAge: 60 * 60 * 1000, // Cookie expiration after 1hr
     });
 
