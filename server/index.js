@@ -9,11 +9,10 @@ const { makeExecutableSchema } = require("@graphql-tools/schema");
 
 const { typeDefs } = require("./app/schema");
 const { resolvers } = require("./app/resolvers");
+const { verifyToken } = require("./app/utils/auth");
+const { onlineUsers } = require("./app/structure/OnlineUser");
 
 async function main() {
-  // Connect to Database
-  // await connectToDatabase();
-
   // Start Express + Apollo
   const app = await startServer();
 
@@ -29,7 +28,70 @@ async function main() {
     path: "/graphql",
   });
 
-  useServer({ schema }, wsServer);
+  useServer(
+    {
+      schema,
+      onDisconnect: (ctx, code, reason) => {
+        const token = ctx.connectionParams.authToken;
+
+        const user = verifyToken(token);
+
+        if (!user) {
+          console.log("Unauthorized subscription attempt");
+          throw new Error("Unauthorized");
+        }
+
+        console.log("userData: ", user);
+
+        const userId = user.userId;
+
+        if (onlineUsers.findUser(userId)) {
+          onlineUsers.removeUser(userId);
+        }
+        console.log("User is Offline:", userId);
+      },
+      onSubscribe: (ctx) => {
+        const token = ctx.connectionParams.authToken;
+
+        const user = verifyToken(token);
+
+        if (!user) {
+          console.log("Unauthorized subscription attempt");
+          throw new Error("Unauthorized");
+        }
+
+        console.log("userData: ", user);
+
+        const userId = user.userId;
+
+        if (onlineUsers.findUser(userId)) {
+          console.log("User already online:", userId);
+          return;
+        }
+
+        onlineUsers.addUser(userId);
+        console.log("User is Online:", userId);
+      },
+      context: async (ctx, msg, args) => {
+        const token = ctx.connectionParams.authToken;
+
+        if (!token) {
+          console.log("No auth token provided for subscription");
+          throw new Error("Unauthorized");
+        }
+
+        const user = verifyToken(token);
+        if (!user) {
+          console.log("Invalid auth token for subscription");
+          throw new Error("Unauthorized");
+        }
+        return {
+          user, // Add authenticated user to context for resolvers
+        };
+      },
+    },
+    wsServer,
+  );
 
   // Start the server
   httpServer.listen(PORT, () => {

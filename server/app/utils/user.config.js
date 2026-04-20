@@ -166,26 +166,37 @@ function validateAuthInput(email, password) {
 }
 
 async function findUserById(userId) {
-  const user = await prisma.user.findFirst({
-    where: {
-      id: userId,
-    },
-    include: {
-      profile: true,
-    },
-  });
+  const user = await prisma.user
+    .findFirst({
+      where: {
+        id: userId,
+        status: "ACTIVE",
+      },
+      include: {
+        profile: true,
+      },
+    })
+    .catch((error) => {
+      console.error("Error finding user by ID:", error.message);
+      throw new Error("Error finding user by ID");
+    });
 
   return user;
 }
 
 async function findUserByEmail(email) {
   try {
-    const user = await prisma.user.findFirst({
-      where: { email, status: "ACTIVE" },
-      include: {
-        profile: true,
-      },
-    });
+    const user = await prisma.user
+      .findFirst({
+        where: { email, status: "ACTIVE" },
+        include: {
+          profile: true,
+        },
+      })
+      .catch((error) => {
+        console.error("Error finding user by email:", error.message);
+        throw new Error("Error finding user by email");
+      });
 
     return user;
   } catch (error) {
@@ -196,38 +207,42 @@ async function findUserByEmail(email) {
 
 async function userRecord(name, email, password) {
   try {
-    const newUser = await prisma.user.create({
-      data: {
-        name,
-        email,
-        password: await hashPassword(password),
-        username: email.split("@")[0],
-        isAdmin: false,
-        profile: {
-          create: {
-            avatarUrl:
-              "https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg",
-            isActive: true,
-            bio: `Hi there, This is ${name}`,
+    const newUser = await prisma.user
+      .create({
+        data: {
+          name,
+          email,
+          password: await hashPassword(password),
+          username: email.split("@")[0],
+          isAdmin: false,
+          profile: {
+            create: {
+              avatarUrl:
+                "https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg",
+              isActive: true,
+              bio: `Hi there, This is ${name}`,
+            },
           },
         },
-      },
-      include: {
-        profile: true,
-      },
-    });
+        include: {
+          profile: true,
+        },
+      })
+      .catch((error) => {
+        console.error("Error creating user:", error.message);
+        throw new Error("Error creating user: ", error.meta.target[0]);
+      });
 
-    return { user: newUser };
-  } catch (err) {
-    console.error("User creation failed:", err.message);
-    return { error: "Database error creating user" };
+    console.log("User email: ", newUser.email);
+
+    delete newUser.password;
+    delete newUser.profile.userId;
+
+    return newUser;
+  } catch (error) {
+    console.error("User creation failed with", error.message);
+    throw new Error(error.message);
   }
-}
-
-async function isValidUsername(username) {
-  return (
-    typeof username === "string" && username.length > 2 && username.length < 20
-  );
 }
 
 async function isSuspiciousLogin(userId) {
@@ -373,7 +388,6 @@ module.exports = {
   findUserByEmail,
   findUserById,
   validateAuthInput,
-  isValidUsername,
   createLoginAttempt,
   isValidUUID,
   isSuspiciousLogin,

@@ -30,6 +30,7 @@ const { getContext } = require("./context");
 
 // Redis Client
 const { redisClient } = require("./data/pubsub");
+const { onlineUsers } = require("./structure/OnlineUser");
 
 // Start Http and Apollo server
 async function startServer() {
@@ -82,7 +83,7 @@ async function startServer() {
     "/graphql",
     cors({
       credentials: true,
-      origin: process.env.CLIENT_PRODUCTION,
+      origin: process.env.CLIENT_DEVELOPMENT,
       optionsSuccessStatus: 200,
     }),
     express.json(),

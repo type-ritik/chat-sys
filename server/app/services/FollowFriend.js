@@ -17,18 +17,6 @@ async function followFriend(_, { friendId }, context) {
     throw new Error("Invalid UUID");
   }
 
-  const isUserSuspend = await isSuspended(userId);
-
-  if (isUserSuspend) {
-    throw new Error("Suspicious activity detected. Please try again later.");
-  }
-
-  const isFriendSuspend = await isSuspended(friendId);
-
-  if (isFriendSuspend) {
-    throw new Error("Suspicious activity detected. Please try again later.");
-  }
-
   if (friendId === userId) {
     throw new Error("You cannot follow yourself.");
   }
@@ -37,8 +25,26 @@ async function followFriend(_, { friendId }, context) {
     const existingFriendship = await prisma.friendship.findFirst({
       where: {
         OR: [
-          { userId: userId, friendId: friendId },
-          { userId: friendId, friendId: userId },
+          {
+            userId: userId,
+            friendId: friendId,
+            friend: {
+              status: "ACTIVE",
+            },
+            user: {
+              status: "ACTIVE",
+            },
+          },
+          {
+            userId: friendId,
+            friendId: userId,
+            friend: {
+              status: "ACTIVE",
+            },
+            user: {
+              status: "ACTIVE",
+            },
+          },
         ],
       },
     });
@@ -48,14 +54,19 @@ async function followFriend(_, { friendId }, context) {
     }
 
     // Check if both users exist
-    const sender = await findUserById(userId);
-    const receiver = await findUserById(friendId);
 
     const follow = await prisma.friendship.create({
       data: {
-        userId: sender.id,
-        friendId: receiver.id,
+        userId,
+        friendId,
         status: "PENDING",
+      },
+      include: {
+        user: {
+          select: {
+            username: true,
+          },
+        },
       },
     });
 
@@ -64,32 +75,18 @@ async function followFriend(_, { friendId }, context) {
     //   Notify the friend about the follow request (implementation depends on your notification system)
     const notification = await prisma.message.create({
       data: {
-        content: `${sender.username} has sent you a follow request.`,
-        senderId: sender.id,
-        receiverId: receiver.id,
+        content: `${follow.user.username} has sent you a follow request.`,
+        senderId: follow.userId,
+        receiverId: follow.friendId,
         requestedId: follow.id,
         isSeen: false,
-      },
-      include: {
-        sender: {
-          select: {
-            username: true,
-            name: true,
-          },
-        },
-        receiver: {
-          select: {
-            username: true,
-            name: true,
-          },
-        },
       },
     });
 
     // console.log("Notification record created:", notification);
 
     // Publish the notification to subscribers (if using subscriptions)
-    pubsub.publish(`NOTIFICATIONS:${receiver.id}`, {
+    pubsub.publish(`NOTIFICATIONS:${follow.friendId}`, {
       subNotify: notification,
     });
 
@@ -102,116 +99,69 @@ async function followFriend(_, { friendId }, context) {
       error.message || "An error occurred while trying to follow the user.",
     );
   }
-
-  // const sender = await prisma.user.findUnique({ where: { id: userId } }); // Sender
-  // const receiver = await prisma.user.findUnique({ where: { id: friendId } }); // Receiver
-
-  // if (!sender || !receiver) {
-  //   // Are both valid id
-  //   throw new Error("Invalid Credential");
-  // }
-
-  // Create a follow relationship
 }
 
 // Everything related to following friends
 async function followResponse(_, { friendshipId, status }, context) {
   const userId = context.user.userId;
-  // Check if friend record is valid
 
+  // Check if friend record is valid
   if (!userId) {
     throw new Error("Unauthorized access");
   }
 
-  const isSuspend = await isSuspended(userId);
-
-  if (isSuspend) {
-    throw new Error("Suspicious activity detected. Please try again later.");
-  }
-
-  if (!isValidUUID(friendshipId)) {
-    throw new Error("Invalid UUID");
-  }
-  const friend = await prisma.friendship.findUnique({
-    where: {
-      id: friendshipId,
-    },
-  });
-
-  // console.log("Friend: ", friend);
-
-  // If record is invalid
-  if (!friend) {
-    console.log(`Invalid Credential`);
-    throw new Error("Invalid Credential");
-  }
-
-  // Update the friend record Status - ["ACCEPTED", "REJECTED"]
-  if (status !== "ACCEPTED") {
-    await prisma.friendship.delete({
+  const friends = await prisma.friendship
+    .update({
       where: {
         id: friendshipId,
-      },
-    });
-    console.log("Rejected here!");
-  } else {
-    await prisma.friendship.update({
-      where: {
-        id: friendshipId,
+        user: {
+          status: "ACTIVE",
+        },
+        friend: {
+          status: "ACTIVE",
+        },
       },
       data: {
         status: status,
       },
+
+      include: {
+        friend: {
+          select: {
+            username: true,
+          },
+        },
+        user: {
+          select: {
+            username: true,
+          },
+        },
+      },
+    })
+    .catch((error) => {
+      console.error("Error fetching friendship record:", error.message);
+      throw new Error("Error fetching friendship record");
     });
-    console.log("Accepted here!");
-  }
-
-  console.log("Friendship record is updated");
-
-  // Retrieve Friend Record include Sender record
-  const friendPayload = await prisma.user.findUnique({
-    where: {
-      id: friend.userId,
-    },
-  });
-
-  const userPayload = await prisma.user.findUnique({
-    where: {
-      id: userId,
-    },
-  });
-
-  console.log("User record is retrieved");
 
   // Create notification for Sender for request update
   const notify = await prisma.message.create({
     data: {
-      content: `${userPayload.username} has ${status} your follow request.`,
+      content: `${friends.friend.username} has ${status} your follow request.`,
       senderId: userId,
-      requestedId: userPayload.id,
-      receiverId: friendPayload.id,
+      requestedId: friends.id,
+      receiverId: friends.userId,
       isSeen: false,
-    },
-    include: {
-      sender: {
-        select: {
-          username: true,
-          name: true,
-        },
-      },
     },
   });
 
-  console.log("Notification is record is created");
-
   // Publish Notification to Sender
-  pubsub.publish(`NOTIFICATIONS:${friendPayload.id}`, {
+  pubsub.publish(`NOTIFICATIONS:${friends.userId}`, {
     subNotify: notify,
   });
 
   console.log(
     "Notification sent to user: ",
-    friendPayload.username,
+    friends.user.username,
     "Successfully.",
   );
 
