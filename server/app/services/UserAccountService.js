@@ -1,5 +1,4 @@
 const {
-  validateAuthInput,
   findUserByEmail,
   findUserById,
   userRecord,
@@ -7,8 +6,6 @@ const {
   createLoginAttempt,
   blockUser,
   alterAvatar,
-  isSuspiciousLogin,
-  isSuspended,
 } = require("../utils/user.config");
 const { comparePassword } = require("../utils/passKey");
 const {
@@ -18,6 +15,7 @@ const {
 } = require("../utils/auth");
 const cloudinary = require("../config/cloudinary");
 const validator = require("../utils/validator");
+const { GraphQLError } = require("graphql");
 
 // User Login
 async function loginUser(_, { email, password }, context) {
@@ -223,11 +221,12 @@ async function updateAvatar(_, { file }, context) {
 async function userData(_, obj, context) {
   const userId = context.user.userId;
 
+  if (!userId) {
+    throw new GraphQLError("Not authenticated", {
+      extensions: { code: "UNAUTHORIZED" },
+    });
+  }
   try {
-    if (!userId) {
-      throw new Error("Unauthorized");
-    }
-
     const payload = findUserById(userId);
 
     return payload;

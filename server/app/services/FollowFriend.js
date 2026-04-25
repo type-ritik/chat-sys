@@ -1,19 +1,19 @@
+const { GraphQLError } = require("graphql");
 const { prisma } = require("../data/prisma");
 const { pubsub } = require("../data/pubsub");
-const {
-  isValidUUID,
-  findUserById,
-  isSuspended,
-} = require("../utils/user.config");
+const { findUserById } = require("../utils/user.config");
+const validator = require("../utils/validator");
 
 async function followFriend(_, { friendId }, context) {
   const userId = context.user.userId;
 
   if (!userId) {
-    throw new Error("Unauthorized access");
+    throw new GraphQLError("Not authenticated", {
+      extensions: { code: "UNAUTHORIZED" },
+    });
   }
 
-  if (!isValidUUID(friendId)) {
+  if (!validator.isUUID(friendId)) {
     throw new Error("Invalid UUID");
   }
 
@@ -107,7 +107,9 @@ async function followResponse(_, { friendshipId, status }, context) {
 
   // Check if friend record is valid
   if (!userId) {
-    throw new Error("Unauthorized access");
+    throw new GraphQLError("Not authenticated", {
+      extensions: { code: "UNAUTHORIZED" },
+    });
   }
 
   const friends = await prisma.friendship

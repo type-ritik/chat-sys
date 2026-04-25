@@ -1,12 +1,14 @@
+const { GraphQLError } = require("graphql");
 const { prisma } = require("../data/prisma");
-const { isValidUsername, isSuspended } = require("../utils/user.config");
 const validator = require("../utils/validator");
 
 async function exploreFriends(_, { username }, context) {
   const userId = context.user.userId;
 
   if (!userId) {
-    throw new Error("Unauthorized access");
+    throw new GraphQLError("Not authenticated", {
+      extensions: { code: "UNAUTHORIZED" },
+    });
   }
 
   if (!validator.isAlphanumeric(username)) {
@@ -41,10 +43,12 @@ async function exploreChatFriend(_, { username }, context) {
   const userId = context.user.userId;
 
   if (!userId) {
-    throw new Error("Unauthorized access");
+    throw new GraphQLError("Not authenticated", {
+      extensions: { code: "UNAUTHORIZED" },
+    });
   }
 
-  if (!isValidUsername(username)) {
+  if (!validator.isAlphanumeric(username)) {
     throw new Error("Invalid username");
   }
 
@@ -131,7 +135,9 @@ async function friendList(_, obj, context) {
   const userId = context.user.userId;
 
   if (!userId) {
-    throw new Error("Unauthorized access");
+    throw new GraphQLError("Not authenticated", {
+      extensions: { code: "UNAUTHORIZED" },
+    });
   }
 
   const friendships = await prisma.friendship
@@ -202,7 +208,9 @@ async function friendRequestList(_, obj, context) {
   const userId = context.user.userId;
 
   if (!userId) {
-    throw new Error("Unauthorized access");
+    throw new GraphQLError("Not authenticated", {
+      extensions: { code: "UNAUTHORIZED" },
+    });
   }
 
   const requests = await prisma.friendship.findMany({

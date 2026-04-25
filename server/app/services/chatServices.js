@@ -1,7 +1,7 @@
 // Description: Services for handling chat operations
+const { GraphQLError } = require("graphql");
 const { prisma } = require("../data/prisma");
 const { pubsub } = require("../data/pubsub");
-const { isValidUUID, isSuspended } = require("../utils/user.config");
 
 const MESSAGE_STATE = {
   DRAFT: "DRAFT",
@@ -13,16 +13,10 @@ const MESSAGE_STATE = {
 async function sendMessage(_, { chatRoomId, text }, context) {
   const userId = context.user.userId;
 
-  if (!isValidUUID(chatRoomId)) {
-    throw new Error("Invalid UUID");
-  }
-
-  const isSuspend = await isSuspended(userId);
-
-  if (isSuspend) {
-    throw new Error(
-      "You are suspended from sending messages. Please contact support.",
-    );
+  if (!userId) {
+    throw new GraphQLError("Not authenticated", {
+      extensions: { code: "UNAUTHORIZED" },
+    });
   }
 
   try {
@@ -30,58 +24,67 @@ async function sendMessage(_, { chatRoomId, text }, context) {
     console.log(
       `[Message State] Creating message with status: ${MESSAGE_STATE.DRAFT}`,
     );
-    let messagePayload = await prisma.chatRoomMessage.create({
-      data: {
-        userId: userId,
-        message: text,
-        chatRoomId: chatRoomId,
-        status: MESSAGE_STATE.DRAFT,
-      },
-    });
 
-    console.log(
-      `[Message State] Message created with ID: ${messagePayload.id}, Status: ${messagePayload.status}`,
-    );
+    let messagePayload = await prisma.chatRoomMessage
+      .create({
+        data: {
+          userId: userId,
+          message: text,
+          chatRoomId: chatRoomId,
+          status: MESSAGE_STATE.DRAFT,
+        },
+      })
+      .catch((error) => {
+        console.error(
+          `[Message State] Failed to create message: ${error.message}`,
+        );
+        throw new Error(`Failed to create message: ${error.message}`);
+      });
 
     // Step 2: Retrieve the chatRoom payload data for friend and user ids
-    const chatRoomPayload = await prisma.chatRoom.findFirst({
-      where: {
-        id: chatRoomId,
-      },
-      include: {
-        friendship: {
-          include: {
-            user: {
-              select: {
-                id: true,
-                username: true,
-              },
-            },
+    const chatRoomPayload = await prisma.chatRoom
+      .findFirst({
+        where: {
+          id: chatRoomId,
+          friendship: {
             friend: {
-              select: {
-                id: true,
-                username: true,
+              status: "ACTIVE",
+            },
+            user: {
+              status: "ACTIVE",
+            },
+          },
+        },
+        include: {
+          friendship: {
+            include: {
+              user: {
+                select: {
+                  id: true,
+                  username: true,
+                },
+              },
+              friend: {
+                select: {
+                  id: true,
+                  username: true,
+                },
               },
             },
           },
         },
-      },
-    });
-
-    if (!chatRoomPayload) {
-      throw new Error("ChatRoom not found");
-    }
+      })
+      .catch((error) => {
+        console.error(
+          `[Message State] Failed to retrieve chat room data: ${error.message}`,
+        );
+        throw new Error(`Failed to retrieve chat room data: ${error.message}`);
+      });
 
     const receiverId =
       userId === chatRoomPayload.friendship.friend.id
         ? chatRoomPayload.friendship.user.id
         : chatRoomPayload.friendship.friend.id;
-
-    if (!isSuspended(receiverId)) {
-      throw new Error(
-        "The recipient is suspended from receiving messages. Please contact support.",
-      );
-    }
 
     // Remove unwanted payload from chatRoomPayload
     // delete chatRoomPayload.friendship.friendId;
@@ -90,8 +93,6 @@ async function sendMessage(_, { chatRoomId, text }, context) {
     // delete chatRoomPayload.createdAt;
     // delete chatRoomPayload.friendshipId;
     // delete chatRoomPayload.id;
-
-    console.log("chatRoomPayload ", chatRoomPayload);
 
     // Step 3: Record the notification about friend sending you a message
     const notification = await prisma.message.create({
@@ -128,6 +129,7 @@ async function sendMessage(_, { chatRoomId, text }, context) {
     console.log(
       `[Message State] Updating message status to: ${MESSAGE_STATE.SENT}`,
     );
+
     messagePayload = await prisma.chatRoomMessage.update({
       where: { id: messagePayload.id },
       data: { status: MESSAGE_STATE.SENT },
@@ -158,7 +160,7 @@ async function sendMessage(_, { chatRoomId, text }, context) {
         take: 1,
       });
 
-      if (failedMessage) {
+      if (!failedMessage) {
         console.log(
           `[Message State] Updating message status to: ${MESSAGE_STATE.FAILED}`,
         );
@@ -182,39 +184,36 @@ async function chatRoomCell(_, { friendId }, context) {
   const userId = context.user.userId;
 
   if (!userId) {
-    throw new Error("Unauthorized access");
+    throw new GraphQLError("Not authenticated", {
+      extensions: { code: "UNAUTHORIZED" },
+    });
   }
 
-  if (!isValidUUID(friendId)) {
-    throw new Error("Invalid UUID");
+  if (!validator.isUUID(friendId)) {
+    throw new Error("Invalid friendId");
   }
 
   // Find you are friend with userB
-  const friend = await prisma.friendship.findFirst({
-    where: {
-      status: "ACCEPTED",
-      OR: [
-        { userId: userId, friendId: friendId },
-        { userId: friendId, friendId: userId },
-      ],
-    },
-  });
-
-  if (!friend) {
-    throw new Error("Friend is not found");
-  }
-
-  const isUserSuspend = await isSuspended(friend.friendId);
-
-  if (isUserSuspend) {
-    throw new Error("Suspicious activity detected. Please try again later.");
-  }
-
-  const isFriendSuspend = await isSuspended(friend.userId);
-
-  if (isFriendSuspend) {
-    throw new Error("Suspicious activity detected. Please try again later.");
-  }
+  const friend = await prisma.friendship
+    .findFirst({
+      where: {
+        status: "ACCEPTED",
+        user: {
+          status: "ACTIVE",
+        },
+        friend: {
+          status: "ACTIVE",
+        },
+        OR: [
+          { userId: userId, friendId: friendId },
+          { userId: friendId, friendId: userId },
+        ],
+      },
+    })
+    .catch((error) => {
+      console.error(`Failed to find friendship: ${error.message}`);
+      throw new Error(`Failed to find friendship: ${error.message}`);
+    });
 
   // If not throw error
 
@@ -242,15 +241,21 @@ async function chatRoomCell(_, { friendId }, context) {
 async function chatRoomList(_, obj, context) {
   const userId = context.user.userId;
 
-  const isSuspend = await isSuspended(userId);
-
-  if (isSuspend) {
-    throw new Error("Suspicious activity detected. Please try again later.");
+  if (!userId) {
+    throw new GraphQLError("Not authenticated", {
+      extensions: { code: "UNAUTHORIZED" },
+    });
   }
 
   const rooms = await prisma.chatRoom.findMany({
     where: {
       friendship: {
+        user: {
+          status: "ACTIVE",
+        },
+        friend: {
+          status: "ACTIVE",
+        },
         OR: [{ userId: userId }, { friendId: userId }],
       },
     },
@@ -313,22 +318,21 @@ async function chatMessageList(_, { chatRoomId }, context) {
   const userId = context.user.userId;
 
   if (!userId) {
-    throw new Error("Unauthorized access");
+    throw new GraphQLError("Not authenticated", {
+      extensions: { code: "UNAUTHORIZED" },
+    });
   }
 
-  const isSuspend = await isSuspended(userId);
-
-  if (isSuspend) {
-    throw new Error("Suspicious activity detected. Please try again later.");
-  }
-
-  if (!isValidUUID(chatRoomId)) {
-    throw new Error("Invalid UUID");
+  if (!validator.isUUID(chatRoomId)) {
+    throw new Error("Invalid chatRoomId");
   }
 
   const msgList = await prisma.chatRoomMessage.findMany({
     where: {
       chatRoomId: chatRoomId,
+      user: {
+        status: "ACTIVE",
+      },
     },
     orderBy: {
       createdAt: "asc",
@@ -346,21 +350,27 @@ async function chatCellData(_, { chatRoomId }, context) {
   const userId = context.user.userId;
 
   if (!userId) {
-    throw new Error("Unauthorized access");
+    throw new GraphQLError("Not authenticated", {
+      extensions: { code: "UNAUTHORIZED" },
+    });
   }
 
-  const isSuspend = await isSuspended(userId);
-
-  if (isSuspend) {
-    throw new Error("Suspicious activity detected. Please try again later.");
-  }
-
-  if (!isValidUUID(chatRoomId)) {
-    throw new Error("Invalid UUID");
+  if (!validator.isUUID(chatRoomId)) {
+    throw new Error("Invalid chatroom UUID");
   }
 
   const chatRoom = await prisma.chatRoom.findUnique({
-    where: { id: chatRoomId },
+    where: {
+      id: chatRoomId,
+      friendship: {
+        user: {
+          status: "ACTIVE",
+        },
+        friend: {
+          status: "ACTIVE",
+        },
+      },
+    },
     select: {
       id: true,
       friendship: {
