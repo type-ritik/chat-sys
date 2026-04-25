@@ -100,7 +100,7 @@ async function loginUser(_, { email, password }, context) {
 
 // Create User
 async function createUser(_, { name, email, password }, context) {
-  if (!validator.isAlpha(name)) {
+  if (!validator.isAscii(name)) {
     console.log("Validation Error:", "Name should contain only letters");
     throw new Error("Validation Error:", "Name should contain only letters");
   }
