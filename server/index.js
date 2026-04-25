@@ -32,13 +32,21 @@ async function main() {
     {
       schema,
       onDisconnect: (ctx, code, reason) => {
-        const token = ctx.connectionParams.authToken;
+        const tokenDetail = ctx.connectionParams.authoriation;
+        if (!tokenDetail) {
+          console.log("Disconnect without token");
+          return null;
+        }
+
+        const token = tokenDetail.startsWith("Bearer ")
+          ? tokenDetail.split(" ")[1]
+          : tokenDetail;
 
         const user = verifyToken(token);
 
         if (!user) {
-          console.log("Unauthorized subscription attempt");
-          throw new Error("Unauthorized");
+          console.log("Disconnect without valid user");
+          return;
         }
 
         console.log("userData: ", user);
@@ -51,7 +59,14 @@ async function main() {
         console.log("User is Offline:", userId);
       },
       onSubscribe: (ctx) => {
-        const token = ctx.connectionParams.authToken;
+        const tokenDetail = ctx.connectionParams.authorization;
+        if (!tokenDetail) {
+          throw new Error("Unauthorized");
+        }
+
+        const token = tokenDetail.startsWith("Bearer ")
+          ? tokenDetail.split(" ")[1]
+          : tokenDetail;
 
         const user = verifyToken(token);
 
@@ -64,21 +79,18 @@ async function main() {
 
         const userId = user.userId;
 
-        if (onlineUsers.findUser(userId)) {
-          console.log("User already online:", userId);
-          return;
-        }
-
         onlineUsers.addUser(userId);
         console.log("User is Online:", userId);
       },
       context: async (ctx, msg, args) => {
-        const token = ctx.connectionParams.authToken;
-
-        if (!token) {
-          console.log("No auth token provided for subscription");
+        const tokenDetail = ctx.connectionParams.authorization;
+        if (!tokenDetail) {
           throw new Error("Unauthorized");
         }
+
+        const token = tokenDetail.startsWith("Bearer ")
+          ? tokenDetail.split(" ")[1]
+          : tokenDetail;
 
         const user = verifyToken(token);
         if (!user) {
