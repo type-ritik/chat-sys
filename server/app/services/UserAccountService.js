@@ -1,14 +1,11 @@
 const {
-  validateAuthInput,
   findUserByEmail,
   findUserById,
   userRecord,
-  updateProifle,
   createLoginAttempt,
   blockUser,
   alterAvatar,
-  isSuspiciousLogin,
-  isSuspended,
+  updateProfile,
 } = require("../utils/user.config");
 const { comparePassword } = require("../utils/passKey");
 const {
@@ -17,46 +14,46 @@ const {
   verifyRefreshToken,
 } = require("../utils/auth");
 const cloudinary = require("../config/cloudinary");
+const validator = require("../utils/validator");
+const { GraphQLError } = require("graphql");
 
 // User Login
 async function loginUser(_, { email, password }, context) {
   try {
     // User input validation
-    const validationErrors = validateAuthInput(email, password);
+    if (!validator.isEmail(email)) {
+      console.log("Validation Error:", "Invalid email format");
+      throw new Error("Validation Error:", "Invalid email format");
+    }
 
-    // If not valid, report "Validation Error" message
-    if (validationErrors.length > 0) {
-      console.log("Validation Error", validationErrors);
-      throw new Error(validationErrors);
+    if (!validator.isStrongPassword(password)) {
+      console.log(
+        "Validation Error:",
+        "Password does not meet strength requirements",
+      );
+      throw new Error(
+        "Validation Error:",
+        "Password does not meet strength requirements.",
+      );
     }
 
     // Find User by Email
     const user = await findUserByEmail(email);
 
-    if (!user) {
-      console.log("Validation Error:", "User not found");
-      throw new Error("User not found");
-    }
-
-    if (user.status !== "ACTIVE") {
-      console.log("Validation Error:", "User account is not active");
-      throw new Error("User account is not active, Please contact support.");
-    }
-
-    const now = new Date();
+    // const now = new Date();
 
     const ipAddress = context.req.ip.replace("::ffff:", "");
 
-    const record = await isSuspiciousLogin(user.id);
+    // const record = await isSuspiciousLogin(user.id);
 
-    if (
-      record &&
-      record.blocked_until &&
-      now < new Date(record.blocked_until)
-    ) {
-      console.log("User blocked. Try again later.");
-      throw new Error("User blocked. Try again later.");
-    }
+    // if (
+    //   record &&
+    //   record.blocked_until &&
+    //   now < new Date(record.blocked_until)
+    // ) {
+    //   console.log("User blocked. Try again later.");
+    //   throw new Error("User blocked. Try again later.");
+    // }
 
     // Match the password
     const isValidPass = await comparePassword(password, user.password);
@@ -90,60 +87,55 @@ async function loginUser(_, { email, password }, context) {
       httpOnly: true, // Makes the cookie inaccessible to client-side scripts
       secure: process.env.NODE_ENV === "production", // Ensure the cookie is sent over HTTPS in production
       sameSite: "none",
-      partitioned: true,
+      // partitioned: true,
       maxAge: 60 * 60 * 1000, // Cookie expiration after 1hr
     });
 
     return { ...user, token };
   } catch (error) {
     console.log("Error login user", error.message);
-
     throw new Error(error.message);
   }
 }
 
 // Create User
 async function createUser(_, { name, email, password }, context) {
+  if (!validator.isAscii(name)) {
+    console.log("Validation Error:", "Name should contain only letters");
+    throw new Error("Validation Error:", "Name should contain only letters");
+  }
+
+  if (name.length < 3) {
+    console.log(
+      "Validation Error:",
+      "Name should be at least 3 characters long",
+    );
+    throw new Error(
+      "Validation Error:",
+      "Name should be at least 3 character long",
+    );
+  }
+
+  if (!validator.isEmail(email)) {
+    console.log("Validation Error:", "Invalid email format");
+    throw new Error("Validation Error:", "Invalid email format");
+  }
+
+  if (!validator.isStrongPassword(password)) {
+    console.log("Validation Error:", "Please provide strong password");
+    throw new Error("Validation Error:", "Please provide strong password");
+  }
+
   try {
-    // 1. Input validation
-    const validationErrors = validateAuthInput(email, password);
-    if (validationErrors.length > 0) {
-      throw new Error(validationErrors.join(", "));
-    }
-
-    console.log("Input validation passed");
-
-    // 2. Check if user exists
-    const existingUser = await findUserByEmail(email);
-    if (existingUser) {
-      throw new Error("User already exists with this email");
-    }
-
-    console.log("User does not exist, creating new user...");
-
-    // 3. Create new user
     const result = await userRecord(name, email, password);
 
-    if (result.error) {
-      throw new Error(result.error);
-    }
-
-    const user = result.user; // extract user object
-
-    if (!user) {
-      throw new Error("User creation failed");
-    }
-
-    // console.log("User created successfully:", user.email);
-
-    // 4. Generate token
-    const token = genToken(user.id, user.isAdmin);
+    const token = genToken(result.id, result.isAdmin);
 
     if (!token) {
       throw new Error("Failed to generate access token");
     }
 
-    const refreshToken = genRefreshToken(user.id, user.isAdmin);
+    const refreshToken = genRefreshToken(result.id, result.isAdmin);
 
     if (!refreshToken) {
       throw new Error("Failed to generate refresh token");
@@ -153,32 +145,33 @@ async function createUser(_, { name, email, password }, context) {
       httpOnly: true, // Makes the cookie inaccessible to client-side scripts
       secure: process.env.NODE_ENV === "production", // Ensure the cookie is sent over HTTPS in production
       sameSite: "none",
-      partitioned: true,
+      // partitioned: true,
       maxAge: 60 * 60 * 1000, // Cookie expiration after 32 minutest
     });
 
     // 5. Return final response
     return {
-      ...user,
+      ...result,
       token,
     };
   } catch (error) {
-    console.error("Error in createUser:", error.message);
-    throw new Error("Error signup user"); // return real error to client
+    console.error(error.message);
+    throw new Error(error); // return real error to client
   }
 }
 
 async function updateUserData(_, { name, username, bio }, context) {
   const userId = context.user.userId;
 
+  if (!userId) {
+    throw new GraphQLError("Not authenticated", {
+      extensions: { code: "UNAUTHORIZED" },
+    });
+  }
+
   try {
-    const isSuspend = await isSuspended(userId);
+    const payload = await updateProfile(userId, name, username, bio);
 
-    if (isSuspend) {
-      throw new Error("Suspicious activity detected. Please try again later.");
-    }
-
-    const payload = await updateProifle(userId, name, username, bio);
     return payload;
   } catch (error) {
     console.log("Error updating userdata", error.message);
@@ -189,18 +182,14 @@ async function updateUserData(_, { name, username, bio }, context) {
 async function updateAvatar(_, { file }, context) {
   const userId = context.user.userId;
 
+  if (!userId) {
+    throw new GraphQLError("Not authenticated", {
+      extensions: { code: "UNAUTHORIZED" },
+    });
+  }
+
   // console.log(file);
   try {
-    if (!userId) {
-      throw new Error("Unauthorized");
-    }
-
-    const isSuspend = await isSuspended(userId);
-
-    if (isSuspend) {
-      throw new Error("Suspicious activity detected. Please try again later.");
-    }
-
     const uploadedFile = await file;
 
     const { createReadStream } = uploadedFile;
@@ -229,6 +218,7 @@ async function updateAvatar(_, { file }, context) {
 
     // console.log("Result: ", result);
     const payload = await alterAvatar(userId, result.secure_url);
+
     return payload;
   } catch (error) {
     console.log("Error updating avatar", error.message);
@@ -239,22 +229,13 @@ async function updateAvatar(_, { file }, context) {
 async function userData(_, obj, context) {
   const userId = context.user.userId;
 
+  if (!userId) {
+    throw new GraphQLError("Not authenticated", {
+      extensions: { code: "UNAUTHORIZED" },
+    });
+  }
   try {
-    if (!userId) {
-      throw new Error("Unauthorized");
-    }
-
-    const isSuspend = await isSuspended(userId);
-
-    if (isSuspend) {
-      throw new Error("Suspicious activity detected. Please try again later.");
-    }
-
     const payload = findUserById(userId);
-
-    if (!payload) {
-      throw new Error("User not found");
-    }
 
     return payload;
   } catch (error) {
@@ -269,7 +250,9 @@ async function createNewAccessToken(_, obj, context) {
     const refreshToken = context.req.cookies?.refreshToken;
 
     if (!refreshToken) {
-      throw new Error("Unauthorized");
+      throw new GraphQLError("Not authenticated", {
+        extensions: { code: "UNAUTHORIZED" },
+      });
     }
 
     const decoded = verifyRefreshToken(refreshToken);
@@ -291,17 +274,13 @@ async function createNewAccessToken(_, obj, context) {
 
     const user = await findUserById(userId);
 
-    if (!user) {
-      throw new Error("User not found");
-    }
-
     delete user.password;
 
     context.res.cookie("refreshToken", newRefreshToken, {
       httpOnly: true, // Makes the cookie inaccessible to client-side scripts
       secure: process.env.NODE_ENV === "production", // Ensure the cookie is sent over HTTPS in production
       sameSite: "none",
-      partitioned: true,
+      // partitioned: true,
       maxAge: 60 * 60 * 1000, // Cookie expiration after 1hr
     });
 

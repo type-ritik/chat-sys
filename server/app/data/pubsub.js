@@ -1,5 +1,4 @@
 const { RedisPubSub } = require("graphql-redis-subscriptions");
-const { REDIS_URL } = require("../config/env");
 require("dotenv").config();
 const Redis = require("ioredis");
 

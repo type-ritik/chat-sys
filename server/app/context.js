@@ -6,7 +6,8 @@ const { verifyToken } = require("./utils/auth");
 // Context function to provide context to resolvers
 
 const getContext = async ({ req, res }) => {
-  const token = req.headers.authorization || null;
+  const myToken = req.headers.authorization || null;
+  const token = myToken ? myToken.replace("Bearer ", "") : null;
 
   try {
     if (req.body.operationName == "CreateNewAccessToken") {
@@ -29,16 +30,11 @@ const getContext = async ({ req, res }) => {
       };
     }
   } catch (error) {
-    if (error.message === "TOKEN EXPIRES") {
-      console.log("Error TOKEN EXPIRES: ", error.message);
-      throw new GraphQLError("Unauthorized", {
-        extensions: {
-          code: "UNAUTHORIZED",
-          http: { status: 401 },
-        },
-      });
-    }
-    throw new Error(error.message);
+    console.log("error")
+    return {
+      user: null,
+      authError: error.name,
+    };
   }
 };
 

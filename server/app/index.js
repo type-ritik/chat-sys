@@ -7,9 +7,6 @@ const cors = require("cors");
 // Apollo Server exposes '/graphql'
 const { ApolloServer } = require("@apollo/server");
 
-// Body parser
-const bodyParser = require("body-parser");
-
 // Cookie parser
 const cookieParser = require("cookie-parser");
 
@@ -30,6 +27,7 @@ const { getContext } = require("./context");
 
 // Redis Client
 const { redisClient } = require("./data/pubsub");
+const { onlineUsers } = require("./structure/OnlineUser");
 
 // Start Http and Apollo server
 async function startServer() {
@@ -42,6 +40,14 @@ async function startServer() {
   app.use(express.json({ limit: "10mb" }));
   app.use(express.urlencoded({ limit: "10mb", extended: true }));
   app.use(cookieParser());
+
+  app.use(
+    cors({
+      credentials: true,
+      origin: process.env.CLIENT_PRODUCTION,
+      optionsSuccessStatus: 200,
+    }),
+  );
 
   app.use(graphqlUploadExpress());
 
@@ -78,17 +84,7 @@ async function startServer() {
   });
 
   await server.start();
-  app.use(
-    "/graphql",
-    cors({
-      credentials: true,
-      origin: process.env.CLIENT_PRODUCTION,
-      optionsSuccessStatus: 200,
-    }),
-    express.json(),
-    bodyParser.json(),
-    expressMiddleware(server, { context: getContext }),
-  );
+  app.use("/graphql", expressMiddleware(server, { context: getContext }));
 
   return app;
 }

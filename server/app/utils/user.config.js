@@ -1,14 +1,8 @@
 const { prisma } = require("../data/prisma");
 const { hashPassword } = require("../utils/passKey");
 
-function isValidUUID(uuid) {
-  const uuidRegex =
-    /^[0-9A-F]{8}-[0-9A-F]{4}-[1-5][0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i;
-  return uuidRegex.test(uuid);
-}
-
 // Update user profile data
-async function updateProifle(userId, name, username, bio) {
+async function updateProfile(userId, name, username, bio) {
   if (!name && !username && !bio) {
     throw new Error("All fields are required");
   } else if (name && username && bio) {
@@ -150,79 +144,84 @@ async function alterAvatar(userId, avatarUrl) {
   }
 }
 
-// Validation function
-function validateAuthInput(email, password) {
-  const errors = [];
-  const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/;
-  if (!emailRegex.test(email)) {
-    errors.push("Invalid email format");
-  }
-
-  if (!password || password.length < 8) {
-    errors.push("Password must be at least 6 characters long");
-  }
-
-  return errors;
-}
-
 async function findUserById(userId) {
-  const user = await prisma.user.findFirst({
-    where: {
-      id: userId,
-    },
-    include: {
-      profile: true,
-    },
-  });
+  const user = await prisma.user
+    .findFirst({
+      where: {
+        id: userId,
+        status: "ACTIVE",
+      },
+      include: {
+        profile: true,
+      },
+    })
+    .catch((error) => {
+      console.error("Error finding user by ID:", error.message);
+      throw new Error("Error finding user by ID");
+    });
 
   return user;
 }
 
 async function findUserByEmail(email) {
-  const user = await prisma.user.findFirst({
-    where: { email },
-    include: {
-      profile: true,
-    },
-  });
+  try {
+    const user = await prisma.user
+      .findFirst({
+        where: { email, status: "ACTIVE" },
+        include: {
+          profile: true,
+        },
+      })
+      .catch((error) => {
+        console.error("Error finding user by email:", error.message);
+        throw new Error("Error finding user by email");
+      });
 
-  return user;
+    return user;
+  } catch (error) {
+    console.error("Error finding user by email:", error.message);
+    throw new Error("Error finding user by email");
+  }
 }
 
 async function userRecord(name, email, password) {
   try {
-    const newUser = await prisma.user.create({
-      data: {
-        name,
-        email,
-        password: await hashPassword(password),
-        username: email.split("@")[0],
-        isAdmin: false,
-        profile: {
-          create: {
-            avatarUrl:
-              "https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg",
-            isActive: true,
-            bio: `Hi there, This is ${name}`,
+    const newUser = await prisma.user
+      .create({
+        data: {
+          name,
+          email,
+          password: await hashPassword(password),
+          username: email.split("@")[0],
+          isAdmin: false,
+          profile: {
+            create: {
+              avatarUrl:
+                "https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg",
+              isActive: true,
+              bio: `Hi there, This is ${name}`,
+            },
           },
         },
-      },
-      include: {
-        profile: true,
-      },
-    });
+        include: {
+          profile: true,
+        },
+      })
+      .catch((error) => {
+        console.error("Error creating user:", error.message);
+        throw new Error("Error creating user: ", error.meta.target[0]);
+      });
 
-    return { user: newUser };
-  } catch (err) {
-    console.error("User creation failed:", err.message);
-    return { error: "Database error creating user" };
+    console.log("User email: ", newUser.email);
+
+    delete newUser.password;
+    delete newUser.profile.userId;
+
+    return newUser;
+  } catch (error) {
+    console.error("User creation failed with", error.message);
+    throw new Error(error.message);
   }
-}
-
-async function isValidUsername(username) {
-  return (
-    typeof username === "string" && username.length > 2 && username.length < 20
-  );
 }
 
 async function isSuspiciousLogin(userId) {
@@ -308,15 +307,20 @@ async function retriveAuditLogs() {
 }
 
 // Is already suspended
-async function isSuspended(userId) {
+async function isSuspended(id) {
   const res = await prisma.user.findUnique({
-    where: { id: userId },
+    where: { id },
   });
 
-  if (res.status === "SUSPENDED") {
+  // console.log("Data is suspend: ", res);
+
+  if (res.status.toString().toUpperCase().match("SUSPENDED")) {
+    console.log("I am suspended");
     return true;
+  } else {
+    console.log("I am not suspended");
+    return false;
   }
-  return false;
 }
 
 // Suspend User
@@ -362,13 +366,10 @@ module.exports = {
   userRecord,
   findUserByEmail,
   findUserById,
-  validateAuthInput,
-  isValidUsername,
   createLoginAttempt,
-  isValidUUID,
   isSuspiciousLogin,
   blockUser,
-  updateProifle,
+  updateProfile,
   alterAvatar,
   userList,
   chatMessageList,
