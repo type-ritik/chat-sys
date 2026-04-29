@@ -2,6 +2,7 @@
 const { GraphQLError } = require("graphql");
 const { prisma } = require("../data/prisma");
 const { pubsub } = require("../data/pubsub");
+const validator = require("../utils/validator");
 
 const MESSAGE_STATE = {
   DRAFT: "DRAFT",
