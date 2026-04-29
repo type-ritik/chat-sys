@@ -1,3 +1,4 @@
+const { GraphQLError } = require("graphql");
 const { genToken } = require("../utils/auth");
 const { comparePassword } = require("../utils/passKey");
 const {
@@ -58,7 +59,9 @@ async function usersRecordData(_, obj, context) {
   const userId = context.user.userId;
 
   if (!userId) {
-    throw new Error("Unauthorized: Admin not logged in");
+    throw new GraphQLError("Not authenticated", {
+      extensions: { code: "UNAUTHORIZED" },
+    });
   }
 
   if (!context.user.role) {
@@ -78,7 +81,9 @@ async function chatMessagesRecordData(_, obj, context) {
   const userId = context.user.userId;
 
   if (!userId) {
-    throw new Error("Unauthorized: User not logged in");
+    throw new GraphQLError("Not authenticated", {
+      extensions: { code: "UNAUTHORIZED" },
+    });
   }
 
   if (!context.user.role) {
@@ -98,7 +103,9 @@ async function userAuditLogsData(_, obj, context) {
   const userId = context.user.userId;
 
   if (!userId) {
-    throw new Error("Unauthorized: User not logged in");
+    throw new GraphQLError("Not authenticated", {
+      extensions: { code: "UNAUTHORIZED" },
+    });
   }
 
   if (!context.user.role) {
@@ -116,7 +123,9 @@ async function userAuditLogsData(_, obj, context) {
 
 async function adminActionOnUserAvalability(_, { userId, action }, context) {
   if (!context.user.userId) {
-    throw new Error("Unauthorized: User not logged in");
+    throw new GraphQLError("Not authenticated", {
+      extensions: { code: "UNAUTHORIZED" },
+    });
   }
 
   if (!context.user.role) {

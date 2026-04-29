@@ -1,3 +1,4 @@
+const { GraphQLError } = require("graphql");
 const { prisma } = require("../data/prisma");
 
 async function retrieveNotification(_, obj, context) {

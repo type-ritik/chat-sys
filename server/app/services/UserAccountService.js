@@ -2,10 +2,10 @@ const {
   findUserByEmail,
   findUserById,
   userRecord,
-  updateProifle,
   createLoginAttempt,
   blockUser,
   alterAvatar,
+  updateProfile,
 } = require("../utils/user.config");
 const { comparePassword } = require("../utils/passKey");
 const {
@@ -163,8 +163,14 @@ async function createUser(_, { name, email, password }, context) {
 async function updateUserData(_, { name, username, bio }, context) {
   const userId = context.user.userId;
 
+  if (!userId) {
+    throw new GraphQLError("Not authenticated", {
+      extensions: { code: "UNAUTHORIZED" },
+    });
+  }
+
   try {
-    const payload = await updateProifle(userId, name, username, bio);
+    const payload = await updateProfile(userId, name, username, bio);
 
     return payload;
   } catch (error) {
@@ -177,7 +183,9 @@ async function updateAvatar(_, { file }, context) {
   const userId = context.user.userId;
 
   if (!userId) {
-    throw new Error("Unauthorized");
+    throw new GraphQLError("Not authenticated", {
+      extensions: { code: "UNAUTHORIZED" },
+    });
   }
 
   // console.log(file);
@@ -242,7 +250,9 @@ async function createNewAccessToken(_, obj, context) {
     const refreshToken = context.req.cookies?.refreshToken;
 
     if (!refreshToken) {
-      throw new Error("Unauthorized");
+      throw new GraphQLError("Not authenticated", {
+        extensions: { code: "UNAUTHORIZED" },
+      });
     }
 
     const decoded = verifyRefreshToken(refreshToken);

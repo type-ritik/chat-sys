@@ -1,16 +1,17 @@
 const http = require("http");
 const { startServer } = require("./app/index");
-const { PORT } = require("./app/config/env");
 // const { connectToDatabase } = require("./app/data/db");
 // For subscriptions (graphql-ws)
 const { WebSocketServer } = require("ws");
 const { useServer } = require("graphql-ws/lib/use/ws");
 const { makeExecutableSchema } = require("@graphql-tools/schema");
-
 const { typeDefs } = require("./app/schema");
 const { resolvers } = require("./app/resolvers");
 const { verifyToken } = require("./app/utils/auth");
 const { onlineUsers } = require("./app/structure/OnlineUser");
+require("dotenv").config();
+
+const PORT = process.env.PORT;
 
 async function main() {
   // Start Express + Apollo

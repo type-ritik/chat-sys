@@ -1,14 +1,8 @@
 const { prisma } = require("../data/prisma");
 const { hashPassword } = require("../utils/passKey");
 
-function isValidUUID(uuid) {
-  const uuidRegex =
-    /^[0-9A-F]{8}-[0-9A-F]{4}-[1-5][0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i;
-  return uuidRegex.test(uuid);
-}
-
 // Update user profile data
-async function updateProifle(userId, name, username, bio) {
+async function updateProfile(userId, name, username, bio) {
   if (!name && !username && !bio) {
     throw new Error("All fields are required");
   } else if (name && username && bio) {
@@ -148,21 +142,6 @@ async function alterAvatar(userId, avatarUrl) {
     console.error("Error updating avatar:", error.message);
     throw new Error("Error updating avatar");
   }
-}
-
-// Validation function
-function validateAuthInput(email, password) {
-  const errors = [];
-  const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/;
-  if (!emailRegex.test(email)) {
-    errors.push("Invalid email format");
-  }
-
-  if (!password || password.length < 8) {
-    errors.push("Password must be at least 6 characters long");
-  }
-
-  return errors;
 }
 
 async function findUserById(userId) {
@@ -387,12 +366,10 @@ module.exports = {
   userRecord,
   findUserByEmail,
   findUserById,
-  validateAuthInput,
   createLoginAttempt,
-  isValidUUID,
   isSuspiciousLogin,
   blockUser,
-  updateProifle,
+  updateProfile,
   alterAvatar,
   userList,
   chatMessageList,
