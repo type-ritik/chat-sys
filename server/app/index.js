@@ -44,7 +44,7 @@ async function startServer() {
   app.use(
     cors({
       credentials: true,
-      origin: process.env.CLIENT_DEVELOPMENT,
+      origin: process.env.CLIENT_PRODUCTION,
       optionsSuccessStatus: 200,
     }),
   );
@@ -84,10 +84,7 @@ async function startServer() {
   });
 
   await server.start();
-  app.use(
-    "/graphql",
-    expressMiddleware(server, { context: getContext }),
-  );
+  app.use("/graphql", expressMiddleware(server, { context: getContext }));
 
   return app;
 }
