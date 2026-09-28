@@ -26,17 +26,6 @@ async function loginUser(_, { email, password }, context) {
       throw new Error("Validation Error:", "Invalid email format");
     }
 
-    if (!validator.isStrongPassword(password)) {
-      console.log(
-        "Validation Error:",
-        "Password does not meet strength requirements",
-      );
-      throw new Error(
-        "Validation Error:",
-        "Password does not meet strength requirements.",
-      );
-    }
-
     // Find User by Email
     const user = await findUserByEmail(email);
 
@@ -119,11 +108,6 @@ async function createUser(_, { name, email, password }, context) {
   if (!validator.isEmail(email)) {
     console.log("Validation Error:", "Invalid email format");
     throw new Error("Validation Error:", "Invalid email format");
-  }
-
-  if (!validator.isStrongPassword(password)) {
-    console.log("Validation Error:", "Please provide strong password");
-    throw new Error("Validation Error:", "Please provide strong password");
   }
 
   try {
