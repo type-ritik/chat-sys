@@ -11,10 +11,6 @@ async function exploreFriends(_, { username }, context) {
     });
   }
 
-  if (!validator.isAlphanumeric(username)) {
-    throw new Error("Invalid username");
-  }
-
   // Find the user by username
   const friend = await prisma.user
     .findUnique({
@@ -46,10 +42,6 @@ async function exploreChatFriend(_, { username }, context) {
     throw new GraphQLError("Not authenticated", {
       extensions: { code: "UNAUTHORIZED" },
     });
-  }
-
-  if (!validator.isAlphanumeric(username)) {
-    throw new Error("Invalid username");
   }
 
   try {
